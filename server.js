@@ -5,7 +5,7 @@ const port = process.env.PORT || 3000;
 
 // Endpoint de ejemplo para el backend
 app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hola desde el backend!' });
+  res.json({ message: 'Hola desde el backend a todos!' });
 });
 
 // Servir archivos estáticos desde la carpeta 'client/build'
