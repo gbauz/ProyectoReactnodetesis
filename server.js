@@ -13,7 +13,7 @@ Conexion.then((conn) => {
 
 // Endpoint de ejemplo para el backend
 app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hola desde el backend!' });
+  res.json({ message: 'Hola desde el backend a todos!' });
 });
 
 // Endpoint para consultar la base de datos
