@@ -1,24 +1,13 @@
-import logo from './logo.svg';
-import './App.css';
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Hola a todos compañeros
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+import React from 'react';
+import { Routes, Route } from 'react-router-dom'; // Importa Routes y Route para definir las rutas
+import Login from './componentes/Login'; // Importa el componente Login
+import Paneladministrador from './componentes/Paneladministrador'; // Importa el componente Paneladministrador
 
-export default App;
+const App = () => (
+  <Routes> {/* Configuración de rutas */}
+    <Route path="/" element={<Login />} /> {/* Ruta para el login */}
+    <Route path="/admin" element={<Paneladministrador />} /> {/* Ruta para el panel administrativo */}
+  </Routes>
+);
+
+export default App; // Exporta el componente App
