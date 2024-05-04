@@ -5,7 +5,7 @@ import Paneladministrador from './componentes/Paneladministrador'; // Importa el
 
 const App = () => (
   <Routes> {/* Configuración de rutas */}
-    <Route path="/" element={<Login />} /> {/* Ruta para el login */}
+    <Route path="/login" element={<Login />} /> {/* Ruta para el login */}
     <Route path="/admin" element={<Paneladministrador />} /> {/* Ruta para el panel administrativo */}
   </Routes>
 );
