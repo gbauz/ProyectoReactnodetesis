@@ -52,7 +52,15 @@ app.get('/api/session', verificaToken, async (req, res) => {
   try {
     if (req.user && req.user.isAdmin) {
       const { email, name } = req.user;
-      res.json({ isAdmin: true, user: { email, name } });
+
+      // Consultar los permisos del usuario desde la base de datos
+      const [rows] = await (await Conexion).execute(
+        'SELECT rp.id_permiso FROM Roles_Permisos rp WHERE rp.id_rol = ?',
+        [req.user.isAdmin]
+      );
+
+      const permissions = rows.map(row => row.id_permiso);
+      res.json({ isAdmin: true, user: { email, name, permissions } });
     } else {
       res.json({ isAdmin: false });
     }
@@ -74,6 +82,66 @@ app.post('/api/logout', verificaToken, (req, res) => {
   }
 });
 
+// Endpoint para obtener todos los usuarios
+app.get('/api/users', verificaToken, async (req, res) => {
+  try {
+    const [rows] = await (await Conexion).execute(
+      'SELECT u.id_usuario, u.nombre, u.correo_electronico, r.nombre AS rol FROM Usuario u JOIN Rol r ON u.rol_id = r.id_rol'
+    );
+    res.json({ users: rows });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Error al obtener usuarios.' });
+  }
+});
+
+// Endpoint para crear un nuevo usuario
+app.post('/api/users', verificaToken, async (req, res) => {
+  const { nombre, correo_electronico, contraseña, rol_id } = req.body;
+
+  try {
+    await (await Conexion).execute(
+      'INSERT INTO Usuario (nombre, correo_electronico, contraseña, rol_id) VALUES (?, ?, ?, ?)',
+      [nombre, correo_electronico, contraseña, rol_id]
+    );
+    res.json({ success: true, message: 'Usuario creado correctamente.' });
+  } catch (error) {
+    console.error('Error creating user:', error);
+    res.status(500).json({ error: 'Error al crear usuario.' });
+  }
+});
+
+// Endpoint para eliminar un usuario
+app.delete('/api/users/:id', verificaToken, async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    await (await Conexion).execute('DELETE FROM Usuario WHERE id_usuario = ?', [userId]);
+    res.json({ success: true, message: 'Usuario eliminado correctamente.' });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({ error: 'Error al eliminar usuario.' });
+  }
+});
+
+// Endpoint para editar un usuario
+app.put('/api/users/:id', verificaToken, async (req, res) => {
+  const userId = req.params.id;
+  const { nombre, correo_electronico, contraseña, rol_id } = req.body;
+
+  try {
+    await (await Conexion).execute(
+      'UPDATE Usuario SET nombre = ?, correo_electronico = ?, contraseña = ?, rol_id = ? WHERE id_usuario = ?',
+      [nombre, correo_electronico, contraseña, rol_id, userId]
+    );
+    res.json({ success: true, message: 'Usuario actualizado correctamente.' });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({ error: 'Error al actualizar usuario.' });
+  }
+});
+
+
 // Servir archivos estáticos desde la carpeta 'client/build'
 app.use(express.static(path.join(__dirname, 'client', 'build')));
 
@@ -84,5 +152,5 @@ app.get('*', (req, res) => {
 
 // Iniciar el servidor
 app.listen(port, () => {
-  console.log(`Servidor corriendo en http://localhost:${port}/login`);
+  console.log(`Servidor corriendo en http://localhost:${port}`);
 });

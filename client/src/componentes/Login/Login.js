@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Importación de Bootstrap
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import './Login.css';
 
 
 const Login = () => {
@@ -40,11 +41,8 @@ const Login = () => {
         <div className="row justify-content-center">
           <div className="bs-secondary-color col-lg-5">
             <div className="card shadow-lg border-0 rounded-lg mt-5">
-              <div className="card-header text-center">
-                <img src="https://www.gob.ec/sites/default/files/styles/medium/public/2018-11/INSPI%20LOGO_0.png?itok=3n2KJyo2" alt="Logo de INSPI" />
-                <h5>Inicio de Sesión</h5>
-              </div>
-              <div className="card-body">
+              <div className="card-body text-center">
+              <img  src="https://www.gob.ec/sites/default/files/styles/medium/public/2018-11/INSPI%20LOGO_0.png?itok=3n2KJyo2" alt="Logo de INSPI" />
                 <div className="form-floating mb-3">
                   <input
                     className="form-control"
@@ -69,17 +67,14 @@ const Login = () => {
                   />
                   <label htmlFor="inputPassword" style={{ color: '#808080', opacity: 0.8 }}>
                     Contraseña <i className="fa fa-lock"></i>
-                  </label><br/>
+                  </label>
                   {error && <div className="text-danger">{error}</div>}
                 </div>
-                <div className="d-flex justify-content-between">
-                  <button
-                    className="btn btn-primary"
-                    onClick={handleLogin}
-                  >
-                    Iniciar Sesión
+                <div className="d-grid gap-2">
+                  <button className="btn btn-primary" onClick={handleLogin}>
+                    Login
                   </button>
-                  <a href="/register">¿Olvidaste tu Contraseña?</a>
+                  <a href="/register" className="mt-3">¿Olvidaste tu Contraseña?</a>
                 </div>
               </div>
             </div>

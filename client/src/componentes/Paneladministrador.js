@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import Users from './Usuarios/Users'; // Importar UsersPage
 
 const AdminPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState('');
+  const [userPermissions, setUserPermissions] = useState([]); // Agrega estado para los permisos del usuario
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,6 +32,7 @@ const AdminPage = () => {
 
         if (data.isAdmin) {
           setUserName(data.user.name); // Establecer el nombre del usuario si es administrador
+          setUserPermissions(data.user.permissions);
         }
       } catch (error) {
         console.error('Error al hacer la solicitud protegida:', error);
@@ -41,11 +45,7 @@ const AdminPage = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token'); // Elimina el token del localStorage al cerrar sesión
-<<<<<<< HEAD
     navigate('/'); // Redirige al usuario a la página de inicio de sesión
-=======
-    navigate('/login'); // Redirige al usuario a la página de inicio de sesión
->>>>>>> 9d6b3cc28a543820ccbf22e624278f977dd30b3f
   };
 
   return (
@@ -96,6 +96,9 @@ const AdminPage = () => {
                 <p>Información clave para administración.</p>
               </div>
             </div>
+
+            {/* Renderizar UsersPage con props */}
+            {/* <Users isAdmin={isAdmin} userPermissions={userPermissions} /> */}
           </>
         ) : (
           <h1>No tienes permiso para acceder a esta página.</h1>
