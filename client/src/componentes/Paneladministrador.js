@@ -98,7 +98,7 @@ const AdminPage = () => {
             </div>
 
             {/* Renderizar UsersPage con props */}
-            {/* <Users isAdmin={isAdmin} userPermissions={userPermissions} /> */}
+           {/*  <Users isAdmin={isAdmin} userPermissions={userPermissions} /> */}
           </>
         ) : (
           <h1>No tienes permiso para acceder a esta página.</h1>

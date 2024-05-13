@@ -6,7 +6,7 @@ import './Login.css';
 
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [cedula, setCedula] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ const Login = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ correo_electronico: email, contraseña: password }),
+        body: JSON.stringify({ cedula: cedula, contraseña: password }),
       });
   
       const data = await response.json();
@@ -46,14 +46,14 @@ const Login = () => {
                 <div className="form-floating mb-3">
                   <input
                     className="form-control"
-                    id="inputEmail"
-                    type="email"
-                    placeholder="Correo electrónico"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    id="input"
+                    type="text"
+                    placeholder="Usuario"
+                    value={cedula}
+                    onChange={(e) => setCedula(e.target.value)}
                   />
-                  <label htmlFor="inputEmail" style={{ color: '#808080', opacity: 0.8 }}>
-                    Correo Electrónico <i class="fa fa-user">
+                  <label htmlFor="input" style={{ color: '#808080', opacity: 0.8 }}>
+                    Usuario <i class="fa fa-user">
                   </i></label>
                 </div>
                 <div className="form-floating mb-3">

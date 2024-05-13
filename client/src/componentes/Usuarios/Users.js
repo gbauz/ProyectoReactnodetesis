@@ -5,49 +5,156 @@ import './Usuario.css';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [userPermissions, setUserPermissions] = useState([]);
+  const [formData, setFormData] = useState({
+    cedula: '',
+    nombre: '',
+    correo_electronico: '',
+    contraseña: '',
+    rol_id: ''
+  });
+  const [showModal, setShowModal] = useState(false);
+  const [editUser, setEditUser] = useState(null); // Estado para mantener el usuario seleccionado para edición
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const token = localStorage.getItem('token');
-
-        if (!token) {
-          console.error('Token no encontrado en localStorage');
-          return;
+  const fetchUsers = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('Token no encontrado en localStorage');
+        return;
+      }
+  
+      // Obtener lista de usuarios
+      const usersResponse = await fetch('/api/users', {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-
-        const response = await fetch('/api/users', {
+      });
+  
+      if (usersResponse.ok) {
+        const userData = await usersResponse.json();
+        console.log('Datos de usuarios recibidos:', userData);
+        setUsers(userData.users);
+  
+        // Obtener permisos del usuario desde otra API
+        const sessionResponse = await fetch('/api/session', {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
-
-        if (response.ok) {
-          const data = await response.json();
-          setUsers(data.users);
+  
+        if (sessionResponse.ok) {
+          const sessionData = await sessionResponse.json();
+          console.log('Datos de sesión recibidos:', sessionData);
+          setUserPermissions(sessionData.user.permissions);
+          console.log('Permisos de usuario:', sessionData.user.permissions);
         } else {
-          console.error('Error fetching users:', response.statusText);
+          console.error('Error fetching session:', sessionResponse.statusText);
         }
-      } catch (error) {
-        console.error('Error fetching users:', error);
+      } else {
+        console.error('Error fetching users:', usersResponse.statusText);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+  
 
+  const fetchRoles = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('Token no encontrado en localStorage');
+        return;
+      }
+      const response = await fetch('/api/roles', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setRoles(data.roles);
+      } else {
+        console.error('Error fetching roles:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching roles:', error);
+    }
+  };
+
+  useEffect(() => {
     fetchUsers();
+    fetchRoles();
   }, []);
+  
 
   const handleCreateUser = () => {
-    navigate('/users/create');
+    setShowModal(true);
+    setEditUser(null); // Reiniciar el usuario seleccionado para edición
+    setFormData({
+      cedula: '',
+      nombre: '',
+      correo_electronico: '',
+      contraseña: '',
+      rol_id: ''
+    });
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('token');
+      let endpoint = '/api/users';
+      let method = 'POST';
+
+      if (editUser) {
+        // Si editUser está presente, es una actualización
+        endpoint = `/api/users/${editUser.cedula}`;
+        method = 'PUT';
+      }
+
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Operación exitosa:', data);
+        fetchUsers(); // Actualizar la lista de usuarios después de crear o editar
+        setShowModal(false);
+      } else {
+        console.error('Error en la operación:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error en la operación:', error);
+    }
   };
 
   const handleDeleteUser = async (userId) => {
     const confirmDelete = window.confirm('¿Estás seguro de eliminar este usuario?');
-
     if (!confirmDelete) {
-      return; // Cancelar la eliminación si el usuario cancela la confirmación
+      return;
     }
-
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`/api/users/${userId}`, {
@@ -58,30 +165,48 @@ const Users = () => {
       });
 
       if (response.ok) {
-        setUsers(users.filter((user) => user.id_usuario !== userId));
+        setUsers(users.filter((user) => user.cedula !== userId));
+        console.log('Usuario eliminado correctamente');
       } else {
-        console.error('Error deleting user:', response.statusText);
+        console.error('Error al eliminar usuario:', response.statusText);
       }
     } catch (error) {
-      console.error('Error deleting user:', error);
+      console.error('Error al eliminar usuario:', error);
     }
   };
 
-  const handleEditUser = (userId) => {
-    navigate(`/users/${userId}/edit`);
+  const handleEditUser = (user) => {
+    setEditUser(user);
+    setFormData({
+      ...user,
+      contraseña: '' // Asegúrate de no incluir la contraseña actual en la edición
+    });
+    setShowModal(true);
+  };
+
+  const handleReturnToAdminPage = () => {
+    navigate('/admin');
   };
 
   return (
     <div className="container mt-4">
+      
+      <button className="btn btn-secondary" onClick={handleReturnToAdminPage}>
+        Volver
+      </button>
       <h2>Usuarios</h2>
       <div className="mb-3">
+      {userPermissions.includes(1) && (
         <button className="btn btn-success" onClick={handleCreateUser}>
           <i className="fas fa-plus"></i> Crear Usuario
         </button>
+        )}
       </div>
+      <div className="table-responsive">
       <table className="table table-striped">
         <thead>
           <tr>
+            <th>Cedula</th>
             <th>Nombre</th>
             <th>Correo Electrónico</th>
             <th>Rol</th>
@@ -90,22 +215,71 @@ const Users = () => {
         </thead>
         <tbody>
           {users.map((user) => (
-            <tr key={user.id_usuario}>
+            <tr key={user.cedula}>
+              <td>{user.cedula}</td>
               <td>{user.nombre}</td>
               <td>{user.correo_electronico}</td>
               <td>{user.rol}</td>
               <td>
-                <button className="btn btn-danger btn-sm mr-2" onClick={() => handleDeleteUser(user.id_usuario)}>
-                  <i className="fas fa-trash"></i> 
+                <button className="btn btn-danger btn-sm mr-2 action-button /n" onClick={() => handleDeleteUser(user.cedula)}>
+                  <i className="fas fa-trash"></i>
                 </button>
-                <button className="btn btn-primary btn-sm mr-2" onClick={() => handleEditUser(user.id_usuario)}>
-                  <i className="fas fa-edit"></i> 
+                {userPermissions.includes(2) && (
+                <button className="btn btn-primary btn-sm mr-2 action-button" onClick={() => handleEditUser(user)}>
+                  <i className="fas fa-edit"></i>
                 </button>
+                )}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      </div>
+
+      {showModal && (
+        <div className="modal show" tabIndex="-1" role="dialog" style={{ display: 'block' }}>
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">{editUser ? 'Editar Usuario' : 'Crear Usuario'}</h5>
+                <button type="button" className="close" onClick={handleCloseModal}>
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <form onSubmit={handleSubmit}>
+                  <div className="form-group">
+                    <label>Cedula</label>
+                    <input type="text" className="form-control" name="cedula" value={formData.cedula} onChange={handleChange} disabled={!!editUser} />
+                  </div>
+                  <div className="form-group">
+                    <label>Nombre</label>
+                    <input type="text" className="form-control" name="nombre" value={formData.nombre} onChange={handleChange} />
+                  </div>
+                  <div className="form-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" className="form-control" name="correo_electronico" value={formData.correo_electronico} onChange={handleChange} />
+                  </div>
+                  <div className="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" className="form-control" name="contraseña" value={formData.contraseña} onChange={handleChange} />
+                  </div>
+                  <div className="form-group">
+                    <label>Rol</label>
+                    <select className="form-control" name="rol_id" value={formData.rol_id} onChange={handleChange}>
+                      <option value="">Seleccionar Rol</option>
+                      {roles.map((role) => (
+                        <option key={role.id_rol} value={role.id_rol}>{role.nombre}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <button type="submit" className="btn btn-primary">{editUser ? 'Guardar' : 'Crear'}</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

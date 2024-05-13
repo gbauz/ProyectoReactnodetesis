@@ -18,21 +18,21 @@ Conexion.then((conn) => {
 
 // Endpoint de inicio de sesión
 app.post('/api/login', async (req, res) => {
-  const { correo_electronico, contraseña } = req.body;
+  const { cedula, contraseña } = req.body;
 
-  if (!correo_electronico || !contraseña) {
-    return res.status(400).json({ error: 'Correo electrónico y contraseña son requeridos.' });
+  if (!cedula || !contraseña) {
+    return res.status(400).json({ error: 'Usuario y contraseña son requeridos.' });
   }
 
   try {
     const [rows] = await (await Conexion).execute(
-      'SELECT * FROM Usuario WHERE correo_electronico = ? AND contraseña = ?',
-      [correo_electronico, contraseña]
+      'SELECT * FROM Usuario WHERE cedula = ? AND contraseña = ?',
+      [cedula, contraseña]
     );
 
     if (rows.length > 0) {
       const usuario = rows[0];
-      if (usuario.rol_id === 1) {
+      if (usuario.rol_id === 1 ||  usuario.rol_id === 3 ) {
         const token = generateToken(usuario);
         res.json({ success: true, token });
       } else {
@@ -50,17 +50,19 @@ app.post('/api/login', async (req, res) => {
 // Endpoint para verificar si un usuario es administrador
 app.get('/api/session', verificaToken, async (req, res) => {
   try {
-    if (req.user && req.user.isAdmin) {
-      const { email, name } = req.user;
+    if (req.user && req.user.isAdmin ) {
+      const { cedula, email, name } = req.user;
 
       // Consultar los permisos del usuario desde la base de datos
       const [rows] = await (await Conexion).execute(
         'SELECT rp.id_permiso FROM Roles_Permisos rp WHERE rp.id_rol = ?',
+      /*   [req.user.rol_id] */  /* no se puede acceder con esto */
         [req.user.isAdmin]
       );
 
       const permissions = rows.map(row => row.id_permiso);
-      res.json({ isAdmin: true, user: { email, name, permissions } });
+      console.log(permissions)
+      res.json({ isAdmin: true, user: { cedula, name, email, permissions } });
     } else {
       res.json({ isAdmin: false });
     }
@@ -86,7 +88,7 @@ app.post('/api/logout', verificaToken, (req, res) => {
 app.get('/api/users', verificaToken, async (req, res) => {
   try {
     const [rows] = await (await Conexion).execute(
-      'SELECT u.id_usuario, u.nombre, u.correo_electronico, r.nombre AS rol FROM Usuario u JOIN Rol r ON u.rol_id = r.id_rol'
+      'SELECT u.cedula, u.nombre, u.correo_electronico, r.nombre AS rol FROM Usuario u JOIN Rol r ON u.rol_id = r.id_rol'
     );
     res.json({ users: rows });
   } catch (error) {
@@ -97,12 +99,12 @@ app.get('/api/users', verificaToken, async (req, res) => {
 
 // Endpoint para crear un nuevo usuario
 app.post('/api/users', verificaToken, async (req, res) => {
-  const { nombre, correo_electronico, contraseña, rol_id } = req.body;
+  const {cedula, nombre, correo_electronico, contraseña, rol_id } = req.body;
 
   try {
     await (await Conexion).execute(
-      'INSERT INTO Usuario (nombre, correo_electronico, contraseña, rol_id) VALUES (?, ?, ?, ?)',
-      [nombre, correo_electronico, contraseña, rol_id]
+      'INSERT INTO Usuario (cedula, nombre, correo_electronico, contraseña, rol_id) VALUES (?, ?, ?, ?, ?)',
+      [cedula, nombre, correo_electronico, contraseña, rol_id]
     );
     res.json({ success: true, message: 'Usuario creado correctamente.' });
   } catch (error) {
@@ -116,7 +118,7 @@ app.delete('/api/users/:id', verificaToken, async (req, res) => {
   const userId = req.params.id;
 
   try {
-    await (await Conexion).execute('DELETE FROM Usuario WHERE id_usuario = ?', [userId]);
+    await (await Conexion).execute('DELETE FROM Usuario WHERE cedula = ?', [userId]);
     res.json({ success: true, message: 'Usuario eliminado correctamente.' });
   } catch (error) {
     console.error('Error deleting user:', error);
@@ -127,11 +129,11 @@ app.delete('/api/users/:id', verificaToken, async (req, res) => {
 // Endpoint para editar un usuario
 app.put('/api/users/:id', verificaToken, async (req, res) => {
   const userId = req.params.id;
-  const { nombre, correo_electronico, contraseña, rol_id } = req.body;
+  const {nombre, correo_electronico, contraseña, rol_id } = req.body;
 
   try {
     await (await Conexion).execute(
-      'UPDATE Usuario SET nombre = ?, correo_electronico = ?, contraseña = ?, rol_id = ? WHERE id_usuario = ?',
+      'UPDATE Usuario SET  nombre = ?, correo_electronico = ?, contraseña = ?, rol_id = ? WHERE cedula = ?',
       [nombre, correo_electronico, contraseña, rol_id, userId]
     );
     res.json({ success: true, message: 'Usuario actualizado correctamente.' });
@@ -141,7 +143,16 @@ app.put('/api/users/:id', verificaToken, async (req, res) => {
   }
 });
 
-
+// Endpoint para obtener todos los roles
+app.get('/api/roles', verificaToken, async (req, res) => {
+  try {
+    const [rows] = await (await Conexion).execute('SELECT id_rol, nombre FROM Rol');
+    res.json({ roles: rows });
+  } catch (error) {
+    console.error('Error fetching roles:', error);
+    res.status(500).json({ error: 'Error al obtener roles.' });
+  }
+});
 // Servir archivos estáticos desde la carpeta 'client/build'
 app.use(express.static(path.join(__dirname, 'client', 'build')));
 

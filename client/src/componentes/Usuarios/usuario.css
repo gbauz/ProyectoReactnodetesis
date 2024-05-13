@@ -4,10 +4,33 @@
 }
 
 .table th {
-  background-color: #007bff;
+  background-color: #0c3247;
   color: white;
 }
 
 .btn {
   cursor: pointer;
+}
+
+/* Estilos CSS para los botones de acción */
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px; /* Ancho fijo para ambos botones */
+  height: 32px; /* Altura fija para ambos botones */
+  padding: 0;
+}
+
+/* Estilos adicionales para los iconos dentro de los botones */
+.action-button i {
+  font-size: 16px; /* Tamaño del icono */
+}
+.table-responsive {
+  overflow-x: auto;
+}
+
+.table-responsive .table {
+  max-width: 100%;
+  white-space: nowrap;
 }

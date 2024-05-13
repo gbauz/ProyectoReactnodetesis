@@ -3,8 +3,16 @@ const jwt = require('jsonwebtoken');
 const tokensRevocados = new Set(); // Conjunto para almacenar tokens revocados
 
 function generateToken(user) {
+  let isAdmin = user.rol_id === 1 || user.rol_id === 3;
+
   return jwt.sign(
-    { userId: user.id, isAdmin: user.rol_id === 1, email: user.correo_electronico, name: user.nombre },
+    {
+      //userId: user.id,
+      isAdmin,
+      cedula: user.cedula,
+      email: user.correo_electronico,
+      name: user.nombre
+    },
     'tu_clave_secreta',
     { expiresIn: '1h' }
   );
@@ -28,8 +36,17 @@ function verificaToken(req, res, next) {
       return res.status(403).json({ error: 'Token inválido.' });
     }
 
+    // El token es válido, asignar los datos decodificados a req.user
     req.user = decoded;
-    next();
+
+    // Verificar los permisos según el rol
+    if (req.user.isAdmin || req.user.rol_id === 3) {
+      // Si el usuario es administrador o tiene el rol 3, permitir acceso
+      next(); // Continuar con la solicitud
+    } else {
+      // Si el usuario no tiene permisos adecuados
+      return res.status(403).json({ error: 'No tienes permiso para acceder.' });
+    }
   });
 }
 
