@@ -41,11 +41,11 @@ const AdminPage = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token'); // Elimina el token del localStorage al cerrar sesión
-<<<<<<< HEAD
+
     navigate('/'); // Redirige al usuario a la página de inicio de sesión
-=======
+
     navigate('/login'); // Redirige al usuario a la página de inicio de sesión
->>>>>>> 9d6b3cc28a543820ccbf22e624278f977dd30b3f
+
   };
 
   return (
