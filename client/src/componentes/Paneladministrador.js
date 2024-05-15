@@ -48,7 +48,7 @@ const AdminPage = () => {
 
     navigate('/'); // Redirige al usuario a la página de inicio de sesión
 
-    navigate('/login'); // Redirige al usuario a la página de inicio de sesión
+    
 
   };
 

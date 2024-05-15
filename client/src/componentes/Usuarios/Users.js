@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Usuario.css';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [userPermissions, setUserPermissions] = useState([]);
+  
   const [formData, setFormData] = useState({
     cedula: '',
     nombre: '',
@@ -15,7 +18,8 @@ const Users = () => {
     rol_id: ''
   });
   const [showModal, setShowModal] = useState(false);
-  const [editUser, setEditUser] = useState(null); // Estado para mantener el usuario seleccionado para edición
+  const [editUser, setEditUser] = useState(null);
+
   const navigate = useNavigate();
 
   const fetchUsers = async () => {
@@ -26,7 +30,6 @@ const Users = () => {
         return;
       }
   
-      // Obtener lista de usuarios
       const usersResponse = await fetch('/api/users', {
         headers: {
           Authorization: `Bearer ${token}`
@@ -35,10 +38,8 @@ const Users = () => {
   
       if (usersResponse.ok) {
         const userData = await usersResponse.json();
-        console.log('Datos de usuarios recibidos:', userData);
         setUsers(userData.users);
   
-        // Obtener permisos del usuario desde otra API
         const sessionResponse = await fetch('/api/session', {
           headers: {
             Authorization: `Bearer ${token}`
@@ -47,9 +48,7 @@ const Users = () => {
   
         if (sessionResponse.ok) {
           const sessionData = await sessionResponse.json();
-          console.log('Datos de sesión recibidos:', sessionData);
           setUserPermissions(sessionData.user.permissions);
-          console.log('Permisos de usuario:', sessionData.user.permissions);
         } else {
           console.error('Error fetching session:', sessionResponse.statusText);
         }
@@ -93,7 +92,7 @@ const Users = () => {
 
   const handleCreateUser = () => {
     setShowModal(true);
-    setEditUser(null); // Reiniciar el usuario seleccionado para edición
+    setEditUser(null);
     setFormData({
       cedula: '',
       nombre: '',
@@ -123,7 +122,6 @@ const Users = () => {
       let method = 'POST';
 
       if (editUser) {
-        // Si editUser está presente, es una actualización
         endpoint = `/api/users/${editUser.cedula}`;
         method = 'PUT';
       }
@@ -139,8 +137,7 @@ const Users = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Operación exitosa:', data);
-        fetchUsers(); // Actualizar la lista de usuarios después de crear o editar
+        fetchUsers();
         setShowModal(false);
       } else {
         console.error('Error en la operación:', response.statusText);
@@ -166,7 +163,6 @@ const Users = () => {
 
       if (response.ok) {
         setUsers(users.filter((user) => user.cedula !== userId));
-        console.log('Usuario eliminado correctamente');
       } else {
         console.error('Error al eliminar usuario:', response.statusText);
       }
@@ -179,7 +175,7 @@ const Users = () => {
     setEditUser(user);
     setFormData({
       ...user,
-      contraseña: '' // Asegúrate de no incluir la contraseña actual en la edición
+      contraseña: ''
     });
     setShowModal(true);
   };
@@ -188,52 +184,73 @@ const Users = () => {
     navigate('/admin');
   };
 
+  const handleShowReport = () => {
+    generatePDF();
+  };
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    doc.text(20, 20, 'Reporte de Usuarios');
+
+    const usersData = users.map(user => [user.cedula, user.nombre, user.correo_electronico, user.rol]);
+
+    doc.autoTable({
+      head: [['Cedula', 'Nombre', 'Correo Electrónico', 'Rol']],
+      body: usersData,
+    });
+
+    doc.save('reporte_usuarios.pdf');
+  };
+
   return (
-    <div className="container mt-4">
-      
+    <div className="container mt-4">      
+
       <button className="btn btn-secondary" onClick={handleReturnToAdminPage}>
         Volver
       </button>
       <h2>Usuarios</h2>
       <div className="mb-3">
-      {userPermissions.includes(1) && (
-        <button className="btn btn-success" onClick={handleCreateUser}>
-          <i className="fas fa-plus"></i> Crear Usuario
-        </button>
+        {userPermissions.includes(1) && (
+          <button className="btn btn-success" onClick={handleCreateUser}>
+            <i className="fas fa-plus"></i> Crear Usuario
+          </button>
         )}
       </div>
-      <div className="table-responsive">
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th>Cedula</th>
-            <th>Nombre</th>
-            <th>Correo Electrónico</th>
-            <th>Rol</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.cedula}>
-              <td>{user.cedula}</td>
-              <td>{user.nombre}</td>
-              <td>{user.correo_electronico}</td>
-              <td>{user.rol}</td>
-              <td>
-                <button className="btn btn-danger btn-sm mr-2 action-button /n" onClick={() => handleDeleteUser(user.cedula)}>
-                  <i className="fas fa-trash"></i>
-                </button>
-                {userPermissions.includes(2) && (
-                <button className="btn btn-primary btn-sm mr-2 action-button" onClick={() => handleEditUser(user)}>
-                  <i className="fas fa-edit"></i>
-                </button>
-                )}
-              </td>
+      <div className="table-responsive">      
+        <table className="table table-striped">
+          <thead>
+            <tr>
+              <th>Cedula</th>
+              <th>Nombre</th>
+              <th>Correo Electrónico</th>
+              <th>Rol</th>
+              <th>Acciones</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {users.map((user) => (
+              <tr key={user.cedula}>
+                <td>{user.cedula}</td>
+                <td>{user.nombre}</td>
+                <td>{user.correo_electronico}</td>
+                <td>{user.rol}</td>
+                <td>
+                  <button className="btn btn-danger btn-sm mr-2 action-button" onClick={() => handleDeleteUser(user.cedula)}>
+                    <i className="fas fa-trash"></i>
+                  </button>
+                  {userPermissions.includes(2) && (
+                    <button className="btn btn-primary btn-sm mr-2 action-button" onClick={() => handleEditUser(user)}>
+                      <i className="fas fa-edit"></i>
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <button className="btn btn-primary mb-3" onClick={handleShowReport}>
+        Mostrar Reporte
+      </button>
       </div>
 
       {showModal && (
