@@ -235,13 +235,15 @@ const Users = () => {
                 <td>{user.correo_electronico}</td>
                 <td>{user.rol}</td>
                 <td>
-                  <button className="btn btn-danger btn-sm mr-2 action-button" onClick={() => handleDeleteUser(user.cedula)}>
-                    <i className="fas fa-trash"></i>
-                  </button>
                   {userPermissions.includes(2) && (
                     <button className="btn btn-primary btn-sm mr-2 action-button" onClick={() => handleEditUser(user)}>
                       <i className="fas fa-edit"></i>
                     </button>
+                  )}
+                  {userPermissions.includes(3) && (
+                  <button className="btn btn-danger btn-sm mr-2 action-button" onClick={() => handleDeleteUser(user.cedula)}>
+                    <i className="fas fa-trash"></i>
+                  </button>
                   )}
                 </td>
               </tr>

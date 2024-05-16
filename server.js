@@ -50,22 +50,18 @@ app.post('/api/login', async (req, res) => {
 // Endpoint para verificar si un usuario es administrador
 app.get('/api/session', verificaToken, async (req, res) => {
   try {
-    if (req.user && req.user.isAdmin ) {
-      const { cedula, email, name } = req.user;
+    const { cedula, email, name, rol } = req.user;
+    const isAdmin = [1, 3].includes(rol);
+    // Consultar los permisos del usuario desde la base de datos según su rol
+    const [rows] = await (await Conexion).execute(
+      'SELECT rp.id_permiso FROM Roles_Permisos rp WHERE rp.id_rol = ?',
+      [rol]
+    );
 
-      // Consultar los permisos del usuario desde la base de datos
-      const [rows] = await (await Conexion).execute(
-        'SELECT rp.id_permiso FROM Roles_Permisos rp WHERE rp.id_rol = ?',
-      /*   [req.user.rol_id] */  /* no se puede acceder con esto */
-        [req.user.isAdmin]
-      );
+    const permissions = rows.map(row => row.id_permiso);
+    console.log(permissions);
 
-      const permissions = rows.map(row => row.id_permiso);
-      console.log(permissions)
-      res.json({ isAdmin: true, user: { cedula, name, email, permissions } });
-    } else {
-      res.json({ isAdmin: false });
-    }
+    res.json({ isAdmin, user: { cedula, name, email, permissions } });
   } catch (error) {
     console.error('Error al obtener información de sesión:', error);
     res.status(500).json({ error: 'Error al obtener información de sesión.' });

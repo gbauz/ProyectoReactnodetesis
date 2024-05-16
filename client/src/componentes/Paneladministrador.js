@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import '@fortawesome/fontawesome-free/css/all.min.css';
-import Users from './Usuarios/Users'; // Importar UsersPage
 
 const AdminPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState('');
-  const [userPermissions, setUserPermissions] = useState([]); // Agrega estado para los permisos del usuario
-
+  const [userPermissions, setUserPermissions] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,12 +23,16 @@ const AdminPage = () => {
           }
         });
 
-        const data = await response.json();
-        setIsAdmin(data.isAdmin);
+        if (response.ok) {
+          const data = await response.json();
+          setIsAdmin(data.isAdmin);
 
-        if (data.isAdmin) {
-          setUserName(data.user.name); // Establecer el nombre del usuario si es administrador
-          setUserPermissions(data.user.permissions);
+          if (data.isAdmin) {
+            setUserName(data.user.name);
+            setUserPermissions(data.user.permissions);
+          }
+        } else {
+          console.error('Error al hacer la solicitud protegida:', response.statusText);
         }
       } catch (error) {
         console.error('Error al hacer la solicitud protegida:', error);
@@ -40,21 +40,15 @@ const AdminPage = () => {
     };
 
     handleProtectedRequest();
-
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token'); // Elimina el token del localStorage al cerrar sesión
-
+    localStorage.removeItem('token');
     navigate('/'); // Redirige al usuario a la página de inicio de sesión
-
-    
-
   };
 
   return (
     <div className="d-flex">
-      {/* Barra lateral fija */}
       {isAdmin && (
         <div className="bg-dark text-white p-3" style={{ width: '200px', height: '100vh', position: 'fixed' }}>
           <h4 className="text-center">Panel Administrativo</h4>
@@ -86,14 +80,12 @@ const AdminPage = () => {
         </div>
       )}
 
-      {/* Área principal desplazada a la derecha */}
       <div className="p-4" style={{ marginLeft: isAdmin ? '200px' : '0', width: isAdmin ? 'calc(100% - 200px)' : '100%' }}>
         {isAdmin ? (
           <>
             <h2>{`Bienvenido al Panel Administrativo, ${userName}!`}</h2>
             <p>Área para realizar tareas administrativas.</p>
 
-            {/* Ejemplo de tarjeta */}
             <div className="card mb-4">
               <div className="card-body">
                 <h5 className="card-title">Estadísticas del Panel</h5>
@@ -101,8 +93,8 @@ const AdminPage = () => {
               </div>
             </div>
 
-            {/* Renderizar UsersPage con props */}
-           {/*  <Users isAdmin={isAdmin} userPermissions={userPermissions} /> */}
+            {/* Aquí puedes renderizar el componente Users con los permisos del usuario */}
+            {/* <Users userPermissions={userPermissions} /> */}
           </>
         ) : (
           <h1>No tienes permiso para acceder a esta página.</h1>

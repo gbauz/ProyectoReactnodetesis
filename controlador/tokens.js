@@ -7,11 +7,12 @@ function generateToken(user) {
 
   return jwt.sign(
     {
-      //userId: user.id,
+      userId: user.id,
       isAdmin,
       cedula: user.cedula,
       email: user.correo_electronico,
-      name: user.nombre
+      name: user.nombre,
+      rol: user.rol_id
     },
     'tu_clave_secreta',
     { expiresIn: '1h' }
@@ -40,7 +41,7 @@ function verificaToken(req, res, next) {
     req.user = decoded;
 
     // Verificar los permisos según el rol
-    if (req.user.isAdmin || req.user.rol_id === 3) {
+    if (decoded.rol === 1 || decoded.rol === 3) {
       // Si el usuario es administrador o tiene el rol 3, permitir acceso
       next(); // Continuar con la solicitud
     } else {
