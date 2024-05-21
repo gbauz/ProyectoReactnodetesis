@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import DataTable from 'react-data-table-component';
 import './Usuario.css';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [userPermissions, setUserPermissions] = useState([]);
-  
   const [formData, setFormData] = useState({
     cedula: '',
     nombre: '',
@@ -17,10 +17,9 @@ const Users = () => {
     contraseña: '',
     rol_id: ''
   });
+  const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editUser, setEditUser] = useState(null);
-
-  const navigate = useNavigate();
 
   const fetchUsers = async () => {
     try {
@@ -29,23 +28,24 @@ const Users = () => {
         console.error('Token no encontrado en localStorage');
         return;
       }
-  
+
       const usersResponse = await fetch('/api/users', {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-  
+
       if (usersResponse.ok) {
         const userData = await usersResponse.json();
         setUsers(userData.users);
-  
+        setFilteredUsers(userData.users);
+
         const sessionResponse = await fetch('/api/session', {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
-  
+
         if (sessionResponse.ok) {
           const sessionData = await sessionResponse.json();
           setUserPermissions(sessionData.user.permissions);
@@ -59,7 +59,6 @@ const Users = () => {
       console.error('Error fetching users:', error);
     }
   };
-  
 
   const fetchRoles = async () => {
     try {
@@ -88,7 +87,15 @@ const Users = () => {
     fetchUsers();
     fetchRoles();
   }, []);
-  
+
+  useEffect(() => {
+    const result = users.filter(user => {
+      return user.nombre.toLowerCase().includes(search.toLowerCase()) ||
+             user.correo_electronico.toLowerCase().includes(search.toLowerCase()) ||
+             user.cedula.includes(search);
+    });
+    setFilteredUsers(result);
+  }, [search, users]);
 
   const handleCreateUser = () => {
     setShowModal(true);
@@ -136,7 +143,6 @@ const Users = () => {
       });
 
       if (response.ok) {
-        const data = await response.json();
         fetchUsers();
         setShowModal(false);
       } else {
@@ -180,10 +186,6 @@ const Users = () => {
     setShowModal(true);
   };
 
-  const handleReturnToAdminPage = () => {
-    navigate('/admin');
-  };
-
   const handleShowReport = () => {
     generatePDF();
   };
@@ -202,58 +204,83 @@ const Users = () => {
     doc.save('reporte_usuarios.pdf');
   };
 
+  const columns = [
+    {
+      name: 'Cedula',
+      selector: row => row.cedula,
+      sortable: true,
+    },
+    {
+      name: 'Nombre',
+      selector: row => row.nombre,
+      sortable: true,
+    },
+    {
+      name: 'Correo Electrónico',
+      selector: row => row.correo_electronico,
+      sortable: true,
+    },
+    {
+      name: 'Rol',
+      selector: row => row.rol,
+      sortable: true,
+    },
+    {
+      name: 'Acciones',
+      cell: row => (
+        <>
+          {userPermissions.includes(2) && (
+            <button className="btn btn-primary btn-sm mr-2 action-button" onClick={() => handleEditUser(row)}>
+              <i className="fas fa-edit"></i>
+            </button>
+          )}
+          {userPermissions.includes(3) && (
+            <button className="btn btn-danger btn-sm mr-2 action-button" onClick={() => handleDeleteUser(row.cedula)}>
+              <i className="fas fa-trash"></i>
+            </button>
+          )}
+        </>
+      ),
+    },
+  ];
+
   return (
     <div className="container mt-4">      
-
-      <button className="btn btn-secondary" onClick={handleReturnToAdminPage}>
-        Volver
-      </button>
-      <h2>Usuarios</h2>
-      <div className="mb-3">
+      <h4>Usuarios</h4>
+      <div className="d-flex justify-content-end mb-3">
+        <input
+          type="text"
+          className="form-control w-25 mr-2"
+          placeholder="Buscar..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
         {userPermissions.includes(1) && (
-          <button className="btn btn-success" onClick={handleCreateUser}>
+          <button className="btn btn-success mr-2" onClick={handleCreateUser}>
             <i className="fas fa-plus"></i> Crear Usuario
           </button>
         )}
+        
       </div>
-      <div className="table-responsive">      
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>Cedula</th>
-              <th>Nombre</th>
-              <th>Correo Electrónico</th>
-              <th>Rol</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.cedula}>
-                <td>{user.cedula}</td>
-                <td>{user.nombre}</td>
-                <td>{user.correo_electronico}</td>
-                <td>{user.rol}</td>
-                <td>
-                  {userPermissions.includes(2) && (
-                    <button className="btn btn-primary btn-sm mr-2 action-button" onClick={() => handleEditUser(user)}>
-                      <i className="fas fa-edit"></i>
-                    </button>
-                  )}
-                  {userPermissions.includes(3) && (
-                  <button className="btn btn-danger btn-sm mr-2 action-button" onClick={() => handleDeleteUser(user.cedula)}>
-                    <i className="fas fa-trash"></i>
-                  </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <button className="btn btn-primary mb-3" onClick={handleShowReport}>
+      <DataTable
+        columns={columns}
+        data={filteredUsers}
+        pagination
+        highlightOnHover
+        pointerOnHover
+        responsive
+        customStyles={{
+          headCells: {
+            style: {
+              backgroundColor: '#0056b3',
+              color: '#ffffff',
+            },
+          },
+        }}
+      />
+      <button className="btn btn-primary mt-3" onClick={handleShowReport}>
         Mostrar Reporte
       </button>
-      </div>
 
       {showModal && (
         <div className="modal show" tabIndex="-1" role="dialog" style={{ display: 'block' }}>

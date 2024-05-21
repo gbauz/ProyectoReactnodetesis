@@ -3,6 +3,7 @@ const path = require('path');
 const { verificaToken, generateToken, revokeToken } = require('./controlador/tokens');
 const Conexion = require('./controlador/conexion');
 
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -59,7 +60,7 @@ app.get('/api/session', verificaToken, async (req, res) => {
     );
 
     const permissions = rows.map(row => row.id_permiso);
-    console.log(permissions);
+    //console.log(permissions);
 
     res.json({ isAdmin, user: { cedula, name, email, permissions } });
   } catch (error) {
@@ -142,11 +143,92 @@ app.put('/api/users/:id', verificaToken, async (req, res) => {
 // Endpoint para obtener todos los roles
 app.get('/api/roles', verificaToken, async (req, res) => {
   try {
-    const [rows] = await (await Conexion).execute('SELECT id_rol, nombre FROM Rol');
-    res.json({ roles: rows });
+    const [roles] = await (await Conexion).execute('SELECT id_rol, nombre FROM Rol');
+    // Obtener permisos para cada rol
+    const rolesWithPermissions = await Promise.all(roles.map(async (role) => {
+      const [permisos] = await (await Conexion).execute(
+        'SELECT p.id_permiso, p.nombre_permiso AS permiso_nombre FROM Permisos p JOIN Roles_Permisos rp ON p.id_permiso = rp.id_permiso WHERE rp.id_rol = ?',
+        [role.id_rol]
+      );
+      return { ...role, permisos };
+    }));
+
+    res.json({ roles: rolesWithPermissions });
   } catch (error) {
     console.error('Error fetching roles:', error);
     res.status(500).json({ error: 'Error al obtener roles.' });
+  }
+});
+// Endpoint para crear un nuevo rol con permisos
+app.post('/api/roles', verificaToken, async (req, res) => {
+  const { nombre, permisos } = req.body;
+
+  try {
+    const [result] = await (await Conexion).execute(
+      'INSERT INTO Rol (nombre) VALUES (?)',
+      [nombre]
+    );
+    const rolId = result.insertId;
+
+    if (permisos && permisos.length > 0) {
+      const permisosValues = permisos.map(permisoId => [rolId, permisoId]);
+      await (await Conexion).query(
+        'INSERT INTO Roles_Permisos (id_rol, id_permiso) VALUES ?',
+        [permisosValues]
+      );
+    }
+
+    res.json({ success: true, message: 'Rol creado correctamente.' });
+  } catch (error) {
+    console.error('Error creating role:', error);
+    res.status(500).json({ error: 'Error al crear rol.' });
+  }
+});
+
+// Endpoint para editar un rol con permisos
+app.put('/api/roles/:id', verificaToken, async (req, res) => {
+  const roleId = req.params.id;
+  const { nombre, permisos } = req.body;
+
+  try {
+    await (await Conexion).execute(
+      'UPDATE Rol SET nombre = ? WHERE id_rol = ?',
+      [nombre, roleId]
+    );
+
+    // Primero, eliminamos los permisos actuales
+    await (await Conexion).execute('DELETE FROM Roles_Permisos WHERE id_rol = ?', [roleId]);
+
+    // Luego, agregamos los nuevos permisos
+    if (permisos && permisos.length > 0) {
+      const permisosValues = permisos.map(permisoId => [roleId, permisoId]);
+      await (await Conexion).query(
+        'INSERT INTO Roles_Permisos (id_rol, id_permiso) VALUES ?',
+        [permisosValues]
+      );
+    }
+
+    res.json({ success: true, message: 'Rol actualizado correctamente.' });
+  } catch (error) {
+    console.error('Error updating role:', error);
+    res.status(500).json({ error: 'Error al actualizar rol.' });
+  }
+});
+// Endpoint para eliminar un rol con sus permisos
+app.delete('/api/roles/:id', verificaToken, async (req, res) => {
+  const roleId = req.params.id;
+
+  try {
+    // Primero, eliminamos las relaciones de permisos del rol
+    await (await Conexion).execute('DELETE FROM Roles_Permisos WHERE id_rol = ?', [roleId]);
+
+    // Luego, eliminamos el rol
+    await (await Conexion).execute('DELETE FROM Rol WHERE id_rol = ?', [roleId]);
+
+    res.json({ success: true, message: 'Rol eliminado correctamente.' });
+  } catch (error) {
+    console.error('Error al eliminar rol:', error);
+    res.status(500).json({ error: 'Error al eliminar rol.' });
   }
 });
 // Servir archivos estáticos desde la carpeta 'client/build'
