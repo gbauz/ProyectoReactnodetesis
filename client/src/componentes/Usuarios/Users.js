@@ -123,6 +123,12 @@ const Users = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Verificar si todos los campos obligatorios están llenos
+  const { cedula, nombre, correo_electronico, contraseña, rol_id } = formData;
+  if (!cedula || !nombre || !correo_electronico || !contraseña || !rol_id) {
+    alert('Todos los campos son obligatorios.');
+    return;
+  }
     try {
       const token = localStorage.getItem('token');
       let endpoint = '/api/users';
@@ -143,8 +149,13 @@ const Users = () => {
       });
 
       if (response.ok) {
+        const responseData = await response.json();
+      if (responseData.error && responseData.error.includes('cedula')) {
+        alert('Ya existe un usuario con la misma cédula.');
+      } else {
         fetchUsers();
         setShowModal(false);
+      }
       } else {
         console.error('Error en la operación:', response.statusText);
       }
@@ -272,7 +283,7 @@ const Users = () => {
         customStyles={{
           headCells: {
             style: {
-              backgroundColor: '#0056b3',
+              backgroundColor: '#135ea9',
               color: '#ffffff',
             },
           },
@@ -296,7 +307,7 @@ const Users = () => {
                 <form onSubmit={handleSubmit}>
                   <div className="form-group">
                     <label>Cedula</label>
-                    <input type="text" className="form-control" name="cedula" value={formData.cedula} onChange={handleChange} disabled={!!editUser} />
+                    <input type="text" maxLength={10} className="form-control" name="cedula" value={formData.cedula} onChange={handleChange} disabled={!!editUser} />
                   </div>
                   <div className="form-group">
                     <label>Nombre</label>

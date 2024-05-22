@@ -231,6 +231,15 @@ app.delete('/api/roles/:id', verificaToken, async (req, res) => {
     res.status(500).json({ error: 'Error al eliminar rol.' });
   }
 });
+app.get('/api/permisos', verificaToken, async (req, res) => {
+  try {
+    const [permisos] = await (await Conexion).execute('SELECT id_permiso, nombre_permiso FROM Permisos');
+    res.json({ permisos });
+  } catch (error) {
+    console.error('Error fetching permisos:', error);
+    res.status(500).json({ error: 'Error al obtener permisos.' });
+  }
+});
 // Servir archivos estáticos desde la carpeta 'client/build'
 app.use(express.static(path.join(__dirname, 'client', 'build')));
 

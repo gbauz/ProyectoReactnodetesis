@@ -51,7 +51,7 @@ const Roles = () => {
         return;
       }
 
-      const permissionsResponse = await fetch('/api/permissions', {
+      const permissionsResponse = await fetch('/api/permisos', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -59,7 +59,7 @@ const Roles = () => {
 
       if (permissionsResponse.ok) {
         const permissionsData = await permissionsResponse.json();
-        setPermissionsList(permissionsData.permissions);
+        setPermissionsList(permissionsData.permisos);
       } else {
         console.error('Error fetching permissions:', permissionsResponse.statusText);
       }
@@ -111,6 +111,11 @@ const Roles = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const {nombre} = formData;
+  if (!nombre) {
+    alert('Todos los campos son obligatorios.');
+    return;
+  }
     try {
       const token = localStorage.getItem('token');
       let endpoint = '/api/roles';
@@ -189,7 +194,7 @@ const Roles = () => {
     ]);
 
     doc.autoTable({
-      head: [['ID', 'Nombre', 'Permisos']],
+      head: [['ID', 'Rol', 'Permisos']],
       body: rolesData,
     });
 
@@ -203,7 +208,7 @@ const Roles = () => {
       sortable: true,
     },
     {
-      name: 'Nombre',
+      name: 'Rol',
       selector: row => row.nombre,
       sortable: true,
     },
@@ -240,7 +245,7 @@ const Roles = () => {
         <input
           type="text"
           className="form-control w-25 mr-2"
-          placeholder="Buscar..."
+          placeholder="Buscar por rol.."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -258,7 +263,7 @@ const Roles = () => {
         customStyles={{
           headCells: {
             style: {
-              backgroundColor: '#0056b3',
+              backgroundColor: '#135ea9',
               color: '#ffffff',
             },
           },
@@ -283,13 +288,18 @@ const Roles = () => {
                   <div className="form-group">
                     <label>Nombre del Rol</label>
                     <input type="text" className="form-control" name="nombre" value={formData.nombre} onChange={handleChange} />
-                  </div>
+                  </div><br/>
                    <div className="form-group">
-                    <label>Permisos</label>
-                    <select className="form-control" name="permisos" value={formData.permisos} onChange={handlePermissionsChange}>
-                    <option value="">Seleccionar Permisos</option>
+                    <label>Asignar Permisos al Rol</label><br/>
+                    <select
+                      className="form-control"
+                      name="permisos"
+                      value={formData.permisos}
+                      onChange={handlePermissionsChange}
+                      multiple
+                    >
                       {permissionsList.map(permiso => (
-                        <option key={permiso.id_permiso} value={permiso.id_permiso}>{permiso.nombre}</option>
+                        <option key={permiso.id_permiso} value={permiso.id_permiso}>{permiso.nombre_permiso}</option>
                       ))}
                     </select>
                   </div>

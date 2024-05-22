@@ -61,13 +61,13 @@ const AdminPage = () => {
       case 'dashboard':
         return (
           <>
-            <h2>{`Bienvenido al Panel Administrativo, ${userName}!`}</h2>
-            <p>Área para realizar tareas administrativas.</p>
+            <h2>{`Bienvenido, ${userName}!`}</h2>
+            {/* <p>Área para realizar tareas administrativas.</p> */}
 
             <div className="card mb-4">
               <div className="card-body">
                 <h5 className="card-title">Estadísticas del Panel</h5>
-                <p>Información clave para administración.</p>
+                <p>Información clave.</p>
               </div>
             </div>
           </>
@@ -115,7 +115,7 @@ const AdminPage = () => {
       {/* Barra superior */}
       {isAdmin && (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-          <a className="navbar-brand" href="#" >  Panel Administrativo INSPI</a>
+          <a className="navbar-brand" href="#" >&nbsp;&nbsp;&nbsp;&nbsp;Instituto Nacional INSPI</a>
           <button className="navbar-toggler" type="button" onClick={toggleSidebar}>
             <span className="navbar-toggler-icon"></span>
           </button>
@@ -127,7 +127,7 @@ const AdminPage = () => {
                     {getInitial(userName)}
                   </div>
                   <span className="ms-2">{userName}</span>
-                </a>
+                  &nbsp;</a>
                 <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                   <li><a className="dropdown-item" href="#">Perfil</a></li>
                   <li><a className="dropdown-item" href="#">Ajustes</a></li>
@@ -153,10 +153,10 @@ const AdminPage = () => {
                   <span>{userName}</span>
                 </div>
                 <div className="nav-item">
-                  <a className="nav-link text-white" href="/profile">Perfil</a>
+                  <a className="nav-link text-white" href="#">Perfil</a>
                 </div>
                 <div className="nav-item">
-                  <a className="nav-link text-white" href="/settings">Ajustes</a>
+                  <a className="nav-link text-white" href="#">Ajustes</a>
                 </div>
               </li>
               <li className="nav-item">
@@ -172,7 +172,7 @@ const AdminPage = () => {
                   aria-expanded="false"
                   aria-controls="userSubMenu"
                 >
-                  <i className="fas fa-users"></i>Usuarios <i className="fas fa-chevron-down"></i>
+                  <i className="fas fa-users"></i> Gestión de Usuarios <i className="fas fa-chevron-down"></i>
                 </button>
                 {/* Submenu para la gestión de usuarios */}
                 <div className="collapse" id="userSubMenu">

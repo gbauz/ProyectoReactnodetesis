@@ -8,6 +8,7 @@
     color: rgba(255, 255, 255, 1);
   }
   
+  
   /* Estilos para la barra lateral en dispositivos móviles */
   @media (max-width: 768px) {
     .sidebar {
@@ -76,7 +77,7 @@
 
 .breadcrumb {
   padding: 10px;
-  background-color: #495057;
+  background-color: #064c91;
   border-radius: 4px;
   margin-bottom: 20px;
 }
@@ -111,4 +112,12 @@
   }
 }
 
-  
+  /* Barra superior */
+.bg-dark {
+  background-color: rgb(19 94 169) !important
+}
+
+/* Barra lateral */
+.bg-dark {
+  background-color: rgb(19 94 169) !important
+}
