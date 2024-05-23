@@ -52,7 +52,7 @@ app.post('/api/login', async (req, res) => {
 app.get('/api/session', verificaToken, async (req, res) => {
   try {
     const { cedula, email, name, rol } = req.user;
-    const isAdmin = [1, 3].includes(rol);
+    const isAdmin = [1, 3, 8].includes(rol);
     // Consultar los permisos del usuario desde la base de datos según su rol
     const [rows] = await (await Conexion).execute(
       'SELECT rp.id_permiso FROM Roles_Permisos rp WHERE rp.id_rol = ?',
@@ -60,7 +60,7 @@ app.get('/api/session', verificaToken, async (req, res) => {
     );
 
     const permissions = rows.map(row => row.id_permiso);
-    //console.log(permissions);
+    console.log(permissions);
 
     res.json({ isAdmin, user: { cedula, name, email, permissions } });
   } catch (error) {

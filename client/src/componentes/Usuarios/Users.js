@@ -88,6 +88,8 @@ const Users = () => {
     fetchRoles();
   }, []);
 
+
+
   useEffect(() => {
     const result = users.filter(user => {
       return user.nombre.toLowerCase().includes(search.toLowerCase()) ||

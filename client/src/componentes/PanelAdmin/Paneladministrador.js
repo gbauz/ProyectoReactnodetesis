@@ -149,14 +149,25 @@ const AdminPage = () => {
             </div>
             <ul className="nav flex-column">
               <li className="nav-item d-lg-none">
-                <div className="nav-link">
-                  <span>{userName}</span>
-                </div>
-                <div className="nav-item">
-                  <a className="nav-link text-white" href="#">Perfil</a>
-                </div>
-                <div className="nav-item">
-                  <a className="nav-link text-white" href="#">Ajustes</a>
+                <button
+                  className="nav-link text-white btn btn-link"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#userProfileSubMenu"
+                  aria-expanded="false"
+                  aria-controls="userProfileSubMenu"
+                >
+                  <i class="fas fa-user"></i> {userName} <i className="fas fa-chevron-down"></i>
+                </button>
+                {/* Submenu para el perfil del usuario */}
+                <div className="collapse" id="userProfileSubMenu">
+                  <ul className="nav flex-column">
+                    <li className="nav-item">
+                      <a className="nav-link text-white" href="#">Perfil</a>
+                    </li>
+                    <li className="nav-item">
+                      <a className="nav-link text-white" href="#">Ajustes</a>
+                    </li>
+                  </ul>
                 </div>
               </li>
               <li className="nav-item">

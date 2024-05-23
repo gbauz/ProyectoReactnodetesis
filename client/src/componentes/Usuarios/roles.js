@@ -8,11 +8,13 @@ import 'jspdf-autotable';
 const Roles = () => {
   const [roles, setRoles] = useState([]);
   const [filteredRoles, setFilteredRoles] = useState([]);
+  const [permissionsList, setPermissionsList] = useState([]);
+  const [rolesPermissions, setRolesPermissions] = useState([]);
   const [formData, setFormData] = useState({
     nombre: '',
     permisos: []
   });
-  const [permissionsList, setPermissionsList] = useState([]);
+
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editRole, setEditRole] = useState(null);
@@ -35,6 +37,18 @@ const Roles = () => {
         const rolesData = await rolesResponse.json();
         setRoles(rolesData.roles);
         setFilteredRoles(rolesData.roles);
+
+        const sessionResponse = await fetch('/api/session', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        if (sessionResponse.ok) {
+          const sessionData = await sessionResponse.json();
+          setRolesPermissions(sessionData.user.permissions);
+        } else {
+          console.error('Error fetching session:', sessionResponse.statusText);
+        }
       } else {
         console.error('Error fetching roles:', rolesResponse.statusText);
       }
@@ -111,11 +125,11 @@ const Roles = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const {nombre} = formData;
-  if (!nombre) {
-    alert('Todos los campos son obligatorios.');
-    return;
-  }
+    const { nombre } = formData;
+    if (!nombre) {
+      alert('Todos los campos son obligatorios.');
+      return;
+    }
     try {
       const token = localStorage.getItem('token');
       let endpoint = '/api/roles';
@@ -227,19 +241,23 @@ const Roles = () => {
       name: 'Acciones',
       cell: row => (
         <>
-          <button className="btn btn-primary btn-sm mr-2 action-button" onClick={() => handleEditRole(row)}>
-            <i className="fas fa-edit"></i>
-          </button>
-          <button className="btn btn-danger btn-sm mr-2 action-button" onClick={() => handleDeleteRole(row.id_rol)}>
-            <i className="fas fa-trash"></i>
-          </button>
+          {rolesPermissions.includes(5) && (
+            <button className="btn btn-primary btn-sm mr-2 action-button" onClick={() => handleEditRole(row)}>
+              <i className="fas fa-edit"></i>
+            </button>
+          )}
+          {rolesPermissions.includes(6) && (
+            <button className="btn btn-danger btn-sm mr-2 action-button" onClick={() => handleDeleteRole(row.id_rol)}>
+              <i className="fas fa-trash"></i>
+            </button>
+          )}
         </>
       ),
     },
   ];
 
   return (
-    <div className="container mt-4">      
+    <div className="container mt-4">
       <h4>Roles</h4>
       <div className="d-flex justify-content-end mb-3">
         <input
@@ -249,9 +267,11 @@ const Roles = () => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <button className="btn btn-success mr-2" onClick={handleCreateRole}>
-          <i className="fas fa-plus"></i> Crear Rol
-        </button>
+        {rolesPermissions.includes(4) && (
+          <button className="btn btn-success mr-2" onClick={handleCreateRole}>
+            <i className="fas fa-plus"></i> Crear Rol
+          </button>
+        )}
       </div>
       <DataTable
         columns={columns}
@@ -289,7 +309,7 @@ const Roles = () => {
                     <label>Nombre del Rol</label>
                     <input type="text" className="form-control" name="nombre" value={formData.nombre} onChange={handleChange} />
                   </div><br/>
-                   <div className="form-group">
+                  <div className="form-group">
                     <label>Asignar Permisos al Rol</label><br/>
                     <select
                       className="form-control"
