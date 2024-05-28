@@ -6,6 +6,8 @@ const Conexion = require('./controlador/conexion');
 
 const app = express();
 const port = process.env.PORT || 3000;
+const bcrypt = require('bcrypt');
+const saltRounds = 10; // Número de rondas de hashing para bcrypt
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -26,25 +28,40 @@ app.post('/api/login', async (req, res) => {
   }
 
   try {
+    // Buscar al usuario por su cédula en la base de datos
     const [rows] = await (await Conexion).execute(
-      'SELECT * FROM Usuario WHERE cedula = ? AND contraseña = ?',
-      [cedula, contraseña]
+      'SELECT * FROM Usuario WHERE cedula = ?',
+      [cedula]
     );
 
-    if (rows.length > 0) {
-      const usuario = rows[0];
-      if (usuario.rol_id === 1 ||  usuario.rol_id === 3 ) {
+    // Si no se encuentra ningún usuario con la cédula proporcionada
+    if (rows.length === 0) {
+      return res.status(401).json({ error: 'Credenciales incorrectas.' });
+    }
+
+    // Obtener el hash de la contraseña almacenada en la base de datos
+    const usuario = rows[0];
+    const hashContraseña = usuario.contraseña;
+
+    // Comparar la contraseña ingresada con el hash almacenado en la base de datos
+    const passwordMatch = await bcrypt.compare(contraseña, hashContraseña);
+
+    // Si las contraseñas coinciden, el inicio de sesión es exitoso
+    if (passwordMatch) {
+      // Verificar los permisos del usuario (rol_id)
+      if (usuario.rol_id === 1 || usuario.rol_id === 2) {
+        // Generar token de sesión
         const token = generateToken(usuario);
-        res.json({ success: true, token });
+        return res.json({ success: true, token });
       } else {
-        res.status(403).json({ error: 'No tienes permiso para acceder.' });
+        return res.status(403).json({ error: 'No tienes permiso para acceder.' });
       }
     } else {
-      res.status(401).json({ error: 'Credenciales incorrectas.' });
+      return res.status(401).json({ error: 'Credenciales incorrectas.' });
     }
   } catch (error) {
     console.error('Error al autenticar:', error);
-    res.status(500).json({ error: 'Error al autenticar usuario.' });
+    return res.status(500).json({ error: 'Error al autenticar usuario.' });
   }
 });
 
@@ -52,7 +69,7 @@ app.post('/api/login', async (req, res) => {
 app.get('/api/session', verificaToken, async (req, res) => {
   try {
     const { cedula, email, name, rol } = req.user;
-    const isAdmin = [1, 3, 8].includes(rol);
+    const isAdmin = [1, 2].includes(rol);
     // Consultar los permisos del usuario desde la base de datos según su rol
     const [rows] = await (await Conexion).execute(
       'SELECT rp.id_permiso FROM Roles_Permisos rp WHERE rp.id_rol = ?',
@@ -60,7 +77,7 @@ app.get('/api/session', verificaToken, async (req, res) => {
     );
 
     const permissions = rows.map(row => row.id_permiso);
-    console.log(permissions);
+    //console.log(permissions);
 
     res.json({ isAdmin, user: { cedula, name, email, permissions } });
   } catch (error) {
@@ -96,13 +113,30 @@ app.get('/api/users', verificaToken, async (req, res) => {
 
 // Endpoint para crear un nuevo usuario
 app.post('/api/users', verificaToken, async (req, res) => {
-  const {cedula, nombre, correo_electronico, contraseña, rol_id } = req.body;
+  const { cedula, nombre, correo_electronico, contraseña, rol_id } = req.body;
 
   try {
+    // Verificar si ya existe un usuario con la misma cédula
+    const [existingUserRows] = await (await Conexion).execute(
+      'SELECT * FROM Usuario WHERE cedula = ?',
+      [cedula]
+    );
+
+    // Si ya existe un usuario con la misma cédula, devolver un error
+    if (existingUserRows.length > 0) {
+      return res.status(400).json({ error: 'Ya existe un usuario con el mismo número de cédula.' });
+    }
+
+    // Encriptar la contraseña antes de almacenarla en la base de datos
+    const hashedPassword = await bcrypt.hash(contraseña, 10); // Generar hash de la contraseña con 10 rounds de salting
+
+    // Insertar el nuevo usuario en la base de datos con la contraseña encriptada
     await (await Conexion).execute(
       'INSERT INTO Usuario (cedula, nombre, correo_electronico, contraseña, rol_id) VALUES (?, ?, ?, ?, ?)',
-      [cedula, nombre, correo_electronico, contraseña, rol_id]
+      [cedula, nombre, correo_electronico, hashedPassword, rol_id]
     );
+
+    // Respuesta exitosa
     res.json({ success: true, message: 'Usuario creado correctamente.' });
   } catch (error) {
     console.error('Error creating user:', error);
@@ -110,11 +144,28 @@ app.post('/api/users', verificaToken, async (req, res) => {
   }
 });
 
+
 // Endpoint para eliminar un usuario
 app.delete('/api/users/:id', verificaToken, async (req, res) => {
   const userId = req.params.id;
 
   try {
+    // Verificar el rol del usuario antes de eliminar
+    const [userRows] = await (await Conexion).execute(
+      'SELECT rol_id FROM Usuario WHERE cedula = ?',
+      [userId]
+    );
+
+    if (userRows.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado.' });
+    }
+
+    const userRol = userRows[0].rol_id;
+
+    if (userRol === 1) {
+      return res.status(403).json({ error: 'No se puede eliminar a un usuario con rol Administrador.' });
+    }
+
     await (await Conexion).execute('DELETE FROM Usuario WHERE cedula = ?', [userId]);
     res.json({ success: true, message: 'Usuario eliminado correctamente.' });
   } catch (error) {
@@ -126,17 +177,43 @@ app.delete('/api/users/:id', verificaToken, async (req, res) => {
 // Endpoint para editar un usuario
 app.put('/api/users/:id', verificaToken, async (req, res) => {
   const userId = req.params.id;
-  const {nombre, correo_electronico, contraseña, rol_id } = req.body;
+  const {nombre, correo_electronico, rol_id } = req.body;
 
   try {
     await (await Conexion).execute(
-      'UPDATE Usuario SET  nombre = ?, correo_electronico = ?, contraseña = ?, rol_id = ? WHERE cedula = ?',
-      [nombre, correo_electronico, contraseña, rol_id, userId]
+      'UPDATE Usuario SET  nombre = ?, correo_electronico = ?, rol_id = ? WHERE cedula = ?',
+      [nombre, correo_electronico, rol_id, userId]
     );
     res.json({ success: true, message: 'Usuario actualizado correctamente.' });
   } catch (error) {
     console.error('Error updating user:', error);
     res.status(500).json({ error: 'Error al actualizar usuario.' });
+  }
+});
+// Endpoint para editar contraseña a un usuario
+app.put('/api/users/:id/password', verificaToken, async (req, res) => {
+  const userId = req.params.id;
+  const { nuevaContraseña, confirmarContraseña } = req.body;
+
+  // Verificar que las contraseñas coincidan
+  if (nuevaContraseña !== confirmarContraseña) {
+    return res.status(400).json({ error: 'Las contraseñas no coinciden.' });
+  }
+
+  try {
+    // Encriptar la nueva contraseña
+    const hashedPassword = await bcrypt.hash(nuevaContraseña, saltRounds);
+
+    // Actualizar la contraseña en la base de datos
+    await (await Conexion).execute(
+      'UPDATE Usuario SET contraseña = ? WHERE cedula = ?',
+      [hashedPassword, userId]
+    );
+
+    res.json({ success: true, message: 'Contraseña actualizada correctamente.' });
+  } catch (error) {
+    console.error('Error updating password:', error);
+    res.status(500).json({ error: 'Error al actualizar la contraseña.' });
   }
 });
 
@@ -219,18 +296,34 @@ app.delete('/api/roles/:id', verificaToken, async (req, res) => {
   const roleId = req.params.id;
 
   try {
+    const [[usersWithRole]] = await (await Conexion).execute(
+      'SELECT COUNT(*) AS count FROM Usuario INNER JOIN Rol ON Usuario.rol_id = Rol.id_rol WHERE Rol.id_rol = ?',
+      [roleId]
+    );
+
+   // console.log(usersWithRole);
+    //console.log(typeof usersWithRole.count);
+
+    if (usersWithRole.count > 0) {
+      // Si hay usuarios asignados, devolver un mensaje de error
+      return res.status(400).json({ error: 'No se puede eliminar el rol porque está asignado a uno o más usuarios.' });
+
+    }
+
     // Primero, eliminamos las relaciones de permisos del rol
     await (await Conexion).execute('DELETE FROM Roles_Permisos WHERE id_rol = ?', [roleId]);
 
     // Luego, eliminamos el rol
     await (await Conexion).execute('DELETE FROM Rol WHERE id_rol = ?', [roleId]);
-
+    
     res.json({ success: true, message: 'Rol eliminado correctamente.' });
   } catch (error) {
     console.error('Error al eliminar rol:', error);
     res.status(500).json({ error: 'Error al eliminar rol.' });
   }
 });
+
+//Endpoint de permisos
 app.get('/api/permisos', verificaToken, async (req, res) => {
   try {
     const [permisos] = await (await Conexion).execute('SELECT id_permiso, nombre_permiso FROM Permisos');

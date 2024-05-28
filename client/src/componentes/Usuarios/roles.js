@@ -18,6 +18,7 @@ const Roles = () => {
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editRole, setEditRole] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(''); // Estado para manejar el mensaje de error
 
   const fetchRoles = async () => {
     try {
@@ -152,6 +153,7 @@ const Roles = () => {
       if (response.ok) {
         fetchRoles();
         setShowModal(false);
+        setErrorMessage(''); // Restablecer el mensaje de error al enviar con éxito
       } else {
         console.error('Error en la operación:', response.statusText);
       }
@@ -174,10 +176,15 @@ const Roles = () => {
         }
       });
 
+      const responseData = await response.json();
       if (response.ok) {
-        setRoles(roles.filter((role) => role.id_rol !== roleId));
+        // Actualiza la lista de roles después de eliminar uno exitosamente
+        setRoles(roles.filter(role => role.id_rol !== roleId));
+        setFilteredRoles(filteredRoles.filter(role => role.id_rol !== roleId));
+        setErrorMessage(''); // Restablece el mensaje de error después de una eliminación exitosa
       } else {
-        console.error('Error al eliminar rol:', response.statusText);
+        // Muestra el mensaje de error recibido del backend
+        setErrorMessage(responseData.error);
       }
     } catch (error) {
       console.error('Error al eliminar rol:', error);
@@ -242,12 +249,12 @@ const Roles = () => {
       cell: row => (
         <>
           {rolesPermissions.includes(5) && (
-            <button className="btn btn-primary btn-sm mr-2 action-button" onClick={() => handleEditRole(row)}>
+            <button  title="Editar" className="btn btn-primary btn-sm mr-2 action-button" onClick={() => handleEditRole(row)}>
               <i className="fas fa-edit"></i>
             </button>
           )}
           {rolesPermissions.includes(6) && (
-            <button className="btn btn-danger btn-sm mr-2 action-button" onClick={() => handleDeleteRole(row.id_rol)}>
+            <button title="Eliminar" className="btn btn-danger btn-sm mr-2 action-button" onClick={() => handleDeleteRole(row.id_rol)}>
               <i className="fas fa-trash"></i>
             </button>
           )}
@@ -255,7 +262,7 @@ const Roles = () => {
       ),
     },
   ];
-
+  
   return (
     <div className="container mt-4">
       <h4>Roles</h4>
@@ -273,6 +280,11 @@ const Roles = () => {
           </button>
         )}
       </div>
+      {errorMessage && (
+        <div className="alert alert-danger mt-3" role="alert">
+          {errorMessage}
+        </div>
+      )}
       <DataTable
         columns={columns}
         data={filteredRoles}

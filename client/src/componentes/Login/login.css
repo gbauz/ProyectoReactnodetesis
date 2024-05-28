@@ -29,3 +29,9 @@
   .btn-primary:hover {
     background-color: #5291c9; /* Color de fondo al pasar el cursor */
   }
+  @media (min-width: 992px) {
+    .col-lg-5 {
+        flex: 0 0 auto;
+        width: 37%;
+    }
+}

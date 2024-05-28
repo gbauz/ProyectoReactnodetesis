@@ -10,7 +10,7 @@
   
   
   /* Estilos para la barra lateral en dispositivos móviles */
-  @media (max-width: 768px) {
+  @media (max-width: 500px) {
     .sidebar {
       position: fixed;
       top: 56px; /* Altura de la barra de navegación */
@@ -126,4 +126,41 @@
 color: white;
 
 }
+
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  position: fixed;
+  top: 56px; /* Ajuste para la altura de la barra de navegación */
+  left: 0;
+  overflow-y: auto;
+  transition: transform 0.3s ease;
+  /*transform: translateX(-100%);*/
+}
+
+.sidebar.show {
+  transform: translateX(0);
+}
+
+.content {
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  margin-top: 56px; /* Ajuste para la altura de la barra de navegación */
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.show {
+    transform: translateX(0);
+  }
+
+  .content {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
 

@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const tokensRevocados = new Set(); // Conjunto para almacenar tokens revocados
 
 function generateToken(user) {
-  let isAdmin = user.rol_id === 1 || user.rol_id === 3;
+  let isAdmin = user.rol_id === 1 || user.rol_id === 2;
 
   return jwt.sign(
     {
@@ -41,7 +41,7 @@ function verificaToken(req, res, next) {
     req.user = decoded;
 
     // Verificar los permisos según el rol
-    if (decoded.rol === 1 || decoded.rol === 3) {
+    if (decoded.rol === 1 || decoded.rol === 2) {
       // Si el usuario es administrador o tiene el rol 3, permitir acceso
       next(); // Continuar con la solicitud
     } else {

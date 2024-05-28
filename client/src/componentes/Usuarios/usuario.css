@@ -64,3 +64,9 @@
   border-color: #007bff; /* Color del borde del botón activo */
   color: #ffffff; /* Color del texto del botón activo */
 }
+
+/*usuarios*/
+.btn-link {
+  text-decoration: none;
+  color: red;
+}

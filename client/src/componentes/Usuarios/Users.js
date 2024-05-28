@@ -19,7 +19,9 @@ const Users = () => {
   });
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [editUser, setEditUser] = useState(null);
+  const [error, setError] = useState(null);
 
   const fetchUsers = async () => {
     try {
@@ -88,8 +90,6 @@ const Users = () => {
     fetchRoles();
   }, []);
 
-
-
   useEffect(() => {
     const result = users.filter(user => {
       return user.nombre.toLowerCase().includes(search.toLowerCase()) ||
@@ -109,6 +109,7 @@ const Users = () => {
       contraseña: '',
       rol_id: ''
     });
+    setError(null); // Resetear error al abrir el modal
   };
 
   const handleCloseModal = () => {
@@ -125,22 +126,21 @@ const Users = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Verificar si todos los campos obligatorios están llenos
-  const { cedula, nombre, correo_electronico, contraseña, rol_id } = formData;
-  if (!cedula || !nombre || !correo_electronico || !contraseña || !rol_id) {
-    alert('Todos los campos son obligatorios.');
-    return;
-  }
+    const { cedula, nombre, correo_electronico, rol_id } = formData; // Eliminar contraseña de los campos a validar
+    if (!cedula || !nombre || !correo_electronico || !rol_id) {
+      alert('Todos los campos son obligatorios.');
+      return;
+    }
     try {
       const token = localStorage.getItem('token');
       let endpoint = '/api/users';
       let method = 'POST';
-
+  
       if (editUser) {
         endpoint = `/api/users/${editUser.cedula}`;
         method = 'PUT';
       }
-
+  
       const response = await fetch(endpoint, {
         method,
         headers: {
@@ -149,20 +149,22 @@ const Users = () => {
         },
         body: JSON.stringify(formData)
       });
-
+  
       if (response.ok) {
         const responseData = await response.json();
-      if (responseData.error && responseData.error.includes('cedula')) {
-        alert('Ya existe un usuario con la misma cédula.');
-      } else {
         fetchUsers();
         setShowModal(false);
-      }
       } else {
-        console.error('Error en la operación:', response.statusText);
+        const errorData = await response.json();
+        if (errorData.error && errorData.error.includes('cédula')) {
+          setError('Ya existe un usuario con el mismo número de cédula.');
+        } else {
+          setError('Error en la operación.'); 
+        }
       }
     } catch (error) {
       console.error('Error en la operación:', error);
+      setError('Error en la operación.');
     }
   };
 
@@ -180,10 +182,12 @@ const Users = () => {
         }
       });
 
+      const responseData = await response.json();
       if (response.ok) {
         setUsers(users.filter((user) => user.cedula !== userId));
       } else {
         console.error('Error al eliminar usuario:', response.statusText);
+        setError(responseData.error);
       }
     } catch (error) {
       console.error('Error al eliminar usuario:', error);
@@ -193,10 +197,10 @@ const Users = () => {
   const handleEditUser = (user) => {
     setEditUser(user);
     setFormData({
-      ...user,
-      contraseña: ''
+      ...user
     });
     setShowModal(true);
+    setError(null); // Resetear error al abrir el modal
   };
 
   const handleShowReport = () => {
@@ -210,16 +214,65 @@ const Users = () => {
     const usersData = users.map(user => [user.cedula, user.nombre, user.correo_electronico, user.rol]);
 
     doc.autoTable({
-      head: [['Cedula', 'Nombre', 'Correo Electrónico', 'Rol']],
+      head: [['Cédula', 'Nombre', 'Correo Electrónico', 'Rol']],
       body: usersData,
     });
 
     doc.save('reporte_usuarios.pdf');
   };
 
+  const handleChangePassword = (user) => {
+    setEditUser(user);
+    setShowChangePasswordModal(true);
+  };
+
+  const handleChangePasswordInput = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+
+  const handleSubmitChangePassword = async (e) => {
+    e.preventDefault();
+  
+    const { nuevaContraseña, confirmarContraseña } = formData;
+  
+    // Verificar que las contraseñas coincidan
+    if (nuevaContraseña !== confirmarContraseña) {
+      alert('Las contraseñas no coinciden.');
+      return;
+    }
+  
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/users/${editUser.cedula}/password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ nuevaContraseña, confirmarContraseña })
+      });
+  
+      if (response.ok) {
+        const responseData = await response.json();
+        setShowChangePasswordModal(false);
+        alert(responseData.message);
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Error al cambiar la contraseña.');
+      }
+    } catch (error) {
+      console.error('Error al cambiar la contraseña:', error);
+      alert('Error al cambiar la contraseña.');
+    }
+  };
+
   const columns = [
     {
-      name: 'Cedula',
+      name: 'Cédula',
       selector: row => row.cedula,
       sortable: true,
     },
@@ -239,16 +292,28 @@ const Users = () => {
       sortable: true,
     },
     {
+      name: 'Contraseña',
+      cell: row => (
+        <>
+        {userPermissions.includes(7) && (
+        <button color='red' className="btn btn-link"  onClick={() => handleChangePassword(row)}>
+          <i class="fas fa-pencil-alt"></i> Cambiar
+        </button>
+        )}
+        </>
+      )
+    },
+    {
       name: 'Acciones',
       cell: row => (
         <>
           {userPermissions.includes(2) && (
-            <button className="btn btn-primary btn-sm mr-2 action-button" onClick={() => handleEditUser(row)}>
+            <button title="Editar" className="btn btn-primary btn-sm mr-2 action-button" onClick={() => handleEditUser(row)}>
               <i className="fas fa-edit"></i>
             </button>
           )}
           {userPermissions.includes(3) && (
-            <button className="btn btn-danger btn-sm mr-2 action-button" onClick={() => handleDeleteUser(row.cedula)}>
+            <button title="Eliminar" className="btn btn-danger btn-sm mr-2 action-button" onClick={() => handleDeleteUser(row.cedula)}>
               <i className="fas fa-trash"></i>
             </button>
           )}
@@ -258,7 +323,7 @@ const Users = () => {
   ];
 
   return (
-    <div className="container mt-4">      
+    <div className="container mt-4">
       <h4>Usuarios</h4>
       <div className="d-flex justify-content-end mb-3">
         <input
@@ -273,8 +338,12 @@ const Users = () => {
             <i className="fas fa-plus"></i> Crear Usuario
           </button>
         )}
-        
       </div>
+      {error && (
+        <div className="alert alert-danger mt-3" role="alert">
+          {error}
+        </div>
+      )}
       <DataTable
         columns={columns}
         data={filteredUsers}
@@ -306,10 +375,11 @@ const Users = () => {
                 </button>
               </div>
               <div className="modal-body">
+                {error && <div className="alert alert-danger">{error}</div>}
                 <form onSubmit={handleSubmit}>
                   <div className="form-group">
-                    <label>Cedula</label>
-                    <input type="text" maxLength={10} className="form-control" name="cedula" value={formData.cedula} onChange={handleChange} disabled={!!editUser} />
+                    <label>Cédula</label>
+                    <input type="number" maxLength={10} className="form-control" name="cedula" value={formData.cedula} onChange={handleChange} disabled={!!editUser} />
                   </div>
                   <div className="form-group">
                     <label>Nombre</label>
@@ -319,10 +389,12 @@ const Users = () => {
                     <label>Correo Electrónico</label>
                     <input type="email" className="form-control" name="correo_electronico" value={formData.correo_electronico} onChange={handleChange} />
                   </div>
-                  <div className="form-group">
-                    <label>Contraseña</label>
-                    <input type="password" className="form-control" name="contraseña" value={formData.contraseña} onChange={handleChange} />
-                  </div>
+                  {!editUser && (
+                    <div className="form-group">
+                      <label>Contraseña</label>
+                      <input type="password" className="form-control" name="contraseña" value={formData.contraseña} onChange={handleChange} />
+                    </div>
+                  )}
                   <div className="form-group">
                     <label>Rol</label>
                     <select className="form-control" name="rol_id" value={formData.rol_id} onChange={handleChange}>
@@ -339,8 +411,38 @@ const Users = () => {
           </div>
         </div>
       )}
+
+      {/* Modal para cambiar contraseña */}
+      {showChangePasswordModal && (
+        <div className="modal show" tabIndex="-1" role="dialog" style={{ display: 'block' }}>
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Cambiar Contraseña</h5>
+                <button type="button" className="close" onClick={() => setShowChangePasswordModal(false)}>
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <form onSubmit={handleSubmitChangePassword}>
+                  <div className="form-group">
+                    <label>Nueva Contraseña</label>
+                    <input type="password" className="form-control" name="nuevaContraseña" value={formData.nuevaContraseña} onChange={handleChangePasswordInput} />
+                  </div>
+                  <div className="form-group">
+                    <label>Confirmar Contraseña</label>
+                    <input type="password" className="form-control" name="confirmarContraseña" value={formData.confirmarContraseña} onChange={handleChangePasswordInput} />
+                  </div>
+                  <button type="submit" className="btn btn-primary">Cambiar Contraseña</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default Users;
+

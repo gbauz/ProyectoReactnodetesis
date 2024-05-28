@@ -9,6 +9,7 @@ import './AdminPage.css';
 
 const AdminPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Nuevo estado para manejar la carga
   const [userName, setUserName] = useState('');
   const [userPermissions, setUserPermissions] = useState([]);
   const [view, setView] = useState('dashboard'); // Nuevo estado para controlar la vista actual
@@ -22,6 +23,7 @@ const AdminPage = () => {
 
         if (!token) {
           console.error('Token no encontrado en localStorage');
+          setIsLoading(false); // Finaliza la carga incluso si no hay token
           return;
         }
 
@@ -34,7 +36,6 @@ const AdminPage = () => {
         if (response.ok) {
           const data = await response.json();
           setIsAdmin(data.isAdmin);
-
           if (data.isAdmin) {
             const firstName = data.user.name.split(' ')[0];
             setUserName(firstName);
@@ -45,6 +46,8 @@ const AdminPage = () => {
         }
       } catch (error) {
         console.error('Error al hacer la solicitud protegida:', error);
+      } finally {
+        setIsLoading(false); // Finaliza la carga después de la solicitud
       }
     };
 
@@ -62,8 +65,6 @@ const AdminPage = () => {
         return (
           <>
             <h2>{`Bienvenido, ${userName}!`}</h2>
-            {/* <p>Área para realizar tareas administrativas.</p> */}
-
             <div className="card mb-4">
               <div className="card-body">
                 <h5 className="card-title">Estadísticas del Panel</h5>
@@ -75,7 +76,7 @@ const AdminPage = () => {
       case 'users':
         return <Users />;
       case 'roles':
-        return <Roles />
+        return <Roles />;
       case 'settings':
         return <div>Configuración</div>;
       case 'reports':
@@ -110,12 +111,22 @@ const AdminPage = () => {
     return name ? name.charAt(0).toUpperCase() : '';
   };
 
+  if (isLoading) {
+    return (
+      <div className="loading-screen">
+        <div className="spinner-border text-primary" role="status">
+          <span className="sr-only">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       {/* Barra superior */}
       {isAdmin && (
-        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-          <a className="navbar-brand" href="#" >&nbsp;&nbsp;&nbsp;&nbsp;Instituto Nacional INSPI</a>
+        <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+          <a className="navbar-brand" href="#">&nbsp;&nbsp;&nbsp;&nbsp;Instituto Nacional INSPI</a>
           <button className="navbar-toggler" type="button" onClick={toggleSidebar}>
             <span className="navbar-toggler-icon"></span>
           </button>
@@ -156,7 +167,7 @@ const AdminPage = () => {
                   aria-expanded="false"
                   aria-controls="userProfileSubMenu"
                 >
-                  <i class="fas fa-user"></i> {userName} <i className="fas fa-chevron-down"></i>
+                  <i className="fas fa-user"></i> {userName} <i className="fas fa-chevron-down"></i>
                 </button>
                 {/* Submenu para el perfil del usuario */}
                 <div className="collapse" id="userProfileSubMenu">
@@ -176,6 +187,11 @@ const AdminPage = () => {
                 </button>
               </li>
               <li className="nav-item">
+                <button className="nav-link text-white btn btn-link" onClick={() => { setView('dashboard'); toggleSidebar(); }}>
+                <i class="fas fa-vial"></i> Gestión de Muestras
+                </button>
+              </li>
+              <li className="nav-item">
                 <button
                   className="nav-link text-white btn btn-link"
                   data-bs-toggle="collapse"
@@ -183,7 +199,7 @@ const AdminPage = () => {
                   aria-expanded="false"
                   aria-controls="userSubMenu"
                 >
-                  <i className="fas fa-users"></i> Gestión de Usuarios <i className="fas fa-chevron-down"></i>
+                  <i class="fas fa-user"></i> Gestión de Usuarios <i className="fas fa-chevron-down"></i>
                 </button>
                 {/* Submenu para la gestión de usuarios */}
                 <div className="collapse" id="userSubMenu">
