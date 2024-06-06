@@ -21,7 +21,8 @@ const Users = () => {
   const [showModal, setShowModal] = useState(false);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [editUser, setEditUser] = useState(null);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null); // Error general de la tabla
+  const [modalError, setModalError] = useState(null); // Error específico del modal
 
   const fetchUsers = async () => {
     try {
@@ -109,11 +110,14 @@ const Users = () => {
       contraseña: '',
       rol_id: ''
     });
-    setError(null); // Resetear error al abrir el modal
+    setError(null);
+    setModalError(null); // Resetear error al abrir el modal
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
+    setError(null);
+    setModalError(null); // Resetear error al cerrar el modal
   };
 
   const handleChange = (e) => {
@@ -128,7 +132,7 @@ const Users = () => {
     e.preventDefault();
     const { cedula, nombre, correo_electronico, rol_id } = formData; // Eliminar contraseña de los campos a validar
     if (!cedula || !nombre || !correo_electronico || !rol_id) {
-      alert('Todos los campos son obligatorios.');
+      setModalError('Todos los campos son obligatorios.');
       return;
     }
     try {
@@ -156,15 +160,21 @@ const Users = () => {
         setShowModal(false);
       } else {
         const errorData = await response.json();
-        if (errorData.error && errorData.error.includes('cédula')) {
-          setError('Ya existe un usuario con el mismo número de cédula.');
+        if (errorData.error) {
+          if (errorData.error.includes('cédula')) {
+            setModalError(errorData.error);
+          } else if (errorData.error.includes('rol 1')) {
+            setModalError(errorData.error);
+          } else {
+            setModalError('Error en la operación.');
+          }
         } else {
-          setError('Error en la operación.'); 
+          setModalError('Error en la operación.');
         }
       }
     } catch (error) {
       console.error('Error en la operación:', error);
-      setError('Error en la operación.');
+      setModalError('Error en la operación.');
     }
   };
 
@@ -200,7 +210,8 @@ const Users = () => {
       ...user
     });
     setShowModal(true);
-    setError(null); // Resetear error al abrir el modal
+    setError(null);
+    setModalError(null); // Resetear error al abrir el modal
   };
 
   const handleShowReport = () => {
@@ -224,6 +235,8 @@ const Users = () => {
   const handleChangePassword = (user) => {
     setEditUser(user);
     setShowChangePasswordModal(true);
+    setModalError(null); // Resetear error al abrir el modal
+    setError(null);
   };
 
   const handleChangePasswordInput = (e) => {
@@ -297,7 +310,7 @@ const Users = () => {
         <>
         {userPermissions.includes(7) && (
         <button color='red' className="btn btn-link"  onClick={() => handleChangePassword(row)}>
-          <i class="fas fa-pencil-alt"></i> Cambiar
+          <i className="fas fa-pencil-alt"></i> Cambiar
         </button>
         )}
         </>
@@ -375,7 +388,7 @@ const Users = () => {
                 </button>
               </div>
               <div className="modal-body">
-                {error && <div className="alert alert-danger">{error}</div>}
+                {modalError && <div className="alert alert-danger">{modalError}</div>}
                 <form onSubmit={handleSubmit}>
                   <div className="form-group">
                     <label>Cédula</label>
@@ -424,6 +437,7 @@ const Users = () => {
                 </button>
               </div>
               <div className="modal-body">
+                {modalError && <div className="alert alert-danger">{modalError}</div>}
                 <form onSubmit={handleSubmitChangePassword}>
                   <div className="form-group">
                     <label>Nueva Contraseña</label>
@@ -445,4 +459,3 @@ const Users = () => {
 };
 
 export default Users;
-

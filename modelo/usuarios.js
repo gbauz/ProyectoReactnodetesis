@@ -89,6 +89,15 @@ router.post('/users', verificaToken, async (req, res) => {
   const { cedula, nombre, correo_electronico, contraseña, rol_id } = req.body;
 
   try {
+
+    const rolIdNumerico = Number(rol_id);
+
+    if (rolIdNumerico === 1) {
+      return res.status(403).json({ error: 'No se pueden crear usuarios con rol 1 Administrador.' });
+    }
+
+    
+
     const [existingUserRows] = await (await Conexion).execute(
       'SELECT * FROM Usuario WHERE cedula = ?',
       [cedula]
@@ -146,10 +155,34 @@ router.put('/users/:id', verificaToken, async (req, res) => {
   const { nombre, correo_electronico, rol_id } = req.body;
 
   try {
+    // Verificar el rol del usuario antes de editar
+    const [userRows] = await (await Conexion).execute(
+      'SELECT rol_id FROM Usuario WHERE cedula = ?',
+      [userId]
+    );
+
+    if (userRows.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado.' });
+    }
+
+    const userRol = userRows[0].rol_id;
+    const rolIdNumerico = Number(rol_id);
+
+    if (rolIdNumerico === 1) {
+      return res.status(403).json({ error: 'No se puede asignar el rol 1 Administrador a un usuario.' });
+    }
+    
+
+    // Verificar si se está intentando cambiar el rol de un usuario con rol 1
+    if (userRol === 1 && rol_id !== userRol) {
+      return res.status(403).json({ error: 'No se puede cambiar el rol de un usuario con rol 1 Administrador.' });
+    }
+
     await (await Conexion).execute(
       'UPDATE Usuario SET nombre = ?, correo_electronico = ?, rol_id = ? WHERE cedula = ?',
-      [nombre, correo_electronico, rol_id, userId]
+      [nombre, correo_electronico, userRol === 1 ? userRol : rol_id, userId]
     );
+
     res.json({ success: true, message: 'Usuario actualizado correctamente.' });
   } catch (error) {
     console.error('Error updating user:', error);
