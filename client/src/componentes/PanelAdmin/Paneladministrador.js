@@ -8,12 +8,12 @@ import Roles from '../Usuarios/roles';
 import './AdminPage.css';
 
 const AdminPage = () => {
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Nuevo estado para manejar la carga
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [userName, setUserName] = useState('');
   const [userPermissions, setUserPermissions] = useState([]);
-  const [view, setView] = useState('dashboard'); // Nuevo estado para controlar la vista actual
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Estado para controlar la visibilidad de la barra lateral en móviles
+  const [view, setView] = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,7 +23,7 @@ const AdminPage = () => {
 
         if (!token) {
           console.error('Token no encontrado en localStorage');
-          setIsLoading(false); // Finaliza la carga incluso si no hay token
+          setIsLoading(false);
           return;
         }
 
@@ -35,19 +35,17 @@ const AdminPage = () => {
 
         if (response.ok) {
           const data = await response.json();
-          setIsAdmin(data.isAdmin);
-          if (data.isAdmin) {
-            const firstName = data.user.name.split(' ')[0];
-            setUserName(firstName);
-            setUserPermissions(data.user.permissions);
-          }
+          setIsAuthenticated(true);
+          const firstName = data.user.name.split(' ')[0];
+          setUserName(firstName);
+          setUserPermissions(data.user.permissions);
         } else {
           console.error('Error al hacer la solicitud protegida:', response.statusText);
         }
       } catch (error) {
         console.error('Error al hacer la solicitud protegida:', error);
       } finally {
-        setIsLoading(false); // Finaliza la carga después de la solicitud
+        setIsLoading(false);
       }
     };
 
@@ -56,7 +54,7 @@ const AdminPage = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    navigate('/'); // Redirige al usuario a la página de inicio de sesión
+    navigate('/');
   };
 
   const renderContent = () => {
@@ -111,6 +109,9 @@ const AdminPage = () => {
     return name ? name.charAt(0).toUpperCase() : '';
   };
 
+  // Verifica si el usuario tiene el permiso de gestión de usuarios
+  const hasGestionUsuariosPermission = userPermissions.includes(8);
+
   if (isLoading) {
     return (
       <div className="loading-screen">
@@ -124,7 +125,7 @@ const AdminPage = () => {
   return (
     <div>
       {/* Barra superior */}
-      {isAdmin && (
+      {isAuthenticated && (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
           <a className="navbar-brand" href="#">&nbsp;&nbsp;&nbsp;&nbsp;Instituto Nacional INSPI</a>
           <button className="navbar-toggler" type="button" onClick={toggleSidebar}>
@@ -153,7 +154,7 @@ const AdminPage = () => {
 
       <div className="d-flex">
         {/* Barra lateral fija */}
-        {isAdmin && (
+        {isAuthenticated && (
           <div className={`sidebar bg-dark text-white p-3 ${sidebarOpen ? 'show' : ''}`}>
             <div className="breadcrumb mb-3">
               <i className="fas fa-home"></i> {getBreadcrumb()}
@@ -188,41 +189,44 @@ const AdminPage = () => {
               </li>
               <li className="nav-item">
                 <button className="nav-link text-white btn btn-link" onClick={() => { setView('dashboard'); toggleSidebar(); }}>
-                <i class="fas fa-vial"></i> Gestión de Muestras
+                  <i className="fas fa-vial"></i> Gestión de Muestras
                 </button>
               </li>
-              <li className="nav-item">
-                <button
-                  className="nav-link text-white btn btn-link"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#userSubMenu"
-                  aria-expanded="false"
-                  aria-controls="userSubMenu"
-                >
-                  <i class="fas fa-user"></i> Gestión de Usuarios <i className="fas fa-chevron-down"></i>
-                </button>
-                {/* Submenu para la gestión de usuarios */}
-                <div className="collapse" id="userSubMenu">
-                  <ul className="nav flex-column">
-                    <li className="nav-item">
-                      <button
-                        className="nav-link text-white btn btn-link"
-                        onClick={() => { setView('users'); toggleSidebar(); }}
-                      >
-                        Usuarios
-                      </button>
-                    </li>
-                    <li className="nav-item">
-                      <button
-                        className="nav-link text-white btn btn-link"
-                        onClick={() => { setView('roles'); toggleSidebar(); }}
-                      >
-                        Roles
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-              </li>
+              {/* Mostrar solo si el usuario tiene permiso de gestión de usuarios */}
+              {hasGestionUsuariosPermission && (
+                <li className="nav-item">
+                  <button
+                    className="nav-link text-white btn btn-link"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#userSubMenu"
+                    aria-expanded="false"
+                    aria-controls="userSubMenu"
+                  >
+                    <i className="fas fa-user"></i> Gestión de Usuarios <i className="fas fa-chevron-down"></i>
+                  </button>
+                  {/* Submenu para la gestión de usuarios */}
+                  <div className="collapse" id="userSubMenu">
+                    <ul className="nav flex-column">
+                      <li className="nav-item">
+                        <button
+                          className="nav-link text-white btn btn-link"
+                          onClick={() => { setView('users'); toggleSidebar(); }}
+                        >
+                          Usuarios
+                        </button>
+                      </li>
+                      <li className="nav-item">
+                        <button
+                          className="nav-link text-white btn btn-link"
+                          onClick={() => { setView('roles'); toggleSidebar(); }}
+                        >
+                          Roles
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+              )}
               <li className="nav-item">
                 <button className="nav-link text-white btn btn-link" onClick={() => { setView('settings'); toggleSidebar(); }}>
                   <i className="fas fa-cogs"></i> Configuración
@@ -243,7 +247,7 @@ const AdminPage = () => {
         )}
 
         <div className={`content p-4`}>
-          {isAdmin ? renderContent() : <h1>No tienes permiso para acceder a esta página.</h1>}
+          {isAuthenticated ? renderContent() : <h1>No tienes permiso para acceder a esta página.</h1>}
         </div>
       </div>
     </div>

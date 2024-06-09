@@ -25,12 +25,8 @@ router.post('/login', async (req, res) => {
     const passwordMatch = await comparePassword(contraseña, usuario.contraseña);
 
     if (passwordMatch) {
-      if (usuario.rol_id === 1 || usuario.rol_id === 2) {
-        const token = generateToken(usuario);
-        return res.json({ success: true, token });
-      } else {
-        return res.status(403).json({ error: 'No tienes permiso para acceder.' });
-      }
+      const token = generateToken(usuario);
+      return res.json({ success: true, token });
     } else {
       return res.status(401).json({ error: 'Credenciales incorrectas.' });
     }
@@ -40,11 +36,10 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Endpoint para verificar si un usuario es administrador
+// Endpoint para verificar sesión y obtener permisos del usuario
 router.get('/session', verificaToken, async (req, res) => {
   try {
     const { cedula, email, name, rol } = req.user;
-    const isAdmin = [1, 2].includes(rol);
     const [rows] = await (await Conexion).execute(
       'SELECT rp.id_permiso FROM Roles_Permisos rp WHERE rp.id_rol = ?',
       [rol]
@@ -52,12 +47,16 @@ router.get('/session', verificaToken, async (req, res) => {
 
     const permissions = rows.map(row => row.id_permiso);
 
-    res.json({ isAdmin, user: { cedula, name, email, permissions } });
+    console.log(permissions);
+
+    res.json({ user: { cedula, name, email, rol, permissions } });
   } catch (error) {
     console.error('Error al obtener información de sesión:', error);
     res.status(500).json({ error: 'Error al obtener información de sesión.' });
   }
 });
+
+module.exports = router;
 
 // Endpoint para cerrar sesión
 router.post('/logout', verificaToken, (req, res) => {
