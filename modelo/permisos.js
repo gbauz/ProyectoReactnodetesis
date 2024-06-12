@@ -6,7 +6,7 @@ const { verificaToken } = require('./auth');
 // Endpoint para obtener todos los permisos
 router.get('/', verificaToken, async (req, res) => {
   try {
-    const [permisos] = await (await Conexion).execute('SELECT id_permiso, nombre_permiso FROM Permisos');
+    const [permisos] = await (await Conexion).execute('SELECT id_permiso, nombre_permiso, categoria, descripcion FROM Permisos');
     res.json({ permisos });
   } catch (error) {
     console.error('Error fetching permisos:', error);

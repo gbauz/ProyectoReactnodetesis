@@ -1,24 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import DataTable from 'react-data-table-component';
-import './Usuario.css'; // Asegúrate de tener el archivo de estilos adecuado
+import './Usuario.css';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import RoleForm from './roleForm';
 
 const Roles = () => {
   const [roles, setRoles] = useState([]);
   const [filteredRoles, setFilteredRoles] = useState([]);
   const [permissionsList, setPermissionsList] = useState([]);
   const [rolesPermissions, setRolesPermissions] = useState([]);
-  const [formData, setFormData] = useState({
-    nombre: '',
-    permisos: []
-  });
-
-  const [search, setSearch] = useState('');
-  const [showModal, setShowModal] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [editRole, setEditRole] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(''); // Estado para manejar el mensaje de error
+  const [search, setSearch] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const fetchRoles = async () => {
     try {
@@ -96,36 +92,45 @@ const Roles = () => {
   }, [search, roles]);
 
   const handleCreateRole = () => {
-    setShowModal(true);
+    setShowForm(true);
     setEditRole(null);
-    setFormData({
-      nombre: '',
-      permisos: []
-    });
+    setErrorMessage(null);
   };
 
-  const handleCloseModal = () => {
-    setShowModal(false);
+  const handleEditRole = (role) => {
+    setEditRole(role);
+    setShowForm(true);
+    setErrorMessage(null);
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+  const handleDeleteRole = async (roleId) => {
+    const confirmDelete = window.confirm('¿Estás seguro de eliminar este rol?');
+    if (!confirmDelete) {
+      return;
+    }
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/roles/${roleId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const responseData = await response.json();
+      if (response.ok) {
+        setRoles(roles.filter(role => role.id_rol !== roleId));
+        setFilteredRoles(filteredRoles.filter(role => role.id_rol !== roleId));
+        setErrorMessage('');
+      } else {
+        setErrorMessage(responseData.error);
+      }
+    } catch (error) {
+      console.error('Error al eliminar rol:', error);
+    }
   };
 
-  const handlePermissionsChange = (e) => {
-    const value = Array.from(e.target.selectedOptions, option => option.value);
-    setFormData({
-      ...formData,
-      permisos: value
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSaveRole = async (formData) => {
     const { nombre } = formData;
     if (!nombre) {
       alert('Todos los campos son obligatorios.');
@@ -152,52 +157,14 @@ const Roles = () => {
 
       if (response.ok) {
         fetchRoles();
-        setShowModal(false);
-        setErrorMessage(''); // Restablecer el mensaje de error al enviar con éxito
+        setShowForm(false);
+        setErrorMessage('');
       } else {
         console.error('Error en la operación:', response.statusText);
       }
     } catch (error) {
       console.error('Error en la operación:', error);
     }
-  };
-
-  const handleDeleteRole = async (roleId) => {
-    const confirmDelete = window.confirm('¿Estás seguro de eliminar este rol?');
-    if (!confirmDelete) {
-      return;
-    }
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/roles/${roleId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      const responseData = await response.json();
-      if (response.ok) {
-        // Actualiza la lista de roles después de eliminar uno exitosamente
-        setRoles(roles.filter(role => role.id_rol !== roleId));
-        setFilteredRoles(filteredRoles.filter(role => role.id_rol !== roleId));
-        setErrorMessage(''); // Restablece el mensaje de error después de una eliminación exitosa
-      } else {
-        // Muestra el mensaje de error recibido del backend
-        setErrorMessage(responseData.error);
-      }
-    } catch (error) {
-      console.error('Error al eliminar rol:', error);
-    }
-  };
-
-  const handleEditRole = (role) => {
-    setEditRole(role);
-    setFormData({
-      nombre: role.nombre,
-      permisos: role.permisos.map(p => p.id_permiso)
-    });
-    setShowModal(true);
   };
 
   const handleShowReport = () => {
@@ -229,12 +196,12 @@ const Roles = () => {
       sortable: true,
     },
     {
-      name: 'Rol',
+      name: 'ROL',
       selector: row => row.nombre,
       sortable: true,
     },
     {
-      name: 'Permisos',
+      name: 'PERMISOS',
       selector: row => (
         <ul style={{ listStyleType: 'none', padding: 0 }}>
           {row.permisos.map(permiso => (
@@ -245,11 +212,11 @@ const Roles = () => {
       sortable: true,
     },
     {
-      name: 'Acciones',
+      name: 'ACCIONES',
       cell: row => (
         <>
           {rolesPermissions.includes(5) && (
-            <button  title="Editar" className="btn btn-primary btn-sm mr-2 action-button" onClick={() => handleEditRole(row)}>
+            <button title="Editar" className="btn btn-primary btn-sm mr-2 action-button" onClick={() => handleEditRole(row)}>
               <i className="fas fa-edit"></i>
             </button>
           )}
@@ -262,88 +229,62 @@ const Roles = () => {
       ),
     },
   ];
-  
+
   return (
     <div className="container mt-4">
       <h4>Roles</h4>
-      <div className="d-flex justify-content-end mb-3">
-        <input
-          type="text"
-          className="form-control w-25 mr-2"
-          placeholder="Buscar por rol.."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        {rolesPermissions.includes(4) && (
-          <button className="btn btn-success mr-2" onClick={handleCreateRole}>
-            <i className="fas fa-plus"></i> Crear Rol
+      {!showForm ? (
+        <>
+          <div className="d-flex justify-content-end mb-3">
+            <input
+              type="text"
+              className="form-control w-25 mr-2"
+              placeholder="Buscar por rol.."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {rolesPermissions.includes(4) && (
+              <button className="btn btn-success mr-2" onClick={handleCreateRole}>
+                <i className="fas fa-plus"></i> Crear Rol
+              </button>
+            )}
+          </div>
+          {errorMessage && (
+            <div className="alert alert-danger mt-3" role="alert">
+              {errorMessage}
+            </div>
+          )}
+          <DataTable
+            columns={columns}
+            data={filteredRoles}
+            pagination
+            highlightOnHover
+            pointerOnHover
+            responsive
+            customStyles={{
+              headCells: {
+                style: {
+                  backgroundColor: '#135ea9',
+                  color: '#ffffff',
+                  border: '1px solid #ccc',
+                },
+              },
+            }}
+          />
+          <button className="btn btn-primary mt-3" onClick={handleShowReport}>
+            Mostrar Reporte
           </button>
+        </>
+      ) : (
+        <RoleForm
+          role={editRole}
+          permissionsList={permissionsList}
+          onSave={handleSaveRole}
+          onCancel={() => setShowForm(false)}
+          />
         )}
       </div>
-      {errorMessage && (
-        <div className="alert alert-danger mt-3" role="alert">
-          {errorMessage}
-        </div>
-      )}
-      <DataTable
-        columns={columns}
-        data={filteredRoles}
-        pagination
-        highlightOnHover
-        pointerOnHover
-        responsive
-        customStyles={{
-          headCells: {
-            style: {
-              backgroundColor: '#135ea9',
-              color: '#ffffff',
-            },
-          },
-        }}
-      />
-      <button className="btn btn-primary mt-3" onClick={handleShowReport}>
-        Mostrar Reporte
-      </button>
-
-      {showModal && (
-        <div className="modal show" tabIndex="-1" role="dialog" style={{ display: 'block' }}>
-          <div className="modal-dialog" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">{editRole ? 'Editar Rol' : 'Crear Rol'}</h5>
-                <button type="button" className="close" onClick={handleCloseModal}>
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                <form onSubmit={handleSubmit}>
-                  <div className="form-group">
-                    <label>Nombre del Rol</label>
-                    <input type="text" className="form-control" name="nombre" value={formData.nombre} onChange={handleChange} />
-                  </div><br/>
-                  <div className="form-group">
-                    <label>Asignar Permisos al Rol</label><br/>
-                    <select
-                      className="form-control"
-                      name="permisos"
-                      value={formData.permisos}
-                      onChange={handlePermissionsChange}
-                      multiple
-                    >
-                      {permissionsList.map(permiso => (
-                        <option key={permiso.id_permiso} value={permiso.id_permiso}>{permiso.nombre_permiso}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <button type="submit" className="btn btn-primary">{editRole ? 'Guardar' : 'Crear'}</button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default Roles;
+    );
+  };
+  
+  export default Roles;

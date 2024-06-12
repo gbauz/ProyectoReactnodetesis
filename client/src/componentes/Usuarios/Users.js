@@ -285,27 +285,27 @@ const Users = () => {
 
   const columns = [
     {
-      name: 'Cédula',
+      name: 'CÉDULA',
       selector: row => row.cedula,
       sortable: true,
     },
     {
-      name: 'Nombre',
+      name: 'NOMBRE',
       selector: row => row.nombre,
       sortable: true,
     },
     {
-      name: 'Correo Electrónico',
+      name: 'E-MAIL',
       selector: row => row.correo_electronico,
       sortable: true,
     },
     {
-      name: 'Rol',
+      name: 'ROL',
       selector: row => row.rol,
       sortable: true,
     },
     {
-      name: 'Contraseña',
+      name: 'CONTRASEÑA',
       cell: row => (
         <>
         {userPermissions.includes(7) && (
@@ -317,7 +317,7 @@ const Users = () => {
       )
     },
     {
-      name: 'Acciones',
+      name: 'ACCIONES',
       cell: row => (
         <>
           {userPermissions.includes(2) && (
@@ -369,6 +369,7 @@ const Users = () => {
             style: {
               backgroundColor: '#135ea9',
               color: '#ffffff',
+              border: '1px solid #ccc',
             },
           },
         }}

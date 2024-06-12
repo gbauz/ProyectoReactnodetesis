@@ -2,7 +2,18 @@ const express = require('express');
 const router = express.Router();
 const Conexion = require('../controlador/conexion');
 const { hashPassword, comparePassword, generateToken, verificaToken, revokeToken } = require('./auth');
+const getClientIp = require('request-ip').getClientIp;
 
+const registrarAuditoria = async (usuarioNombre, ipUsuario, accion) => {
+  try {
+    await (await Conexion).execute(`
+      INSERT INTO auditoria (usuario_nombre, ip_usuario, accion)
+      VALUES (?, ?, ?)
+    `, [usuarioNombre, ipUsuario, accion]);
+  } catch (error) {
+    console.error('Error registrando auditoría:', error);
+  }
+};
 // Endpoint de inicio de sesión
 router.post('/login', async (req, res) => {
   const { cedula, contraseña } = req.body;
@@ -47,9 +58,8 @@ router.get('/session', verificaToken, async (req, res) => {
 
     const permissions = rows.map(row => row.id_permiso);
 
-    console.log(permissions);
-
     res.json({ user: { cedula, name, email, rol, permissions } });
+   
   } catch (error) {
     console.error('Error al obtener información de sesión:', error);
     res.status(500).json({ error: 'Error al obtener información de sesión.' });
@@ -86,7 +96,11 @@ router.get('/users', verificaToken, async (req, res) => {
 // Endpoint para crear un nuevo usuario
 router.post('/users', verificaToken, async (req, res) => {
   const { cedula, nombre, correo_electronico, contraseña, rol_id } = req.body;
+  const usuario_nombre = req.user.name; // Asumiendo que el middleware verificaToken añade el nombre del usuario logueado a req.user
+  const ip_usuario = getClientIp(req);
+  const accion = `Creó Usuario con Cédula: ${cedula}`;
 
+ 
   try {
 
     const rolIdNumerico = Number(rol_id);
@@ -94,8 +108,6 @@ router.post('/users', verificaToken, async (req, res) => {
     if (rolIdNumerico === 1) {
       return res.status(403).json({ error: 'No se pueden crear usuarios con rol 1 Administrador.' });
     }
-
-    
 
     const [existingUserRows] = await (await Conexion).execute(
       'SELECT * FROM Usuario WHERE cedula = ?',
@@ -113,16 +125,27 @@ router.post('/users', verificaToken, async (req, res) => {
       [cedula, nombre, correo_electronico, hashedPassword, rol_id]
     );
 
+    
+    await registrarAuditoria(usuario_nombre, ip_usuario, accion);
+
+    console.log(usuario_nombre);
+    console.log(ip_usuario);
+
     res.json({ success: true, message: 'Usuario creado correctamente.' });
   } catch (error) {
     console.error('Error creating user:', error);
     res.status(500).json({ error: 'Error al crear usuario.' });
   }
+
+  
 });
 
 // Endpoint para eliminar un usuario
 router.delete('/users/:id', verificaToken, async (req, res) => {
   const userId = req.params.id;
+  const usuario_nombre = req.user.name; // Asumiendo que el middleware verificaToken añade el nombre del usuario logueado a req.user
+  const ip_usuario = getClientIp(req);
+  const accion = `Eliminó usuario: ${userId}`;
 
   try {
     const [userRows] = await (await Conexion).execute(
@@ -141,6 +164,8 @@ router.delete('/users/:id', verificaToken, async (req, res) => {
     }
 
     await (await Conexion).execute('DELETE FROM Usuario WHERE cedula = ?', [userId]);
+
+    await registrarAuditoria(usuario_nombre, ip_usuario, accion);
     res.json({ success: true, message: 'Usuario eliminado correctamente.' });
   } catch (error) {
     console.error('Error deleting user:', error);
@@ -152,6 +177,9 @@ router.delete('/users/:id', verificaToken, async (req, res) => {
 router.put('/users/:id', verificaToken, async (req, res) => {
   const userId = req.params.id;
   const { nombre, correo_electronico, rol_id } = req.body;
+  const usuario_nombre = req.user.name; // Asumiendo que el middleware verificaToken añade el nombre del usuario logueado a req.user
+  const ip_usuario = getClientIp(req);
+  const accion = `Editó Usuario: ${userId}`;
 
   try {
     // Verificar el rol del usuario antes de editar
@@ -182,17 +210,23 @@ router.put('/users/:id', verificaToken, async (req, res) => {
       [nombre, correo_electronico, userRol === 1 ? userRol : rol_id, userId]
     );
 
+    await registrarAuditoria(usuario_nombre, ip_usuario, accion);
+
     res.json({ success: true, message: 'Usuario actualizado correctamente.' });
   } catch (error) {
     console.error('Error updating user:', error);
     res.status(500).json({ error: 'Error al actualizar usuario.' });
   }
+  
 });
 
 // Endpoint para editar la contraseña de un usuario
 router.put('/users/:id/password', verificaToken, async (req, res) => {
   const userId = req.params.id;
   const { nuevaContraseña, confirmarContraseña } = req.body;
+  const usuario_nombre = req.user.name; // Asumiendo que el middleware verificaToken añade el nombre del usuario logueado a req.user
+  const ip_usuario = getClientIp(req);
+  const accion = `Reseteo Contraseña de Usuario: ${userId}`;
 
   if (nuevaContraseña !== confirmarContraseña) {
     return res.status(400).json({ error: 'Las contraseñas no coinciden.' });
@@ -205,6 +239,8 @@ router.put('/users/:id/password', verificaToken, async (req, res) => {
       'UPDATE Usuario SET contraseña = ? WHERE cedula = ?',
       [hashedPassword, userId]
     );
+
+    await registrarAuditoria(usuario_nombre, ip_usuario, accion);
 
     res.json({ success: true, message: 'Contraseña actualizada correctamente.' });
   } catch (error) {

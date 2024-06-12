@@ -2,7 +2,19 @@ const express = require('express');
 const router = express.Router();
 const Conexion = require('../controlador/conexion');
 const { verificaToken } = require('./auth');
+const getClientIp = require('request-ip').getClientIp;
 
+
+const registrarAuditoria = async (usuarioNombre, ipUsuario, accion) => {
+  try {
+    await (await Conexion).execute(`
+      INSERT INTO auditoria (usuario_nombre, ip_usuario, accion)
+      VALUES (?, ?, ?)
+    `, [usuarioNombre, ipUsuario, accion]);
+  } catch (error) {
+    console.error('Error registrando auditoría:', error);
+  }
+};
 // Endpoint para obtener todos los roles
 router.get('/', verificaToken, async (req, res) => {
   try {
@@ -25,6 +37,9 @@ router.get('/', verificaToken, async (req, res) => {
 // Endpoint para crear un nuevo rol con permisos
 router.post('/', verificaToken, async (req, res) => {
   const { nombre, permisos } = req.body;
+  const usuario_nombre = req.user.name; // Asumiendo que el middleware verificaToken añade el nombre del usuario logueado a req.user
+  const ip_usuario = getClientIp(req);
+  const accion = `Creó Rol: ${nombre}`;
 
   try {
     const [result] = await (await Conexion).execute(
@@ -40,6 +55,7 @@ router.post('/', verificaToken, async (req, res) => {
         [permisosValues]
       );
     }
+    await registrarAuditoria(usuario_nombre, ip_usuario, accion);
 
     res.json({ success: true, message: 'Rol creado correctamente.' });
   } catch (error) {
@@ -52,6 +68,9 @@ router.post('/', verificaToken, async (req, res) => {
 router.put('/:id', verificaToken, async (req, res) => {
   const roleId = req.params.id;
   const { nombre, permisos } = req.body;
+  const usuario_nombre = req.user.name; // Asumiendo que el middleware verificaToken añade el nombre del usuario logueado a req.user
+  const ip_usuario = getClientIp(req);
+  const accion = `Editó Rol: ${nombre}`;
 
   try {
     await (await Conexion).execute(
@@ -68,6 +87,7 @@ router.put('/:id', verificaToken, async (req, res) => {
         [permisosValues]
       );
     }
+    await registrarAuditoria(usuario_nombre, ip_usuario, accion);
 
     res.json({ success: true, message: 'Rol actualizado correctamente.' });
   } catch (error) {
@@ -79,6 +99,10 @@ router.put('/:id', verificaToken, async (req, res) => {
 // Endpoint para eliminar un rol con sus permisos
 router.delete('/:id', verificaToken, async (req, res) => {
   const roleId = req.params.id;
+  const { nombre, permisos} = req.body;
+  const usuario_nombre = req.user.name; // Asumiendo que el middleware verificaToken añade el nombre del usuario logueado a req.user
+  const ip_usuario = getClientIp(req);
+  const accion = `Eliminó Rol: ${roleId}`;
 
   try {
     const [[usersWithRole]] = await (await Conexion).execute(
@@ -92,6 +116,8 @@ router.delete('/:id', verificaToken, async (req, res) => {
 
     await (await Conexion).execute('DELETE FROM Roles_Permisos WHERE id_rol = ?', [roleId]);
     await (await Conexion).execute('DELETE FROM Rol WHERE id_rol = ?', [roleId]);
+
+    await registrarAuditoria(usuario_nombre, ip_usuario, accion);
     
     res.json({ success: true, message: 'Rol eliminado correctamente.' });
   } catch (error) {

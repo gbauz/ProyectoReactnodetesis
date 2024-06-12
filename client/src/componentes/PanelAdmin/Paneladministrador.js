@@ -5,6 +5,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Users from '../Usuarios/Users';
 import Roles from '../Usuarios/roles';
+import Auditoria from '../Usuarios/auditoria';
 import './AdminPage.css';
 
 const AdminPage = () => {
@@ -71,10 +72,14 @@ const AdminPage = () => {
             </div>
           </>
         );
+      case 'muestras':
+        return <div>Gestion de Muestras Microbiologicas</div>;
       case 'users':
         return <Users />;
       case 'roles':
         return <Roles />;
+      case 'auditoria':
+        return  <Auditoria/>;
       case 'settings':
         return <div>Configuración</div>;
       case 'reports':
@@ -90,12 +95,16 @@ const AdminPage = () => {
 
   const getBreadcrumb = () => {
     switch (view) {
+      case 'muestras':
+        return 'Muestras';
       case 'dashboard':
         return 'Dashboard';
       case 'users':
         return 'Usuarios > Usuarios';
       case 'roles':
         return 'Usuarios > Roles';
+      case 'auditoria':
+        return 'Auditoria';
       case 'settings':
         return 'Configuración';
       case 'reports':
@@ -110,7 +119,7 @@ const AdminPage = () => {
   };
 
   // Verifica si el usuario tiene el permiso de gestión de usuarios
-  const hasGestionUsuariosPermission = userPermissions.includes(8);
+  //const hasGestionUsuariosPermission = userPermissions.includes(8);
 
   if (isLoading) {
     return (
@@ -188,12 +197,12 @@ const AdminPage = () => {
                 </button>
               </li>
               <li className="nav-item">
-                <button className="nav-link text-white btn btn-link" onClick={() => { setView('dashboard'); toggleSidebar(); }}>
+                <button className="nav-link text-white btn btn-link" onClick={() => { setView('muestras'); toggleSidebar(); }}>
                   <i className="fas fa-vial"></i> Gestión de Muestras
                 </button>
               </li>
               {/* Mostrar solo si el usuario tiene permiso de gestión de usuarios */}
-              {hasGestionUsuariosPermission && (
+              {/* {userPermissions.includes(11) && ( 
                 <li className="nav-item">
                   <button
                     className="nav-link text-white btn btn-link"
@@ -203,30 +212,41 @@ const AdminPage = () => {
                     aria-controls="userSubMenu"
                   >
                     <i className="fas fa-user"></i> Gestión de Usuarios <i className="fas fa-chevron-down"></i>
-                  </button>
+                  </button> */}
                   {/* Submenu para la gestión de usuarios */}
-                  <div className="collapse" id="userSubMenu">
-                    <ul className="nav flex-column">
+                  {/* <div className="collapse" id="userSubMenu">
+                    <ul className="nav flex-column"> */}
+                    {userPermissions.includes(8) && (
                       <li className="nav-item">
                         <button
                           className="nav-link text-white btn btn-link"
                           onClick={() => { setView('users'); toggleSidebar(); }}
                         >
-                          Usuarios
+                          <i class="fas fa-users"></i> Usuarios
                         </button>
                       </li>
+                      )}
+                      {userPermissions.includes(10) && (
                       <li className="nav-item">
                         <button
                           className="nav-link text-white btn btn-link"
                           onClick={() => { setView('roles'); toggleSidebar(); }}
                         >
-                          Roles
+                         <i class="fas fa-user-friends"></i> Roles
                         </button>
                       </li>
+                       /* )}
                     </ul>
                   </div>
-                </li>
-              )}
+                </li> */
+               )}
+          {userPermissions.includes(9) && (
+              <li className="nav-item">
+                <button className="nav-link text-white btn btn-link" onClick={() => { setView('auditoria'); toggleSidebar(); }}>
+                  <i className="fas fa-vial"></i> Auditoria
+                </button>
+              </li>
+          )}    
               <li className="nav-item">
                 <button className="nav-link text-white btn btn-link" onClick={() => { setView('settings'); toggleSidebar(); }}>
                   <i className="fas fa-cogs"></i> Configuración

@@ -36,7 +36,7 @@ function verificaToken(req, res, next) {
 
     // El token es válido, asignar los datos decodificados a req.user
     req.user = decoded;
-
+    
     // Continuar con la solicitud
     next();
   });
