@@ -72,8 +72,10 @@ const AdminPage = () => {
             </div>
           </>
         );
-      case 'muestras':
-        return <div>Gestion de Muestras Microbiologicas</div>;
+      case 'RegPacientes':
+        return <div>Registrar Pacientes</div>;
+      case 'RegResultados':
+        return <div>Registrar Resultados Medicos</div>;
       case 'users':
         return <Users />;
       case 'roles':
@@ -95,14 +97,16 @@ const AdminPage = () => {
 
   const getBreadcrumb = () => {
     switch (view) {
-      case 'muestras':
-        return 'Muestras';
+      case 'RegPacientes':
+        return 'Registro de Pacientes';
+        case 'RegResultados':
+        return 'Registro de Resultados';
       case 'dashboard':
         return 'Dashboard';
       case 'users':
-        return 'Usuarios > Usuarios';
+        return 'Usuarios';
       case 'roles':
-        return 'Usuarios > Roles';
+        return 'Roles';
       case 'auditoria':
         return 'Auditoria';
       case 'settings':
@@ -196,11 +200,20 @@ const AdminPage = () => {
                   <i className="fas fa-tachometer-alt"></i> Dashboard
                 </button>
               </li>
+              {userPermissions.includes(12) && (
               <li className="nav-item">
-                <button className="nav-link text-white btn btn-link" onClick={() => { setView('muestras'); toggleSidebar(); }}>
-                  <i className="fas fa-vial"></i> Gestión de Muestras
+                <button className="nav-link text-white btn btn-link" onClick={() => { setView('RegPacientes'); toggleSidebar(); }}>
+                  <i className="fas fa-vial"></i> Registro de Pacientes
                 </button>
               </li>
+              )}
+              {userPermissions.includes(13) && (
+              <li className="nav-item">
+                <button className="nav-link text-white btn btn-link" onClick={() => { setView('RegResultados'); toggleSidebar(); }}>
+                  <i className="fas fa-vial"></i> Registro de Resultados
+                </button>
+              </li>
+              )}
               {/* Mostrar solo si el usuario tiene permiso de gestión de usuarios */}
               {/* {userPermissions.includes(11) && ( 
                 <li className="nav-item">
