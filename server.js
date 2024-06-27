@@ -17,7 +17,7 @@ function exception_routes(paths, fn) {
   }
 }
 
-const whitelist = ['https://localhost', 'http://localhost:3010'];
+const whitelist = ['http://localhost:3000', 'http://localhost:3010'];
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || whitelist.some(domain => origin.includes(domain))) {

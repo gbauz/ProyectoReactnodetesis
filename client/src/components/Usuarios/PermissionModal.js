@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import Uri from '../../enviroment/enviroment';
+import Uri from '../../environment/environment';
 
 const PermissionModal = ({ isOpen, onClose, onSave }) => {
   const [permissions, setPermissions] = useState([]);

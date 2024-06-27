@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'; // Importación de Bootstrap
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './login.css';
 import labLogo from './image/GB-LAB1.png';
-import Uri from '../../enviroment/enviroment';
+import Uri from '../../environment/environment';
 
 
 const Login = () => {

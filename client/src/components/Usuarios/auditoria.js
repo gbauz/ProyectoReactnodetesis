@@ -3,7 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import DataTable from 'react-data-table-component';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import Uri from '../../enviroment/enviroment';
+import Uri from '../../environment/environment';
 const Auditoria = () => {
   const [auditoria, setAuditoria] = useState([]);
   const [filteredAuditoria, setFilteredAuditoria] = useState([]);

@@ -214,12 +214,12 @@ const Pacientes = () => {
       name: 'ACCIONES',
       cell: row => (
         <>
-          <button title="Editar" className="btn btn-primary btn-sm mr-2" onClick={() => handleEditPaciente(row)}>
+          {/* <button title="Editar" className="btn btn-primary btn-sm mr-2" onClick={() => handleEditPaciente(row)}>
             <i className="fas fa-edit"></i>
-          </button>
-          <button title="Eliminar" className="btn btn-danger btn-sm mr-2" onClick={() => handleDeletePaciente(row.cedula)}>
+          </button> */}
+          {/* <button title="Eliminar" className="btn btn-danger btn-sm mr-2" onClick={() => handleDeletePaciente(row.cedula)}>
             <i className="fas fa-trash"></i>
-          </button>
+          </button> */}
         </>
       ),
     },

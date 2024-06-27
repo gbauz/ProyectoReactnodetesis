@@ -4,7 +4,7 @@ import DataTable from 'react-data-table-component';
 import './usuario.css';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import Uri from '../../enviroment/enviroment';
+import Uri from '../../environment/environment';
 
 const Users = () => {
   const [users, setUsers] = useState([]);

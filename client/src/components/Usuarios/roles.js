@@ -5,7 +5,7 @@ import './usuario.css';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import RoleForm from './roleForm';
-import Uri from '../../enviroment/enviroment';
+import Uri from '../../environment/environment';
 
 const Roles = () => {
   const [roles, setRoles] = useState([]);

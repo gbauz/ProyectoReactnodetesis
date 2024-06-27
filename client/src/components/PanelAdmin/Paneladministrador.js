@@ -8,7 +8,8 @@ import Roles from '../Usuarios/roles';
 import Auditoria from '../Usuarios/auditoria';
 import './AdminPage.css';
 import labLogo from '../Login/image/GB-LAB.png';
-import Uri from '../../enviroment/enviroment';
+import Uri from '../../environment/environment';
+import Paciente from '../Paciente/Paciente';
 const AdminPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -139,7 +140,7 @@ const AdminPage = () => {
           </>
         );
       case 'Registro de Pacientes':
-        return <div>Registrar Pacientes</div>;
+        return <Paciente />;
       case 'Registro de Resultados':
         return <div>Registrar Resultados Médicos</div>;
       case 'users':
