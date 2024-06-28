@@ -9,7 +9,7 @@ import Auditoria from '../Usuarios/auditoria';
 import './AdminPage.css';
 import labLogo from '../Login/image/GB-LAB.png';
 import Uri from '../../environment/environment';
-import Paciente from '../Paciente/Paciente';
+import Paciente from '../Pacient/Pacient';
 const AdminPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,7 +31,7 @@ const AdminPage = () => {
           return;
         }
     
-        const response = await fetch(Uri+'api/permisos/categorias', {
+        const response = await fetch(Uri+'permisos/categorias', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -63,7 +63,7 @@ const AdminPage = () => {
           return;
         }
 
-        const response = await fetch(Uri+'api/session', {
+        const response = await fetch(Uri+'session', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -275,7 +275,7 @@ const AdminPage = () => {
               </li>
               <li className="nav-item">
                 <button className="nav-link text-white btn btn-link" onClick={() => { setView('inicio'); toggleSidebar(); }}>
-                <i class="fa-solid fa-house"></i> Inicio
+                <i className="fa-solid fa-house"></i> Inicio
                 </button>
               </li>
               {Array.from(categories).map((category, index) => {

@@ -17,7 +17,7 @@ const PermissionModal = ({ isOpen, onClose, onSave }) => {
         console.error('Token no encontrado en localStorage');
         return;
       }
-      const response = await fetch(Uri+'api/permisos', {
+      const response = await fetch(Uri+'permisos', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -49,7 +49,7 @@ const PermissionModal = ({ isOpen, onClose, onSave }) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(Uri+'api/permisos', {
+      const response = await fetch(Uri+'permisos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

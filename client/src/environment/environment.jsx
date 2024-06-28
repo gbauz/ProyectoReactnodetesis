@@ -1,3 +1,3 @@
-const Uri = 'http://localhost:3010/'
+const Uri = 'http://localhost:3010/api/'
 
 export default Uri;

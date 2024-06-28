@@ -32,7 +32,7 @@ const Auditoria = () => {
         return;
       }
 
-      const response = await fetch(Uri+'api/auditoria', {
+      const response = await fetch(Uri+'auditoria', {
         headers: {
           Authorization: `Bearer ${token}`
         }

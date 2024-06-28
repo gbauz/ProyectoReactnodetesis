@@ -33,7 +33,7 @@ const Users = () => {
         return;
       }
 
-      const usersResponse = await fetch(Uri+'api/users', {
+      const usersResponse = await fetch(Uri+'users', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -44,7 +44,7 @@ const Users = () => {
         setUsers(userData.users);
         setFilteredUsers(userData.users);
 
-        const sessionResponse = await fetch(Uri+'api/session', {
+        const sessionResponse = await fetch(Uri+'session', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -71,7 +71,7 @@ const Users = () => {
         console.error('Token no encontrado en localStorage');
         return;
       }
-      const response = await fetch(Uri+'api/roles', {
+      const response = await fetch(Uri+'roles', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -138,11 +138,11 @@ const Users = () => {
     }
     try {
       const token = localStorage.getItem('token');
-      let endpoint = Uri+'api/users';
+      let endpoint = Uri+'users';
       let method = 'POST';
   
       if (editUser) {
-        endpoint = Uri+`api/users/${editUser.cedula}`;
+        endpoint = Uri+`users/${editUser.cedula}`;
         method = 'PUT';
       }
   
@@ -186,7 +186,7 @@ const Users = () => {
     }
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(Uri+`api/users/${userId}`, {
+      const response = await fetch(Uri+`users/${userId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`
@@ -261,7 +261,7 @@ const Users = () => {
   
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(Uri+`api/users/${editUser.cedula}/password`, {
+      const response = await fetch(Uri+`users/${editUser.cedula}/password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

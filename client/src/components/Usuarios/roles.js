@@ -25,7 +25,7 @@ const Roles = () => {
         return;
       }
 
-      const rolesResponse = await fetch(Uri+'api/roles', {
+      const rolesResponse = await fetch(Uri+'roles', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -36,7 +36,7 @@ const Roles = () => {
         setRoles(rolesData.roles);
         setFilteredRoles(rolesData.roles);
 
-        const sessionResponse = await fetch(Uri+'api/session', {
+        const sessionResponse = await fetch(Uri+'session', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -63,7 +63,7 @@ const Roles = () => {
         return;
       }
 
-      const permissionsResponse = await fetch(Uri+'api/permisos', {
+      const permissionsResponse = await fetch(Uri+'permisos', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -111,7 +111,7 @@ const Roles = () => {
     }
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(Uri+`api/roles/${roleId}`, {
+      const response = await fetch(Uri+`roles/${roleId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`
@@ -139,11 +139,11 @@ const Roles = () => {
     }
     try {
       const token = localStorage.getItem('token');
-      let endpoint = Uri+'api/roles';
+      let endpoint = Uri+'roles';
       let method = 'POST';
 
       if (editRole) {
-        endpoint = Uri+`api/roles/${editRole.id_rol}`;
+        endpoint = Uri+`roles/${editRole.id_rol}`;
         method = 'PUT';
       }
 

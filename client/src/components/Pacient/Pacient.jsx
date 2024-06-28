@@ -1,70 +1,73 @@
-import "./Paciente.css";
+import "./Pacient.css";
 import React, { useState } from "react";
 import { Space, Table, Tag, Button, notification } from "antd";
-import EditPaciente from "./Edit/EditPaciente";
-import { DeleteOutlined, FormOutlined } from "@ant-design/icons";
+import EditCreatePacient from "./Edit-Create/EditCreatePacient";
+import PacienteService from "../../services/PacientService";
+import { DeleteFilled, EditFilled, PlusCircleOutlined } from "@ant-design/icons";
+import Notification from "../Notification/Notification";
 
 const Paciente = () => {
   let data = [];
   let columns = [];
   let filter = [];
+  const [api, contextHolder] = notification.useNotification(); //Notification
   const [tableParams, setTableParams] = useState({
     pagination: {
       current: 1,
-      pageSize: 5,
-      pageSizeOptions: [5, 10, 20, 50, 100],
+      pageSize: 6,
+      pageSizeOptions: [6, 10, 20, 50, 100],
       showQuickJumper: true,
       position: ["bottomRight"]
     },
   });
-
+  
   //Cargar data
-  data = [
-    {
-      id: "1",
-      name: "John Brown",
-      chinese: 98,
-      math: 60,
-      english: 22,
-      tags: ["nice", "developer"],
-    },
-    {
-      id: "2",
-      name: "Jim Green",
-      chinese: 98,
-      math: 60,
-      english: 40,
-      tags: ["loser"],
-    },
-    {
-      id: "3",
-      name: "Joe Black",
-      chinese: 98,
-      math: 90,
-      english: 10,
-      tags: ["cool", "teacher"],
-    },
-    {
-      id: "4",
-      name: "Jim Red",
-      chinese: 88,
-      math: 99,
-      english: 89,
-      tags: ["nice", "developer"],
-    },
-  ];
-
-  //Data de prueba
-  // for (let i = 0; i < 100; i++) {
-  //   data.push({
-  //     id: i,
+  // data = [
+  //   {
+  //     id: "1",
   //     name: "John Brown",
   //     chinese: 98,
   //     math: 60,
   //     english: 22,
   //     tags: ["nice", "developer"],
-  //   });
-  // }
+  //   },
+  //   {
+  //     id: "2",
+  //     name: "Jim Green",
+  //     chinese: 98,
+  //     math: 60,
+  //     english: 40,
+  //     tags: ["loser"],
+  //   },
+  //   {
+  //     id: "3",
+  //     name: "Joe Black",
+  //     chinese: 98,
+  //     math: 90,
+  //     english: 10,
+  //     tags: ["cool", "teacher"],
+  //   },
+  //   {
+  //     id: "4",
+  //     name: "Jim Red",
+  //     chinese: 88,
+  //     math: 99,
+  //     english: 89,
+  //     tags: ["nice", "developer"],
+  //   },
+  // ];
+
+  //Data de prueba
+  for (let i = 0; i < 100; i++) {
+    data.push({
+      id: i,
+      name: "John Brown",
+      chinese: 98,
+      math: 60,
+      english: 22,
+      tags: ["nice", "developer"],
+    });
+  }
 
   //Llenar filtros
   data.forEach(element => {
@@ -142,11 +145,11 @@ const Paciente = () => {
       align: "center",
       render: (_, record) => (
         <Space size="middle">
-          <Button className="actions" onClick={() => showEditModal(record)}>
-            <FormOutlined />
+          <Button className="actions" onClick={() => showEditCreateModal(record)}>
+            <EditFilled className="edit-icon"/>
           </Button>
           <Button className="actions">
-            <DeleteOutlined />
+            <DeleteFilled className="delete-icon"/>
           </Button>
         </Space>
       ),
@@ -168,44 +171,31 @@ const Paciente = () => {
   //Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
-  const showEditModal = (item) => {
+  const showEditCreateModal = (item) => {
     setCurrentItem(item);
     setIsModalOpen(true);
   };
   const handleCancel = () => {
     setIsModalOpen(false);
   };
-  const handleSubmit = (response) => {
-    console.log(response);
-    openNotification(response);
+  const handleSubmit = (response, message, description) => {
+    Notification(api, response, message, description);
     setIsModalOpen(false);
+    //Aqui refrescar datos
   };
-  //Fin Modal
 
-  //Notification
-  const [api, contextHolder] = notification.useNotification();
-  const openNotification = (title) => {
-    if (title == 'Exito'){
-      api.success({
-        message: `${title}`,
-        description: "Se ha editado correctamente",
-        showProgress: true,
-        placement: "topRight",
-      });
-    }else{
-      api.error({
-        message: `${title}`,
-        description: "Ha habido un error, no se ha podido editar!!",
-        showProgress: true,
-        placement: "topRight",
-      });
-    }
-  };
-  //Fin Notification
+  const tetsUsers = ()=> {
+    PacienteService.getPatients();
+  }
 
   return (
     <div>
-      <h3>Paciente</h3>
+      <div className="header-content">
+        <h3>Paciente</h3>
+        <Button type="primary" onClick={() => showEditCreateModal(null)}>
+          <PlusCircleOutlined /> Crear
+        </Button>
+      </div>
       {contextHolder}
       <Table 
         columns={columns}
@@ -213,12 +203,13 @@ const Paciente = () => {
         rowKey={"id"}
         pagination={tableParams.pagination}
         onChange={handleTableChange} />
-      <EditPaciente
+      <EditCreatePacient
         isModalOpen={isModalOpen}
         handleCancel={handleCancel}
         handleSubmit={handleSubmit}
         initialValues={currentItem}
       />
+      <Button onClick={() => tetsUsers()}>TestLlamadaAPI</Button>
     </div>
   );
 };

@@ -2,11 +2,6 @@
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
@@ -35,4 +30,28 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Style components */
+.header-content{
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding-left: 1%;
+  padding-right: 1%;
+}
+
+/* Styles Table */
+.actions{
+  padding: 7px !important;
+  border-radius: 100% !important;
+  font-size: 1rem !important;
+}
+
+.actions .delete-icon {
+  color: red;
+}
+
+.actions .edit-icon {
+  color: #1a6ab9;
 }

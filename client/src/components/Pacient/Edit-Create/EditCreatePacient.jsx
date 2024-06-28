@@ -1,24 +1,37 @@
 import React, { useEffect, useState } from "react";
 import { Button, Form, Input, Modal } from "antd";
-import './EditPaciente.css'
+import './EditCreatePacient.css'
+import PacientService from "../../../services/PacientService";
 
-const EditPaciente = ({ isModalOpen, handleSubmit, handleCancel, initialValues }) => {
+const EditCreatePacient = ({ isModalOpen, handleSubmit, handleCancel, initialValues }) => {
   const [form] = Form.useForm();
+  const [isEditing, setIsEditing] = useState(false);
   
   useEffect(() => {
-    if (initialValues) form.setFieldsValue(initialValues) 
-    // console.log(initialValues);
+    if (initialValues) {
+      form.setFieldsValue(initialValues);
+      setIsEditing(true);
+    } else {
+      form.resetFields();
+      setIsEditing(false);
+    }
+    console.log(initialValues);
   }, [initialValues, form]);
 
   const onFinish = (values) => {
-    console.log(values);
-    handleSubmit("Exito");
+    if (isEditing) {
+      PacientService.editPatient(values.id, values);
+    } else {
+      console.log(values);
+      // PacientService.createPatient(values);
+    }
+    handleSubmit('Exito', 'Exito', 'Se ha editado correctamente');
     form.resetFields();
   };
 
   return (
     <Modal
-      title="Crear Paciente"
+      title={isEditing ? "Editar Paciente" : "Crear Paciente"}
       open={isModalOpen}
       onOk={handleSubmit}
       onCancel={handleCancel}
@@ -36,12 +49,12 @@ const EditPaciente = ({ isModalOpen, handleSubmit, handleCancel, initialValues }
         <Form.Item name="chinese" label="Chinese" rules={[{ required: true, message: 'Please input the number!' }]}>
           <Input />
         </Form.Item>
-        <Form.Item>
+        <Form.Item className="footer">
           <Button key="back" onClick={handleCancel}>
             Cancelar
           </Button>
           <Button htmlType="submit">
-            Editar
+            {isEditing ? "Editar" : "Crear"}
           </Button>
         </Form.Item>
       </Form>
@@ -49,4 +62,4 @@ const EditPaciente = ({ isModalOpen, handleSubmit, handleCancel, initialValues }
   );
 };
 
-export default EditPaciente;
+export default EditCreatePacient;
