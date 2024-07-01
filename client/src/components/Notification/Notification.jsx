@@ -5,6 +5,7 @@ const Notification = (api, response, message, description) => {
     showProgress: true,
     placement: "topRight",
   };
+  console.log(response);
   (response === "Exito") ? api.success(config) : api.error(config);
 };
 

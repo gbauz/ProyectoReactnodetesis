@@ -42,7 +42,7 @@ const AdminPage = () => {
           const uniqueCategories = new Set(data.permissions.map(permission => permission.categoria));
           setCategories(uniqueCategories);
           setUserPermissions(data.permissions.map(permission => permission.id_permiso));
-          console.log(uniqueCategories);
+          // console.log(uniqueCategories);
         } else {
           console.error('Error al obtener categorías:', response.statusText);
         }

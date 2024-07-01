@@ -3,38 +3,37 @@ import { Button, Form, Input, Modal } from "antd";
 import './EditCreatePacient.css'
 import PacientService from "../../../services/PacientService";
 
-const EditCreatePacient = ({ isModalOpen, handleSubmit, handleCancel, initialValues }) => {
+const EditCreatePacient = ({ isModalOpen, handleSubmit, handleCancel, initialValues, action }) => {
   const [form] = Form.useForm();
   const [isEditing, setIsEditing] = useState(false);
   
   useEffect(() => {
-    if (initialValues) {
+    if (action=='Edit') {
       form.setFieldsValue(initialValues);
       setIsEditing(true);
-    } else {
+    } 
+    if (action=='Create'){
       form.resetFields();
       setIsEditing(false);
     }
+    console.log(form);
     console.log(initialValues);
   }, [initialValues, form]);
 
   const onFinish = (values) => {
-    if (isEditing) {
-      PacientService.editPatient(values.id, values);
-    } else {
-      console.log(values);
-      // PacientService.createPatient(values);
+    let response = '';
+    if (action=='Edit') response = PacientService.editPatient(values.id, values);
+    if (action=='Create') response = PacientService.createPatient(values);
+    if (response) {
+      handleSubmit(response, 'Exito', 'Se ha editado correctamente');
+      form.resetFields();
     }
-    handleSubmit('Exito', 'Exito', 'Se ha editado correctamente');
-    form.resetFields();
   };
 
   return (
     <Modal
       title={isEditing ? "Editar Paciente" : "Crear Paciente"}
       open={isModalOpen}
-      onOk={handleSubmit}
-      onCancel={handleCancel}
       centered
       maskClosable={false}
       footer={null}
@@ -50,10 +49,10 @@ const EditCreatePacient = ({ isModalOpen, handleSubmit, handleCancel, initialVal
           <Input />
         </Form.Item>
         <Form.Item className="footer">
-          <Button key="back" onClick={handleCancel}>
+          <Button key="back" onClick={handleCancel} style={{marginRight:'15px'}}>
             Cancelar
           </Button>
-          <Button htmlType="submit">
+          <Button htmlType="submit" style={{background: '#4096FF', color:'white'}}>
             {isEditing ? "Editar" : "Crear"}
           </Button>
         </Form.Item>

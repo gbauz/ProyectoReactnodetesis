@@ -1,0 +1,7 @@
+.slidebar{
+    width: 300px;
+    height: 100vh;
+    background: red;
+    transition: 0.5s;
+    padding-left: 10px;
+}

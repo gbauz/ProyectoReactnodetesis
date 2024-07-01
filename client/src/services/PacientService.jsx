@@ -24,23 +24,35 @@ const getPatients = async () => {
   }
 };
 
+const createPatient = async (patientData) => {
+  try {
+    console.log(patientData);
+    // const response = await apiClient.post('paciente', patientData);
+    // return response;
+    return await 'Exito';
+  }catch (error){
+    return error;
+  }
+}
+
 const editPatient = async (id, patientData) => {
   try {
     console.log(patientData);
     console.log(id);
-    const response = await apiClient.put(`paciente/${id}`, patientData);
+    // const response = await apiClient.put(`paciente/${id}`, patientData);
     // return response.data;
+    return await 'Exito';
   } catch (error) {
-    console.error('Error al editar el paciente:', error);
-    throw error;
+    return error;
   }
 };
 
 const deletePatient = async (id) => {
   try {
     console.log(id);
-    const response = await apiClient.delete(`paciente/${id}`);
+    // const response = await apiClient.delete(`paciente/${id}`);
     // return response.data;
+    return 'Exito';
   } catch (error) {
     console.error('Error al eliminar el paciente:', error);
     throw error;
@@ -49,6 +61,7 @@ const deletePatient = async (id) => {
 
 export default {
   getPatients,
+  createPatient,
   editPatient,
   deletePatient,
 };

@@ -5,6 +5,7 @@ import EditCreatePacient from "./Edit-Create/EditCreatePacient";
 import PacienteService from "../../services/PacientService";
 import { DeleteFilled, EditFilled, PlusCircleOutlined } from "@ant-design/icons";
 import Notification from "../Notification/Notification";
+import DeletePacient from "./Delete/DeletePacient";
 
 const Paciente = () => {
   let data = [];
@@ -145,11 +146,11 @@ const Paciente = () => {
       align: "center",
       render: (_, record) => (
         <Space size="middle">
-          <Button className="actions" onClick={() => showEditCreateModal(record)}>
+          <Button className="actions" onClick={() => showEditCreateModal(record, 'Edit')}>
             <EditFilled className="edit-icon"/>
           </Button>
-          <Button className="actions">
-            <DeleteFilled className="delete-icon"/>
+          <Button className="actions" onClick={() => showDeleteModal(record)}>
+            <DeleteFilled className="delete-icon" />
           </Button>
         </Space>
       ),
@@ -171,7 +172,10 @@ const Paciente = () => {
   //Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
-  const showEditCreateModal = (item) => {
+  const [action, setAction] = useState(null);
+  //Edit-Create
+  const showEditCreateModal = (item, action) => {
+    setAction(action);
     setCurrentItem(item);
     setIsModalOpen(true);
   };
@@ -183,16 +187,30 @@ const Paciente = () => {
     setIsModalOpen(false);
     //Aqui refrescar datos
   };
+  
+  //Delete
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const showDeleteModal = (item) => {
+    setCurrentItem(item);
+    setIsDeleteModalOpen(true);
+  };
+  const handleDeleteCancel = () => {
+    setIsDeleteModalOpen(false);
+  };
+  const handleDelete = (response) => {
+    Notification(api, 'Exito', 'Exito', 'Has eliminado el paciente!');
+    setIsDeleteModalOpen(false);
+  };
 
   const tetsUsers = ()=> {
     PacienteService.getPatients();
   }
 
   return (
-    <div>
+    <div className="paciente">
       <div className="header-content">
         <h3>Paciente</h3>
-        <Button type="primary" onClick={() => showEditCreateModal(null)}>
+        <Button type="primary" onClick={() => showEditCreateModal(null, 'Create')}>
           <PlusCircleOutlined /> Crear
         </Button>
       </div>
@@ -207,6 +225,13 @@ const Paciente = () => {
         isModalOpen={isModalOpen}
         handleCancel={handleCancel}
         handleSubmit={handleSubmit}
+        initialValues={currentItem}
+        action={action}
+      />
+      <DeletePacient 
+        isDeleteModalOpen={isDeleteModalOpen}
+        handleDelete={handleDelete}
+        handleDeleteCancel={handleDeleteCancel}
         initialValues={currentItem}
       />
       <Button onClick={() => tetsUsers()}>TestLlamadaAPI</Button>
