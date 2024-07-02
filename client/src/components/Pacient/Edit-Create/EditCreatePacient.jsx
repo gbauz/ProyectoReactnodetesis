@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Button, Form, Input, Modal } from "antd";
+import { Button, Form, Input, Modal, Select } from "antd";
 import './EditCreatePacient.css'
 import PacientService from "../../../services/PacientService";
 
 const EditCreatePacient = ({ isModalOpen, handleSubmit, handleCancel, initialValues, action }) => {
   const [form] = Form.useForm();
   const [isEditing, setIsEditing] = useState(false);
-  
+  const [error, setError] = useState(null);
+  let response = '';
+
   useEffect(() => {
     if (action=='Edit') {
       form.setFieldsValue(initialValues);
@@ -20,13 +22,17 @@ const EditCreatePacient = ({ isModalOpen, handleSubmit, handleCancel, initialVal
     console.log(initialValues);
   }, [initialValues, form]);
 
-  const onFinish = (values) => {
-    let response = '';
-    if (action=='Edit') response = PacientService.editPatient(values.id, values);
-    if (action=='Create') response = PacientService.createPatient(values);
-    if (response) {
-      handleSubmit(response, 'Exito', 'Se ha editado correctamente');
-      form.resetFields();
+  const onFinish = async (values) => {
+    try {
+      if (action=='Edit') response = await PacientService.editPatient(values.cedula, values);
+      if (action=='Create') response = await PacientService.createPatient(values);
+    } catch (error) {
+      setError(error);
+    }finally {
+      if (response) {
+        handleSubmit(response);
+        form.resetFields();
+      }
     }
   };
 
@@ -34,6 +40,7 @@ const EditCreatePacient = ({ isModalOpen, handleSubmit, handleCancel, initialVal
     <Modal
       title={isEditing ? "Editar Paciente" : "Crear Paciente"}
       open={isModalOpen}
+      onCancel={handleCancel}
       centered
       maskClosable={false}
       footer={null}
@@ -42,10 +49,22 @@ const EditCreatePacient = ({ isModalOpen, handleSubmit, handleCancel, initialVal
         <Form.Item name="id" hidden>
           <Input />
         </Form.Item>
-        <Form.Item name="name" label="Name" rules={[{ required: true, message: 'Please input the name!' }]}>
+        <Form.Item name="paciente" label="Nombre" rules={[{ required: true, message: 'Por favor ingrese el nombre!' }]}>
           <Input />
         </Form.Item>
-        <Form.Item name="chinese" label="Chinese" rules={[{ required: true, message: 'Please input the number!' }]}>
+        <Form.Item name="cedula" label="Cedula" rules={[{ required: true, message: 'Por favor ingrese la cédula!' }]}>
+          <Input />
+        </Form.Item>
+        <Form.Item name="edad" label="Edad" rules={[{ required: true, message: 'Por favor ingrese la edad!' }]}>
+          <Input />
+        </Form.Item>
+        <Form.Item name="sexo" label="Sexo" rules={[{ required: true, message: 'Por favor seleccione el sexo!' }]}>
+          <Select options={[
+            { value: 'Masculino', label: <span>Masculino</span> },
+            { value: 'Femenino', label: <span>Femenino</span> }
+          ]} />
+        </Form.Item>
+        <Form.Item name="celular" label="Teléfono" rules={[{ required: true, message: 'Por favor ingrese el teléfono!' }]}>
           <Input />
         </Form.Item>
         <Form.Item className="footer">

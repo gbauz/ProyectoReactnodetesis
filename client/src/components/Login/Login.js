@@ -38,7 +38,7 @@ const Login = () => {
     }
   };
   return (
-    <div className="bs-body-color min-vh-100 d-flex align-items-center justify-content-center">
+    <div className="bs-body-color min-vh-100 d-flex align-items-center justify-content-center w-100">
       <div className="container">
         <div className="row justify-content-center">
           <div className="bs-secondary-color col-lg-5">

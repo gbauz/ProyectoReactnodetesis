@@ -12,8 +12,8 @@ import Navigation from './components/Navigation/Navigation';
 function App () {
   return (
     <BrowserRouter>
-      <div style={{display:'flex'}}>
-        <Navigation />
+      <div>
+        {/* <Navigation /> */}
         <Routes> {/* Configuración de rutas */}
           <Route path="/admin" element={<Paneladministrador />} />
           <Route path="/users" element={<Users />} />

@@ -1,12 +1,12 @@
-const Notification = (api, response, message, description) => {
+const Notification = (api, response, description) => {
   const config = {
-    message: message,
+    message: (response >= 200 && response < 300) ? 'Exito': 'Error',
     description: description,
     showProgress: true,
     placement: "topRight",
   };
   console.log(response);
-  (response === "Exito") ? api.success(config) : api.error(config);
+  (response >= 200 && response < 300) ? api.success(config) : api.error(config);
 };
 
 export default Notification;

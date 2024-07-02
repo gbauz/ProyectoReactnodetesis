@@ -1,13 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import "./DeletePacient.css";
 import PacientService from "../../../services/PacientService";
 import { Button, Modal } from "antd";
 
 const DeletePacient = ({ isDeleteModalOpen, handleDelete, handleDeleteCancel, initialValues }) => {
-  const onFinish = () => {
-    const response = PacientService.deletePatient(initialValues.id);
-    if (response) {
-      handleDelete(response);
+  const [error, setError] = useState(null);
+  let response;
+
+  const onFinish = async () => {
+    try {
+      response = await PacientService.deletePatient(initialValues.cedula);
+      console.log(response);
+    } catch (error) {
+      setError(error);
+    } finally {
+      if (response) {
+        handleDelete(response);
+      }
     }
   };
 
@@ -15,6 +24,7 @@ const DeletePacient = ({ isDeleteModalOpen, handleDelete, handleDeleteCancel, in
     <Modal
       title="Eliminar Paciente"
       open={isDeleteModalOpen}
+      onCancel={handleDeleteCancel}
       centered
       maskClosable={false}
       footer={null}
@@ -24,7 +34,7 @@ const DeletePacient = ({ isDeleteModalOpen, handleDelete, handleDeleteCancel, in
         <Button key="back" onClick={handleDeleteCancel} style={{ marginRight: "15px" }}>
           Cancelar
         </Button>
-        <Button style={{ background: "#4096FF", color: "white" }} onClick={onFinish}>
+        <Button style={{ background: "red", color: "white" }} onClick={onFinish}>
           Eliminar
         </Button>
       </div>

@@ -1,16 +1,19 @@
 import "./Pacient.css";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Space, Table, Tag, Button, notification } from "antd";
 import EditCreatePacient from "./Edit-Create/EditCreatePacient";
 import PacienteService from "../../services/PacientService";
 import { DeleteFilled, EditFilled, PlusCircleOutlined } from "@ant-design/icons";
 import Notification from "../Notification/Notification";
 import DeletePacient from "./Delete/DeletePacient";
+import moment from 'moment';
 
 const Paciente = () => {
-  let data = [];
+  const [data, setData] = useState([]);
+  const [error, setError] = useState(null);
   let columns = [];
-  let filter = [];
+  let filterSexo = [];
+  let uniqueSexos = new Set();
   const [api, contextHolder] = notification.useNotification(); //Notification
   const [tableParams, setTableParams] = useState({
     pagination: {
@@ -21,125 +24,108 @@ const Paciente = () => {
       position: ["bottomRight"]
     },
   });
+  const fetchPatients = async () => {
+    try {
+      const response = await PacienteService.getPatients();
+      setData(response.data.users);
+      console.log(response);
+    } catch (error) {
+      setError(error);
+    } finally {
+      // setLoading(false);
+    }
+  };
   
-  //Cargar data
-  // data = [
-  //   {
-  //     id: "1",
-  //     name: "John Brown",
-  //     chinese: 98,
-  //     math: 60,
-  //     english: 22,
-  //     tags: ["nice", "developer"],
-  //   },
-  //   {
-  //     id: "2",
-  //     name: "Jim Green",
-  //     chinese: 98,
-  //     math: 60,
-  //     english: 40,
-  //     tags: ["loser"],
-  //   },
-  //   {
-  //     id: "3",
-  //     name: "Joe Black",
-  //     chinese: 98,
-  //     math: 90,
-  //     english: 10,
-  //     tags: ["cool", "teacher"],
-  //   },
-  //   {
-  //     id: "4",
-  //     name: "Jim Red",
-  //     chinese: 88,
-  //     math: 99,
-  //     english: 89,
-  //     tags: ["nice", "developer"],
-  //   },
-  // ];
-
-  //Data de prueba
-  for (let i = 0; i < 100; i++) {
-    data.push({
-      id: i,
-      name: "John Brown",
-      chinese: 98,
-      math: 60,
-      english: 22,
-      tags: ["nice", "developer"],
-    });
-  }
+  useEffect(() => {
+    fetchPatients();
+  }, []);
 
   //Llenar filtros
   data.forEach(element => {
-    filter.push({
-      text: element.name,
-      value: element.name,
-    })
+    if (!uniqueSexos.has(element.sexo)) {
+      uniqueSexos.add(element.sexo);
+      filterSexo.push({
+        text: element.sexo,
+        value: element.sexo,
+      });
+    }
   });
 
   //Llenar columnas
   columns = [
     {
-      title: "Name",
-      dataIndex: "name",
+      title: "Nombre",
+      dataIndex: "paciente",
       sorter: {
-        compare: (a, b) => a.name - b.name,
-        multiple: 4,
-      },
-      filters: filter,
-      onFilter: (value, record) => record.name.startsWith(value),
-      filterSearch: true,
-      render: (text) => <a>{text}</a>,
-    },
-    {
-      title: "Chinese Score",
-      dataIndex: "chinese",
-      align: "center",
-      sorter: {
-        compare: (a, b) => a.chinese - b.chinese,
-        multiple: 3,
-      },
-    },
-    {
-      title: "Math Score",
-      dataIndex: "math",
-      align: "center",
-      sorter: {
-        compare: (a, b) => a.math - b.math,
-        multiple: 2,
-      },
-    },
-    {
-      title: "English Score",
-      dataIndex: "english",
-      align: "center",
-      sorter: {
-        compare: (a, b) => a.english - b.english,
+        compare: (a, b) => a.paciente.localeCompare(b.paciente),
         multiple: 1,
       },
     },
     {
-      title: "Tags",
-      key: "tags",
-      dataIndex: "tags",
+      title: "Cedula",
+      dataIndex: "cedula",
       align: "center",
-      render: (_, { tags }) => (
-        <>
-          {tags.map((tag) => {
-            let color = tag.length > 5 ? "geekblue" : "green";
-            if (tag === "loser") {
-              color = "volcano";
-            }
-            return (
-              <Tag color={color} key={tag}>
-                {tag.toUpperCase()}
-              </Tag>
-            );
-          })}
-        </>
-      ),
+      sorter: {
+        compare: (a, b) => a.cedula - b.cedula,
+        multiple: 2,
+      },
     },
+    {
+      title: "Edad",
+      dataIndex: "edad",
+      align: "center",
+      sorter: {
+        compare: (a, b) => a.edad - b.edad,
+        multiple: 3,
+      },
+    },
+    {
+      title: "Sexo",
+      dataIndex: "sexo",
+      sorter: {
+        compare: (a, b) => a.sexo.localeCompare(b.sexo),
+        multiple: 4,
+      },
+      filters: filterSexo,
+      onFilter: (value, data) => data.sexo.startsWith(value),
+      filterSearch: true,
+    },
+    {
+      title: "Telefono",
+      dataIndex: "celular",
+      align: "center",
+    },
+    {
+      title: "Fecha de ingreso",
+      dataIndex: "fecha_de_ingreso",
+      align: "center",
+      sorter: {
+        compare: (a, b) => new Date(a.fecha_de_ingreso) - new Date(b.fecha_de_ingreso),
+        multiple: 5,
+      },
+      render: (text) => moment(text).format('DD-MM-YYYY'),
+    },
+    // {
+    //   title: "Tags",
+    //   key: "tags",
+    //   dataIndex: "tags",
+    //   align: "center",
+    //   render: (_, { tags }) => (
+    //     <>
+    //       {tags.map((tag) => {
+    //         let color = tag.length > 5 ? "geekblue" : "green";
+    //         if (tag === "loser") {
+    //           color = "volcano";
+    //         }
+    //         return (
+    //           <Tag color={color} key={tag}>
+    //             {tag.toUpperCase()}
+    //           </Tag>
+    //         );
+    //       })}
+    //     </>
+    //   ),
+    // },
     {
       title: "Action",
       key: "action",
@@ -182,8 +168,8 @@ const Paciente = () => {
   const handleCancel = () => {
     setIsModalOpen(false);
   };
-  const handleSubmit = (response, message, description) => {
-    Notification(api, response, message, description);
+  const handleSubmit = (axiosResponse) => {
+    Notification(api, axiosResponse.response.status, 'Edicion o creacion de paciente');
     setIsModalOpen(false);
     //Aqui refrescar datos
   };
@@ -197,14 +183,10 @@ const Paciente = () => {
   const handleDeleteCancel = () => {
     setIsDeleteModalOpen(false);
   };
-  const handleDelete = (response) => {
-    Notification(api, 'Exito', 'Exito', 'Has eliminado el paciente!');
+  const handleDelete = (axiosResponse) => {
+    Notification(api, axiosResponse.response.status, 'Has eliminado el paciente!');
     setIsDeleteModalOpen(false);
   };
-
-  const tetsUsers = ()=> {
-    PacienteService.getPatients();
-  }
 
   return (
     <div className="paciente">
@@ -215,10 +197,10 @@ const Paciente = () => {
         </Button>
       </div>
       {contextHolder}
-      <Table 
+      <Table
         columns={columns}
         dataSource={data}
-        rowKey={"id"}
+        rowKey={"cedula"}
         pagination={tableParams.pagination}
         onChange={handleTableChange} />
       <EditCreatePacient
@@ -234,7 +216,6 @@ const Paciente = () => {
         handleDeleteCancel={handleDeleteCancel}
         initialValues={currentItem}
       />
-      <Button onClick={() => tetsUsers()}>TestLlamadaAPI</Button>
     </div>
   );
 };
