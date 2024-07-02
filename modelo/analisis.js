@@ -9,7 +9,7 @@ const moment = require('moment-timezone');
 router.get('/', verificaToken, async (req, res) => {
     try {
       const [rows] = await (await Conexion).execute(
-        'SELECT * FROM Pacientes'
+        'SELECT * FROM Analisis'
       );
 
       const paciente = rows.map(row => ({
@@ -23,32 +23,19 @@ router.get('/', verificaToken, async (req, res) => {
     }
   });
 
-  // Endpoint para crear un nuevo usuario
+  // Endpoint para crear un nuevo analisis
 router.post('/', verificaToken, async (req, res) => {
-    const { cedula, paciente, edad, sexo, celular, fecha_de_ingreso } = req.body;
+    const {analisis} = req.body;
     const usuario_nombre = req.user.name; // Asumiendo que el middleware verificaToken añade el nombre del usuario logueado a req.user
     const ip_usuario = getClientIp(req);
-    const accion = `Creó Usuario con Cédula: ${cedula}`;
+    //const accion = `Creó Usuario con Cédula: ${cedula}`;
   
    
     try {
   
-      
-  
-      const [existingUserRows] = await (await Conexion).execute(
-        'SELECT * FROM Pacientes WHERE cedula = ?',
-        [cedula]
-      );
-  
-      if (existingUserRows.length > 0) {
-        return res.status(400).json({ error: 'Ya existe un paciente con el mismo número de cédula.' });
-      }
-  
-      
-  
       await (await Conexion).execute(
-        'INSERT INTO Pacientes (cedula, paciente, edad, sexo, celular) VALUES (?, ?, ?, ?, ?)',
-        [cedula, paciente, edad, sexo, celular]
+        'INSERT INTO Analisis (analisis) VALUES (?)',
+        [analisis]
       );
   
       res.json({ success: true, message: 'Paciente creado correctamente.' });
@@ -69,19 +56,19 @@ router.delete('/:id', verificaToken, async (req, res) => {
   
     try {
       
-      await (await Conexion).execute('DELETE FROM Pacientes WHERE cedula = ?', [userId]);
+      await (await Conexion).execute('DELETE FROM Analisis WHERE id_analisis = ?', [userId]);
   
       //await registrarAuditoria(usuario_nombre, ip_usuario, accion);
-      res.json({ success: true, message: 'Paciente eliminado correctamente.' });
+      res.json({ success: true, message: 'Analisis eliminado correctamente.' });
     } catch (error) {
       console.error('Error deleting user:', error);
       res.status(500).json({ error: 'Error al eliminar usuario.' });
     }
   });
-
+// Endpoint para editar un usuario
   router.put('/:id', verificaToken, async (req, res) => {
     const userId = req.params.id;
-    const {paciente, edad, sexo, celular} = req.body;
+    const {analisis} = req.body;
     const usuario_nombre = req.user.name; // Asumiendo que el middleware verificaToken añade el nombre del usuario logueado a req.user
     const ip_usuario = getClientIp(req);
     const accion = `Editó Usuario: ${userId}`;
@@ -89,8 +76,8 @@ router.delete('/:id', verificaToken, async (req, res) => {
     try {
    
       await (await Conexion).execute(
-        'UPDATE Pacientes SET paciente = ?, edad = ?, sexo = ?, celular = ?  WHERE cedula = ?',
-        [paciente, edad, sexo, celular, userId]
+        'UPDATE Analisis SET analisis = ?  WHERE id_analisis = ?',
+        [analisis, userId]
       );
   
       //await registrarAuditoria(usuario_nombre, ip_usuario, accion);
@@ -102,24 +89,5 @@ router.delete('/:id', verificaToken, async (req, res) => {
     }
     
   });
-
-  // Endpoint buscar paciente
-router.get('/:id', verificaToken, async (req, res) => {
-  const userId = req.params.id;
-
-  try {
-    // Realizar la consulta para verificar si existe el paciente con la cédula proporcionada
-    const [rows] = await (await Conexion).execute('SELECT * FROM Pacientes WHERE cedula = ?', [userId]);
-
-    if (rows.length === 1) {
-      res.json({ success: true, userId, message: 'Paciente encontrado correctamente.' });
-    } else {
-      res.status(404).json({ error: 'Paciente no encontrado.' });
-    }
-  } catch (error) {
-    console.error('Error al buscar paciente:', error);
-    res.status(500).json({ error: 'Error al buscar paciente.' });
-  }
-});
 
   module.exports = router;

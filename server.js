@@ -8,6 +8,10 @@ const usuariosRouter = require('./modelo/usuarios');
 const rolesRouter = require('./modelo/roles');
 const permisosRouter = require('./modelo/permisos');
 const auditoriaRouter = require('./modelo/auditoria');
+const pacientesRouter = require('./modelo/pacientes');
+const medicoRouter = require('./modelo/medico');
+const analisisRouter = require('./modelo/analisis');
+const examenesRouter = require('./modelo/examenes');
 
 
 function exception_routes(paths, fn) {
@@ -17,7 +21,7 @@ function exception_routes(paths, fn) {
   }
 }
 
-const whitelist = ['http://localhost:3000', 'http://localhost:3010'];
+const whitelist = ['https://localhost', 'http://localhost:3010'];
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || whitelist.some(domain => origin.includes(domain))) {
@@ -39,6 +43,10 @@ app.use('/api', usuariosRouter);
 app.use('/api/roles', rolesRouter);
 app.use('/api/permisos', permisosRouter);
 app.use('/api/auditoria', auditoriaRouter);
+app.use('/api/pacientes', pacientesRouter);
+app.use('/api/medico', medicoRouter);
+app.use('/api/analisis', analisisRouter);
+app.use('/api/examenes', examenesRouter);
 
 app.use(express.static(path.join(__dirname, 'client', 'build')));
 
