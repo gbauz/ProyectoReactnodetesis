@@ -2,7 +2,6 @@ import axios from 'axios';
 import Uri from '../environment/environment'
 
 const token = localStorage.getItem('token');
-if (!token) console.error('Token no encontrado en localStorage');
 
 // Configuración base de axios
 const apiClient = axios.create({
@@ -36,7 +35,7 @@ const editPatient = async (id, patientData) => {
   try {
     // console.log(patientData);
     // console.log(id);
-    const response = await apiClient.put(`paciente/${id}`, patientData);
+    const response = await apiClient.put(`pacientes/${id}`, patientData);
     return response;
   } catch (error) {
     return error;

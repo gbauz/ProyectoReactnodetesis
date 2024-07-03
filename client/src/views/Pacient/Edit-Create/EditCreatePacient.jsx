@@ -7,6 +7,7 @@ const EditCreatePacient = ({ isModalOpen, handleSubmit, handleCancel, initialVal
   const [form] = Form.useForm();
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   let response = '';
 
   useEffect(() => {
@@ -18,17 +19,19 @@ const EditCreatePacient = ({ isModalOpen, handleSubmit, handleCancel, initialVal
       form.resetFields();
       setIsEditing(false);
     }
-    console.log(form);
-    console.log(initialValues);
+    // console.log(form);
+    // console.log(initialValues);
   }, [initialValues, form]);
 
   const onFinish = async (values) => {
+    setLoading(true);
     try {
       if (action=='Edit') response = await PacientService.editPatient(values.cedula, values);
       if (action=='Create') response = await PacientService.createPatient(values);
     } catch (error) {
       setError(error);
     }finally {
+      setLoading(false);
       if (response) {
         handleSubmit(response);
         form.resetFields();
@@ -46,9 +49,9 @@ const EditCreatePacient = ({ isModalOpen, handleSubmit, handleCancel, initialVal
       footer={null}
     >
       <Form form={form} layout="vertical" onFinish={onFinish}>
-        <Form.Item name="id" hidden>
+        {/* <Form.Item name="id" hidden>
           <Input />
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item name="paciente" label="Nombre" rules={[{ required: true, message: 'Por favor ingrese el nombre!' }]}>
           <Input />
         </Form.Item>
@@ -71,7 +74,7 @@ const EditCreatePacient = ({ isModalOpen, handleSubmit, handleCancel, initialVal
           <Button key="back" onClick={handleCancel} style={{marginRight:'15px'}}>
             Cancelar
           </Button>
-          <Button htmlType="submit" style={{background: '#4096FF', color:'white'}}>
+          <Button htmlType="submit" style={{background: '#4096FF', color:'white'}} loading={loading}>
             {isEditing ? "Editar" : "Crear"}
           </Button>
         </Form.Item>

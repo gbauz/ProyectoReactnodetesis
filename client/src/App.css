@@ -55,3 +55,24 @@
 .actions .edit-icon {
   color: #1a6ab9;
 }
+
+/* Styles Search Input */
+.input-group {
+  border-radius: 20px;
+  padding: 3px;
+  width: fit-content;
+  margin-right: 5px;
+}
+
+.input-group input {
+  border: 0;
+  outline: none;
+  padding: 2px;
+  width: 200px;
+  background: #f6fafd;
+}
+
+.input-group input:focus {
+  box-shadow: none;
+  outline: none;
+}

@@ -1,20 +1,22 @@
 import "./Pacient.css";
 import React, { useEffect, useState } from "react";
-import { Space, Table, Tag, Button, notification } from "antd";
+import { Space, Table, Tag, Button, notification, Input } from "antd";
 import EditCreatePacient from "./Edit-Create/EditCreatePacient";
 import PacienteService from "../../services/PacientService";
-import { DeleteFilled, EditFilled, PlusCircleOutlined } from "@ant-design/icons";
+import { DeleteFilled, EditFilled, PlusCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import Notification from "../Notification/Notification";
 import DeletePacient from "./Delete/DeletePacient";
 import moment from 'moment';
 
 const Paciente = () => {
-  const [data, setData] = useState([]);
-  const [error, setError] = useState(null);
-  let columns = [];
-  let filterSexo = [];
-  let uniqueSexos = new Set();
-  const [api, contextHolder] = notification.useNotification(); //Notification
+  let columns                         = [];
+  let filterSexo                      = [];
+  let uniqueSexos                     = new Set();
+  const [data, setData]               = useState([]);
+  const [error, setError]             = useState(null);
+  const [loading, setLoading]         = useState(false);
+  const [searchText, setSearchText]   = useState('');
+  const [api, contextHolder]          = notification.useNotification(); //Notification
   const [tableParams, setTableParams] = useState({
     pagination: {
       current: 1,
@@ -25,14 +27,15 @@ const Paciente = () => {
     },
   });
   const fetchPatients = async () => {
+    setLoading(true);
     try {
       const response = await PacienteService.getPatients();
       setData(response.data.users);
-      console.log(response);
+      // console.log(response);
     } catch (error) {
       setError(error);
     } finally {
-      // setLoading(false);
+      setLoading(false);
     }
   };
   
@@ -143,6 +146,7 @@ const Paciente = () => {
     },
   ];
 
+  //Propiedades de la tabla
   const handleTableChange = (pagination, filters, sorter) => {
     console.log(pagination)
     console.log(filters)
@@ -154,6 +158,10 @@ const Paciente = () => {
       sortField: Array.isArray(sorter) ? undefined : sorter.field,
     });
   };
+  const filteredData = data.filter(item => 
+    item.paciente.toLowerCase().includes(searchText.toLowerCase()) || 
+    item.cedula.toLowerCase().includes(searchText.toLowerCase())
+  );
 
   //Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -169,9 +177,9 @@ const Paciente = () => {
     setIsModalOpen(false);
   };
   const handleSubmit = (axiosResponse) => {
-    Notification(api, axiosResponse.response.status, 'Edicion o creacion de paciente');
+    Notification(api, axiosResponse);
     setIsModalOpen(false);
-    //Aqui refrescar datos
+    fetchPatients();
   };
   
   //Delete
@@ -184,22 +192,35 @@ const Paciente = () => {
     setIsDeleteModalOpen(false);
   };
   const handleDelete = (axiosResponse) => {
-    Notification(api, axiosResponse.response.status, 'Has eliminado el paciente!');
+    Notification(api, axiosResponse);
     setIsDeleteModalOpen(false);
+    fetchPatients();
   };
 
   return (
     <div className="paciente">
       <div className="header-content">
         <h3>Paciente</h3>
-        <Button type="primary" onClick={() => showEditCreateModal(null, 'Create')}>
-          <PlusCircleOutlined /> Crear
-        </Button>
+        <div className="d-flex p-0 m-0 align-items-center">
+          <div className="input-group d-flex border align-items-center me-3">
+            <SearchOutlined className="mx-2"/>
+            <Input className="rounded-pill"
+              placeholder="Buscar paciente"
+              value={searchText}
+              onChange={e => setSearchText(e.target.value)}
+            />
+          </div>
+          <Button className="rounded-pill" type="primary" onClick={() => showEditCreateModal(null, 'Create')}>
+            <PlusCircleOutlined /> Crear
+          </Button>
+        </div>
       </div>
       {contextHolder}
       <Table
+        responsive
+        loading={loading}
         columns={columns}
-        dataSource={data}
+        dataSource={filteredData}
         rowKey={"cedula"}
         pagination={tableParams.pagination}
         onChange={handleTableChange} />
@@ -208,14 +229,12 @@ const Paciente = () => {
         handleCancel={handleCancel}
         handleSubmit={handleSubmit}
         initialValues={currentItem}
-        action={action}
-      />
+        action={action} />
       <DeletePacient 
         isDeleteModalOpen={isDeleteModalOpen}
         handleDelete={handleDelete}
         handleDeleteCancel={handleDeleteCancel}
-        initialValues={currentItem}
-      />
+        initialValues={currentItem} />
     </div>
   );
 };

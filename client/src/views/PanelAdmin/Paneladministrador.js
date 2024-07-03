@@ -24,13 +24,12 @@ const AdminPage = () => {
     const fetchCategories = async () => {
       try {
         const token = localStorage.getItem('token');
-    
         if (!token) {
           console.error('Token no encontrado en localStorage');
           setIsLoading(false);
           return;
         }
-    
+        
         const response = await fetch(Uri+'permisos/categorias', {
           headers: {
             Authorization: `Bearer ${token}`
@@ -91,7 +90,7 @@ const AdminPage = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    navigate('/');
+    navigate('/login', {replace: true});
   };
 
   const renderContent = () => {

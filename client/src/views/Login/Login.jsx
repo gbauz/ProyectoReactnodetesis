@@ -4,8 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'; // Importación de Bootstrap
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './login.css';
 import labLogo from './image/GB-LAB1.png';
-import Uri from '../../environment/environment';
-
+import LoginService from '../../services/LoginService';
 
 const Login = () => {
   const [cedula, setCedula] = useState('');
@@ -15,28 +14,21 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch(Uri+'login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ cedula: cedula, contraseña: password }),
-      });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
+      const axiosResponse = await LoginService.logIn(JSON.stringify({ cedula: cedula, contraseña: password }));
+      if (axiosResponse.status == '200') {
+        const data = await axiosResponse.data;
         const { token } = data;
         localStorage.setItem('token', token); // Almacena el token en localStorage
-        navigate('/admin'); // Redirige a la página protegida
+        navigate('/admin', {replace: true}); // Redirige a la página protegida
       } else {
-        setError(data.error); // Muestra el mensaje de error del servidor
+        setError(axiosResponse.response.data.error); // Muestra el mensaje de error del servidor
       }
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
       setError('Error al iniciar sesión.');
     }
   };
+
   return (
     <div className="bs-body-color min-vh-100 d-flex align-items-center justify-content-center w-100">
       <div className="container">
@@ -77,7 +69,7 @@ const Login = () => {
                   <button className="btn btn-primary" onClick={handleLogin}>
                     Login
                   </button>
-                  <a href="/register" className="mt-3">¿Olvidaste tu conteña?</a>
+                  <a href="/register" className="mt-3">¿Olvidaste tu contraseña?</a>
                 </div>
               </div>
             </div>
@@ -87,6 +79,5 @@ const Login = () => {
     </div>
   );
 };
-
 
 export default Login;
