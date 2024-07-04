@@ -25,9 +25,9 @@ const Pacientes = () => {
   // Función para obtener la lista de pacientes
   const fetchPacientes = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) {
-        console.error('Token no encontrado en localStorage');
+        console.error('Token no encontrado en sessionStorage');
         return;
       }
 
@@ -61,7 +61,7 @@ const Pacientes = () => {
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       let endpoint = '/api/pacientes';
       let method = 'POST';
 
@@ -100,7 +100,7 @@ const Pacientes = () => {
       return;
     }
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await fetch(`/api/pacientes/${cedula}`, {
         method: 'DELETE',
         headers: {

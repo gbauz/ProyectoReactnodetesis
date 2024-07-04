@@ -27,9 +27,9 @@ const Users = () => {
 
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) {
-        console.error('Token no encontrado en localStorage');
+        console.error('Token no encontrado en sessionStorage');
         return;
       }
 
@@ -66,9 +66,9 @@ const Users = () => {
 
   const fetchRoles = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) {
-        console.error('Token no encontrado en localStorage');
+        console.error('Token no encontrado en sessionStorage');
         return;
       }
       const response = await fetch(Uri+'roles', {
@@ -137,7 +137,7 @@ const Users = () => {
       return;
     }
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       let endpoint = Uri+'users';
       let method = 'POST';
   
@@ -185,7 +185,7 @@ const Users = () => {
       return;
     }
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await fetch(Uri+`users/${userId}`, {
         method: 'DELETE',
         headers: {
@@ -260,7 +260,7 @@ const Users = () => {
     }
   
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await fetch(Uri+`users/${editUser.cedula}/password`, {
         method: 'PUT',
         headers: {

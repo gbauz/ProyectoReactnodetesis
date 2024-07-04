@@ -12,9 +12,9 @@ const PermissionModal = ({ isOpen, onClose, onSave }) => {
 
   const fetchPermissions = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) {
-        console.error('Token no encontrado en localStorage');
+        console.error('Token no encontrado en sessionStorage');
         return;
       }
       const response = await fetch(Uri+'permisos', {
@@ -48,7 +48,7 @@ const PermissionModal = ({ isOpen, onClose, onSave }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await fetch(Uri+'permisos', {
         method: 'POST',
         headers: {

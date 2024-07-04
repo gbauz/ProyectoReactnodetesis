@@ -19,9 +19,9 @@ const Roles = () => {
 
   const fetchRoles = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) {
-        console.error('Token no encontrado en localStorage');
+        console.error('Token no encontrado en sessionStorage');
         return;
       }
 
@@ -57,9 +57,9 @@ const Roles = () => {
 
   const fetchPermissions = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) {
-        console.error('Token no encontrado en localStorage');
+        console.error('Token no encontrado en sessionStorage');
         return;
       }
 
@@ -110,7 +110,7 @@ const Roles = () => {
       return;
     }
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await fetch(Uri+`roles/${roleId}`, {
         method: 'DELETE',
         headers: {
@@ -138,7 +138,7 @@ const Roles = () => {
       return;
     }
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       let endpoint = Uri+'roles';
       let method = 'POST';
 

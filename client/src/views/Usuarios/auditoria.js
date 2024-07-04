@@ -26,9 +26,9 @@ const Auditoria = () => {
 
   const fetchAuditoria = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) {
-        console.error('Token no encontrado en localStorage');
+        console.error('Token no encontrado en sessionStorage');
         return;
       }
 

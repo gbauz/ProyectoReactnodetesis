@@ -1,16 +1,4 @@
-import axios from 'axios';
-import Uri from '../environment/environment'
-
-const token = localStorage.getItem('token');
-
-// Configuración base de axios
-const apiClient = axios.create({
-  baseURL: Uri,
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`
-  },
-});
+import apiClient from "./AxiosAPI";
 
 const getPatients = async () => {
   try {

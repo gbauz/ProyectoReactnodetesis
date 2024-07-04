@@ -10,6 +10,9 @@ import './AdminPage.css';
 import labLogo from '../Login/image/GB-LAB.png';
 import Uri from '../../environment/environment';
 import Paciente from '../Pacient/Pacient';
+import Medic from '../Medic/Medic';
+import ExaminationOrder from '../ExaminationOrder/ExaminationOrder';
+import Audit from '../Audit/Audit';
 const AdminPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,9 +26,9 @@ const AdminPage = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) {
-          console.error('Token no encontrado en localStorage');
+          console.error('Token no encontrado en sessionStorage');
           setIsLoading(false);
           return;
         }
@@ -54,10 +57,10 @@ const AdminPage = () => {
 
     const fetchSession = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
 
         if (!token) {
-          console.error('Token no encontrado en localStorage');
+          console.error('Token no encontrado en sessionStorage');
           setIsLoading(false);
           return;
         }
@@ -89,7 +92,7 @@ const AdminPage = () => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
     navigate('/login', {replace: true});
   };
 
@@ -141,15 +144,15 @@ const AdminPage = () => {
       case 'Registro de Pacientes':
         return <Paciente />;
       case 'Registro de Resultados':
-        return <div>Registrar Resultados Médicos</div>;
+        return <Medic />
       case 'users':
         return <Users />;
       case 'roles':
         return <Roles />;
       case 'auditoria':
-        return <Auditoria />;
+        return <Audit />;
       case 'Generar Examenes':
-        return <div>Generar Orden de Examenes </div>;
+        return <ExaminationOrder />;
       case 'reports':
         return <div>Reportes</div>;
       default:

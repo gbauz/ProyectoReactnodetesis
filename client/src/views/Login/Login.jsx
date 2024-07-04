@@ -18,7 +18,7 @@ const Login = () => {
       if (axiosResponse.status == '200') {
         const data = await axiosResponse.data;
         const { token } = data;
-        localStorage.setItem('token', token); // Almacena el token en localStorage
+        sessionStorage.setItem('token', token); // Almacena el token en sessionStorage
         navigate('/admin', {replace: true}); // Redirige a la página protegida
       } else {
         setError(axiosResponse.response.data.error); // Muestra el mensaje de error del servidor
