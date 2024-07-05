@@ -4,10 +4,10 @@ import './EditCreateExaminationOrder.css'
 import ExaminationOrderService from "../../../services/ExaminationOrderService";
 
 const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, initialValues, action }) => {
-  const [form] = Form.useForm();
+  const [form]                    = Form.useForm();
   const [isEditing, setIsEditing] = useState(false);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [error, setError]         = useState(null);
+  const [loading, setLoading]     = useState(false);
   let response = '';
 
   useEffect(() => {

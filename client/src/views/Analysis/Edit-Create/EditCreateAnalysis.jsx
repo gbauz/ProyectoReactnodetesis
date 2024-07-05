@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Button, Form, Input, Modal, Select } from "antd";
-import './EditCreateMedic.css'
-import MedicService from "../../../services/MedicService";
+import { Button, Form, Input, Modal } from "antd";
+import './EditCreateAnalysis.css';
+import AnalysisService from "../../../services/AnalysisService";
 
-const EditCreateMedic = ({ isModalOpen, handleSubmit, handleCancel, initialValues, action }) => {
+const EditCreateAnalysis = ({ isModalOpen, handleSubmit, handleCancel, initialValues, action }) => {
   const [form]                    = Form.useForm();
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError]         = useState(null);
   const [loading, setLoading]     = useState(false);
-  let response;
+  let response = '';
 
   useEffect(() => {
     if (action=='Edit') {
@@ -24,8 +24,8 @@ const EditCreateMedic = ({ isModalOpen, handleSubmit, handleCancel, initialValue
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      if (action=='Edit') response = await MedicService.editMedic(values.cedula, values);
-      if (action=='Create') response = await MedicService.createMedic(values);
+      if (action=='Edit') response = await AnalysisService.editAnalysis(values.id_analisis, values);
+      if (action=='Create') response = await AnalysisService.createAnalysis(values);
     } catch (error) {
       setError(error);
     }finally {
@@ -39,7 +39,7 @@ const EditCreateMedic = ({ isModalOpen, handleSubmit, handleCancel, initialValue
 
   return (
     <Modal
-      title={isEditing ? "Editar Médico" : "Crear Médico"}
+      title={isEditing ? "Editar Análisis" : "Crear Análisis"}
       open={isModalOpen}
       onCancel={handleCancel}
       centered
@@ -47,22 +47,10 @@ const EditCreateMedic = ({ isModalOpen, handleSubmit, handleCancel, initialValue
       footer={null}
     >
       <Form form={form} layout="vertical" onFinish={onFinish}>
-        {/* <Form.Item name="id_medico" hidden>
-          <Input />
-        </Form.Item> */}
-        <Form.Item name="nombre_apellido" label="Nombre" rules={[{ required: true, message: 'Por favor ingrese el nombre!' }]}>
+        <Form.Item name="id_analisis" hidden>
           <Input />
         </Form.Item>
-        <Form.Item name="cedula" label="Cedula" rules={[{ required: true, message: 'Por favor ingrese la cédula!' }]}>
-          <Input />
-        </Form.Item>
-        <Form.Item name="especialidad" label="Especialidad" rules={[{ required: true, message: 'Por favor ingrese la especialidad!' }]}>
-          <Input />
-        </Form.Item>
-        <Form.Item name="celular" label="Teléfono" rules={[{ required: true, message: 'Por favor ingrese el teléfono!' }]}>
-          <Input />
-        </Form.Item>
-        <Form.Item name="direccion" label="Dirección" rules={[{ required: true, message: 'Por favor ingrese la dirección!' }]}>
+        <Form.Item name="analisis" label="Nombre" rules={[{ required: true, message: 'Por favor ingrese el nombre!' }]}>
           <Input />
         </Form.Item>
         <Form.Item className="footer">
@@ -78,4 +66,4 @@ const EditCreateMedic = ({ isModalOpen, handleSubmit, handleCancel, initialValue
   );
 };
 
-export default EditCreateMedic;
+export default EditCreateAnalysis;

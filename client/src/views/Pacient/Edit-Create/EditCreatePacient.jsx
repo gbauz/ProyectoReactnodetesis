@@ -4,11 +4,11 @@ import './EditCreatePacient.css'
 import PacientService from "../../../services/PacientService";
 
 const EditCreatePacient = ({ isModalOpen, handleSubmit, handleCancel, initialValues, action }) => {
-  const [form] = Form.useForm();
+  const [form]                    = Form.useForm();
   const [isEditing, setIsEditing] = useState(false);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-  let response = '';
+  const [error, setError]         = useState(null);
+  const [loading, setLoading]     = useState(false);
+  let response;
 
   useEffect(() => {
     if (action=='Edit') {
@@ -21,7 +21,7 @@ const EditCreatePacient = ({ isModalOpen, handleSubmit, handleCancel, initialVal
     }
     // console.log(form);
     // console.log(initialValues);
-  }, [initialValues, form]);
+  }, [isModalOpen, initialValues, form, action]);
 
   const onFinish = async (values) => {
     setLoading(true);

@@ -4,7 +4,7 @@ import { Space, Table, Tag, Button, notification, Input } from "antd";
 import EditCreateExaminationOrder from "./Edit-Create/EditCreateExaminationOrder";
 import ExaminationOrderService from "../../services/ExaminationOrderService";
 import { DeleteFilled, EditFilled, PlusCircleOutlined, SearchOutlined } from "@ant-design/icons";
-import Notification from "../Notification/Notification";
+import Notification from "../../components/Notification/Notification";
 import DeleteExaminationOrder from "./Delete/DeleteExaminationOrder";
 import moment from 'moment';
 

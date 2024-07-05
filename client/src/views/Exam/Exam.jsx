@@ -1,16 +1,17 @@
-import "./Medic.css";
+import "./Exam.css";
 import React, { useEffect, useState } from "react";
-import { Space, Table, Button, notification, Input } from "antd";
-import EditCreateMedic from "./Edit-Create/EditCreateMedic";
+import { Space, Table, Tag, Button, notification, Input } from "antd";
+import EditCreateExam from "./Edit-Create/EditCreateExam";
 import { DeleteFilled, EditFilled, PlusCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import Notification from "../../components/Notification/Notification";
-import DeletePacient from "./Delete/DeleteMedic";
-import MedicService from "../../services/MedicService";
+import DeleteExam from "./Delete/DeleteExam";
+import moment from 'moment';
+import ExamService from "../../services/ExamService";
 
-const Medic = () => {
+const Exam = () => {
   let columns                         = [];
-  let filterEspecialidad              = [];
-  let uniqueEspecialidad              = new Set();
+  let filterAnalysis                  = [];
+  let uniqueAnalysis                  = new Set();
   const [data, setData]               = useState([]);
   const [error, setError]             = useState(null);
   const [loading, setLoading]         = useState(false);
@@ -25,11 +26,11 @@ const Medic = () => {
       position: ["bottomRight"]
     },
   });
-  const fetchMedics = async () => {
+  const fetchPatients = async () => {
     setLoading(true);
     try {
-      const response = await MedicService.getMedics();
-      setData(response.data.medicos);
+      const response = await ExamService.getExam();
+      setData(response.data.users);
     } catch (error) {
       setError(error);
     } finally {
@@ -38,16 +39,16 @@ const Medic = () => {
   };
   
   useEffect(() => {
-    fetchMedics();
+    fetchPatients();
   }, []);
 
   //Llenar filtros
   data.forEach(element => {
-    if (!uniqueEspecialidad.has(element.especialidad)) {
-      uniqueEspecialidad.add(element.especialidad);
-      filterEspecialidad.push({
-        text: element.especialidad,
-        value: element.especialidad,
+    if (!uniqueAnalysis.has(element.analisis)) {
+      uniqueAnalysis.add(element.analisis);
+      filterAnalysis.push({
+        text: element.analisis,
+        value: element.analisis,
       });
     }
   });
@@ -55,47 +56,33 @@ const Medic = () => {
   //Llenar columnas
   columns = [
     {
-      title: "Nombre",
-      dataIndex: "nombre_apellido",
+      title: "Análisis",
+      dataIndex: "analisis",
       sorter: {
-        compare: (a, b) => a.nombre_apellido.localeCompare(b.nombre_apellido),
+        compare: (a, b) => a.analisis.localeCompare(b.analisis),
         multiple: 1,
       },
+      filters: filterAnalysis,
+      onFilter: (value, data) => data.analisis.startsWith(value),
+      filterSearch: true,
     },
     {
-      title: "Cedula",
-      dataIndex: "cedula",
-      align: "center",
+      title: "Examen",
+      dataIndex: "examen",
       sorter: {
-        compare: (a, b) => a.cedula - b.cedula,
+        compare: (a, b) => a.examen.localeCompare(b.examen),
         multiple: 2,
       },
     },
     {
-      title: "Especialidad",
-      dataIndex: "especialidad",
+      title: "Fecha",
+      dataIndex: "fecha",
       align: "center",
       sorter: {
-        compare: (a, b) => a.especialidad.localeCompare(b.especialidad),
+        compare: (a, b) => new Date(a.fecha) - new Date(b.fecha),
         multiple: 3,
       },
-      filters: filterEspecialidad,
-      onFilter: (value, data) => data.especialidad.startsWith(value),
-      filterSearch: true,
-    },
-    {
-      title: "Telefono",
-      dataIndex: "celular",
-      align: "center",
-    },
-    {
-      title: "Dirección",
-      dataIndex: "direccion",
-      align: "center",
-      sorter: {
-        compare: (a, b) => a.direccion.localeCompare(b.direccion),
-        multiple: 4,
-      },
+      render: (text) => moment(text).format("DD-MM-YYYY HH:mm:ss"),
     },
     {
       title: "Action",
@@ -124,8 +111,9 @@ const Medic = () => {
     });
   };
   const filteredData = data.filter(item => 
-    item.nombre_apellido.toLowerCase().includes(searchText.toLowerCase()) || 
-    item.cedula.toLowerCase().includes(searchText.toLowerCase())
+    item.analisis.toLowerCase().includes(searchText.toLowerCase()) || 
+    item.examen.toLowerCase().includes(searchText.toLowerCase())   ||
+    item.fecha.toLowerCase().includes(searchText.toLowerCase())
   );
 
   //Modal
@@ -144,7 +132,7 @@ const Medic = () => {
   const handleSubmit = (axiosResponse) => {
     Notification(api, axiosResponse);
     setIsModalOpen(false);
-    fetchMedics();
+    fetchPatients();
   };
   
   //Delete
@@ -159,18 +147,18 @@ const Medic = () => {
   const handleDelete = (axiosResponse) => {
     Notification(api, axiosResponse);
     setIsDeleteModalOpen(false);
-    fetchMedics();
+    fetchPatients();
   };
 
   return (
-    <div className="medic">
+    <div className="exam">
       <div className="header-content">
-        <h3>Médico</h3>
+        <h3>Examen</h3>
         <div className="d-flex p-0 m-0 align-items-center">
           <div className="input-group d-flex border align-items-center me-3">
             <SearchOutlined className="mx-2"/>
             <Input className="rounded-pill"
-              placeholder="Buscar médico"
+              placeholder="Buscar examen"
               value={searchText}
               onChange={e => setSearchText(e.target.value)}
             />
@@ -186,16 +174,16 @@ const Medic = () => {
         loading={loading}
         columns={columns}
         dataSource={filteredData}
-        rowKey={"id_medico"}
+        rowKey={"id_examen"}
         pagination={tableParams.pagination}
         onChange={handleTableChange} />
-      <EditCreateMedic
+      <EditCreateExam
         isModalOpen={isModalOpen}
         handleCancel={handleCancel}
         handleSubmit={handleSubmit}
         initialValues={currentItem}
         action={action} />
-      <DeletePacient 
+      <DeleteExam 
         isDeleteModalOpen={isDeleteModalOpen}
         handleDelete={handleDelete}
         handleDeleteCancel={handleDeleteCancel}
@@ -204,4 +192,4 @@ const Medic = () => {
   );
 };
 
-export default Medic;
+export default Exam;

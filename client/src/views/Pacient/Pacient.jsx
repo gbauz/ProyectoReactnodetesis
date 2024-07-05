@@ -4,7 +4,7 @@ import { Space, Table, Tag, Button, notification, Input } from "antd";
 import EditCreatePacient from "./Edit-Create/EditCreatePacient";
 import PacienteService from "../../services/PacientService";
 import { DeleteFilled, EditFilled, PlusCircleOutlined, SearchOutlined } from "@ant-design/icons";
-import Notification from "../Notification/Notification";
+import Notification from "../../components/Notification/Notification";
 import DeletePacient from "./Delete/DeletePacient";
 import moment from 'moment';
 
@@ -20,8 +20,8 @@ const Paciente = () => {
   const [tableParams, setTableParams] = useState({
     pagination: {
       current: 1,
-      pageSize: 6,
-      pageSizeOptions: [6, 10, 20, 50, 100],
+      pageSize: 7,
+      pageSizeOptions: [7, 10, 20, 50, 100],
       showQuickJumper: true,
       position: ["bottomRight"]
     },
@@ -106,7 +106,7 @@ const Paciente = () => {
         compare: (a, b) => new Date(a.fecha_de_ingreso) - new Date(b.fecha_de_ingreso),
         multiple: 5,
       },
-      render: (text) => moment(text).format('DD-MM-YYYY'),
+      render: (text) => moment(text).format("DD-MM-YYYY HH:mm:ss"),
     },
     // {
     //   title: "Tags",
@@ -221,7 +221,7 @@ const Paciente = () => {
         loading={loading}
         columns={columns}
         dataSource={filteredData}
-        rowKey={"cedula"}
+        rowKey={"id_paciente"}
         pagination={tableParams.pagination}
         onChange={handleTableChange} />
       <EditCreatePacient

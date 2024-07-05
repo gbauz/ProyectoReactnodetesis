@@ -1,15 +1,15 @@
 import React, { useState } from "react";
-import "./DeleteMedic.css";
+import "./DeleteExam.css";
 import { Button, Modal } from "antd";
-import MedicService from "../../../services/MedicService";
+import ExamService from "../../../services/ExamService";
 
-const DeletePacient = ({ isDeleteModalOpen, handleDelete, handleDeleteCancel, initialValues }) => {
+const DeleteExam = ({ isDeleteModalOpen, handleDelete, handleDeleteCancel, initialValues }) => {
   const [error, setError] = useState(null);
   let response;
 
   const onFinish = async () => {
     try {
-      response = await MedicService.deleteMedic(initialValues.cedula);
+      response = await ExamService.deleteExam(initialValues.id_examen);
     } catch (error) {
       setError(error);
     } finally {
@@ -21,14 +21,14 @@ const DeletePacient = ({ isDeleteModalOpen, handleDelete, handleDeleteCancel, in
 
   return (
     <Modal
-      title="Eliminar Médico"
+      title="Eliminar Examen"
       open={isDeleteModalOpen}
       onCancel={handleDeleteCancel}
       centered
       maskClosable={false}
       footer={null}
     >
-      <p>¿Estás seguro de que deseas eliminar este médico?</p>
+      <p>¿Estás seguro de que deseas eliminar este examen?</p>
       <div className="footer">
         <Button key="back" onClick={handleDeleteCancel} style={{ marginRight: "15px" }}>
           Cancelar
@@ -41,4 +41,4 @@ const DeletePacient = ({ isDeleteModalOpen, handleDelete, handleDeleteCancel, in
   );
 };
 
-export default DeletePacient;
+export default DeleteExam;

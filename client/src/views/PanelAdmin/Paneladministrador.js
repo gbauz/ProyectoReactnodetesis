@@ -13,6 +13,8 @@ import Paciente from '../Pacient/Pacient';
 import Medic from '../Medic/Medic';
 import ExaminationOrder from '../ExaminationOrder/ExaminationOrder';
 import Audit from '../Audit/Audit';
+import Analysis from '../Analysis/Analysis';
+import Exam from '../Exam/Exam';
 const AdminPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -108,11 +110,11 @@ const AdminPage = () => {
                 <p>Información clave.</p>
               </div>
             </div> */}
-            <div className="card mb-4">
+            <div className="card">
               <div className="card-body">
                 <div className="row">
                   <div className="col-md-4">
-                    <img src={labLogo} alt="Lab Logo" className="img-flui mb-3" />
+                    <img src={labLogo} alt="Lab Logo" className="img-flui mb-2" />
                     <h5 className="card-title">Laboratorio Clínico GB-Lab </h5>
                     <p className="card-text">
                       <i className="fas fa-map-marker-alt"></i> MUCHO LOTE 1 ETAPA 3 Mz: 2344 V: 1 Av. Manuel Gómez Lince, Guayaquil, Ecuador
@@ -128,7 +130,7 @@ const AdminPage = () => {
                     <iframe
                       src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d997.12345!2d-79.93555!3d-2.14443!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x902d1abcde0fghij:0xabcdef12345678!2sInstituto%20Nacional%20INSPI!5e0!3m2!1sen!2sec!4v1621234567890!5m2!1sen!2sec"
                       width="100%"
-                      height="250"
+                      height="100%"
                       frameBorder="0"
                       style={{ border: 0 }}
                       allowFullScreen=""
@@ -141,9 +143,9 @@ const AdminPage = () => {
             </div>
           </>
         );
-      case 'Registro de Pacientes':
+      case 'Pacientes':
         return <Paciente />;
-      case 'Registro de Resultados':
+      case 'Medico':
         return <Medic />
       case 'users':
         return <Users />;
@@ -151,8 +153,12 @@ const AdminPage = () => {
         return <Roles />;
       case 'auditoria':
         return <Audit />;
-      case 'Generar Examenes':
+      case 'Realizar Examenes':
         return <ExaminationOrder />;
+      case 'Analisis':
+        return <Analysis />;
+      case 'Examenes':
+        return <Exam />;
       case 'reports':
         return <div>Reportes</div>;
       default:
@@ -166,10 +172,10 @@ const AdminPage = () => {
 
   const getBreadcrumb = () => {
     switch (view) {
-      case 'Registro de Pacientes':
-        return 'Registro de Pacientes';
-      case 'Registro de Resultados':
-        return 'Registro de Resultados';
+      case 'Pacientes':
+        return 'Pacientes';
+      case 'Medico':
+        return 'Medico';
       case 'inicio':
         return 'Inicio';
       case 'users':
@@ -178,8 +184,12 @@ const AdminPage = () => {
         return 'Roles';
       case 'auditoria':
         return 'Auditoría';
-      case 'Generar Examenes':
-        return 'Generar Examenes';
+      case 'Analisis':
+        return 'Analisis';
+      case 'Realizar Examenes':
+        return 'Realizar Examenes';
+      case 'Examenes':
+        return 'Examenes';
       case 'reports':
         return 'Reportes';
       default:
@@ -195,9 +205,9 @@ const AdminPage = () => {
     'Usuarios': 'fas fa-users',
     'Roles': 'fas fa-user-tag',
     'Auditoria': 'fas fa-file',
-    'Registro de Pacientes': 'fas fa-user-plus',
-    'Registro de Resultados': 'fas fa-vials',
-    'Generar Examenes': 'fas fa-file-medical',
+    'Pacientes': 'fas fa-user-plus',
+    'Resultados': 'fas fa-vials',
+    'Examenes': 'fas fa-file-medical',
     // Añade más categorías y sus íconos aquí
   };
   const principalCategories = ['Registro de Pacientes', 'Registro de Resultados', 'Generar Examenes'];
@@ -292,14 +302,20 @@ const AdminPage = () => {
                   case 'Auditoria':
                     componentKey = 'auditoria';
                     break;
-                  case 'Registro de Pacientes':
-                    componentKey = 'Registro de Pacientes';
+                  case 'Pacientes':
+                    componentKey = 'Pacientes';
                     break;
-                  case 'Registro de Resultados':
-                    componentKey = 'Registro de Resultados';
+                  case 'Medico':
+                    componentKey = 'Medico';
                     break;
-                  case 'Generar Examenes':
-                    componentKey = 'Generar Examenes';
+                  case 'Analisis':
+                    componentKey = 'Analisis';
+                    break;
+                  case 'Realizar Examenes':
+                    componentKey = 'Realizar Examenes';
+                    break;
+                  case 'Examenes':
+                    componentKey = 'Examenes';
                     break;
                   case 'Reportes':
                     componentKey = 'reports';

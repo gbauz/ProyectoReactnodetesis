@@ -1,16 +1,15 @@
-import "./Medic.css";
+import "./Analysis.css";
 import React, { useEffect, useState } from "react";
 import { Space, Table, Button, notification, Input } from "antd";
-import EditCreateMedic from "./Edit-Create/EditCreateMedic";
+import EditCreateAnalysis from "./Edit-Create/EditCreateAnalysis";
 import { DeleteFilled, EditFilled, PlusCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import Notification from "../../components/Notification/Notification";
-import DeletePacient from "./Delete/DeleteMedic";
-import MedicService from "../../services/MedicService";
+import DeleteAnalysis from "./Delete/DeleteAnalysis";
+import moment from 'moment';
+import AnalysisService from "../../services/AnalysisService";
 
-const Medic = () => {
+const Analysis = () => {
   let columns                         = [];
-  let filterEspecialidad              = [];
-  let uniqueEspecialidad              = new Set();
   const [data, setData]               = useState([]);
   const [error, setError]             = useState(null);
   const [loading, setLoading]         = useState(false);
@@ -25,11 +24,11 @@ const Medic = () => {
       position: ["bottomRight"]
     },
   });
-  const fetchMedics = async () => {
+  const fetchAnalysis = async () => {
     setLoading(true);
     try {
-      const response = await MedicService.getMedics();
-      setData(response.data.medicos);
+      const response = await AnalysisService.getAnalysis();
+      setData(response.data.users);
     } catch (error) {
       setError(error);
     } finally {
@@ -38,64 +37,28 @@ const Medic = () => {
   };
   
   useEffect(() => {
-    fetchMedics();
+    fetchAnalysis();
   }, []);
-
-  //Llenar filtros
-  data.forEach(element => {
-    if (!uniqueEspecialidad.has(element.especialidad)) {
-      uniqueEspecialidad.add(element.especialidad);
-      filterEspecialidad.push({
-        text: element.especialidad,
-        value: element.especialidad,
-      });
-    }
-  });
 
   //Llenar columnas
   columns = [
     {
       title: "Nombre",
-      dataIndex: "nombre_apellido",
+      dataIndex: "analisis",
       sorter: {
-        compare: (a, b) => a.nombre_apellido.localeCompare(b.nombre_apellido),
+        compare: (a, b) => a.analisis.localeCompare(b.analisis),
         multiple: 1,
       },
     },
     {
-      title: "Cedula",
-      dataIndex: "cedula",
+      title: "Fecha",
+      dataIndex: "fecha",
       align: "center",
       sorter: {
-        compare: (a, b) => a.cedula - b.cedula,
+        compare: (a, b) => new Date(a.fecha) - new Date(b.fecha),
         multiple: 2,
       },
-    },
-    {
-      title: "Especialidad",
-      dataIndex: "especialidad",
-      align: "center",
-      sorter: {
-        compare: (a, b) => a.especialidad.localeCompare(b.especialidad),
-        multiple: 3,
-      },
-      filters: filterEspecialidad,
-      onFilter: (value, data) => data.especialidad.startsWith(value),
-      filterSearch: true,
-    },
-    {
-      title: "Telefono",
-      dataIndex: "celular",
-      align: "center",
-    },
-    {
-      title: "Dirección",
-      dataIndex: "direccion",
-      align: "center",
-      sorter: {
-        compare: (a, b) => a.direccion.localeCompare(b.direccion),
-        multiple: 4,
-      },
+      render: (text) => moment(text).format("DD-MM-YYYY HH:mm:ss"),
     },
     {
       title: "Action",
@@ -116,6 +79,9 @@ const Medic = () => {
 
   //Propiedades de la tabla
   const handleTableChange = (pagination, filters, sorter) => {
+    console.log(pagination)
+    console.log(filters)
+    console.log(sorter)
     setTableParams({
       pagination,
       filters,
@@ -124,8 +90,8 @@ const Medic = () => {
     });
   };
   const filteredData = data.filter(item => 
-    item.nombre_apellido.toLowerCase().includes(searchText.toLowerCase()) || 
-    item.cedula.toLowerCase().includes(searchText.toLowerCase())
+    item.analisis.toLowerCase().includes(searchText.toLowerCase()) || 
+    item.fecha.toLowerCase().includes(searchText.toLowerCase())
   );
 
   //Modal
@@ -144,7 +110,7 @@ const Medic = () => {
   const handleSubmit = (axiosResponse) => {
     Notification(api, axiosResponse);
     setIsModalOpen(false);
-    fetchMedics();
+    fetchAnalysis();
   };
   
   //Delete
@@ -159,18 +125,18 @@ const Medic = () => {
   const handleDelete = (axiosResponse) => {
     Notification(api, axiosResponse);
     setIsDeleteModalOpen(false);
-    fetchMedics();
+    fetchAnalysis();
   };
 
   return (
-    <div className="medic">
+    <div className="analisis">
       <div className="header-content">
-        <h3>Médico</h3>
+        <h3>Análisis</h3>
         <div className="d-flex p-0 m-0 align-items-center">
           <div className="input-group d-flex border align-items-center me-3">
             <SearchOutlined className="mx-2"/>
             <Input className="rounded-pill"
-              placeholder="Buscar médico"
+              placeholder="Buscar análisis"
               value={searchText}
               onChange={e => setSearchText(e.target.value)}
             />
@@ -186,16 +152,16 @@ const Medic = () => {
         loading={loading}
         columns={columns}
         dataSource={filteredData}
-        rowKey={"id_medico"}
+        rowKey={"id_analisis"}
         pagination={tableParams.pagination}
         onChange={handleTableChange} />
-      <EditCreateMedic
+      <EditCreateAnalysis
         isModalOpen={isModalOpen}
         handleCancel={handleCancel}
         handleSubmit={handleSubmit}
         initialValues={currentItem}
         action={action} />
-      <DeletePacient 
+      <DeleteAnalysis 
         isDeleteModalOpen={isDeleteModalOpen}
         handleDelete={handleDelete}
         handleDeleteCancel={handleDeleteCancel}
@@ -204,4 +170,4 @@ const Medic = () => {
   );
 };
 
-export default Medic;
+export default Analysis;

@@ -7,16 +7,16 @@ import jsPDF from 'jspdf';
 import AuditService from "../../services/AuditService";
 
 const Audit = () => {
-  let columns = [];
-  const [data, setData] = useState([]);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [searchText, setSearchText] = useState("");
+  let columns                         = [];
+  const [data, setData]               = useState([]);
+  const [error, setError]             = useState(null);
+  const [loading, setLoading]         = useState(false);
+  const [searchText, setSearchText]   = useState("");
   const [tableParams, setTableParams] = useState({
     pagination: {
       current: 1,
-      pageSize: 6,
-      pageSizeOptions: [6, 10, 20, 50, 100],
+      pageSize: 8,
+      pageSizeOptions: [8, 10, 20, 50, 100],
       showQuickJumper: true,
       position: ["bottomRight"],
     },
@@ -136,7 +136,7 @@ const Audit = () => {
         loading={loading}
         columns={columns}
         dataSource={filteredData}
-        rowKey={"fecha"}
+        rowKey={"id"}
         pagination={tableParams.pagination}
         onChange={handleTableChange}
       />

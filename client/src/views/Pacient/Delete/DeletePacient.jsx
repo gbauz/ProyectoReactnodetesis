@@ -10,7 +10,6 @@ const DeletePacient = ({ isDeleteModalOpen, handleDelete, handleDeleteCancel, in
   const onFinish = async () => {
     try {
       response = await PacientService.deletePatient(initialValues.cedula);
-      console.log(response);
     } catch (error) {
       setError(error);
     } finally {

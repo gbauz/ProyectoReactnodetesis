@@ -11,7 +11,6 @@ const getMedics = async () => {
 
 const createMedic = async (medicData) => {
   try {
-    // console.log(medicData);
     const response = await apiClient.post("medico", medicData);
     return response;
   } catch (error) {
@@ -21,8 +20,6 @@ const createMedic = async (medicData) => {
 
 const editMedic = async (id, medicData) => {
   try {
-    // console.log(medicData);
-    // console.log(id);
     const response = await apiClient.put(`medico/${id}`, medicData);
     return response;
   } catch (error) {
@@ -32,7 +29,6 @@ const editMedic = async (id, medicData) => {
 
 const deleteMedic = async (id) => {
   try {
-    // console.log(id);
     const response = await apiClient.delete(`medico/${id}`);
     return response;
   } catch (error) {
