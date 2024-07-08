@@ -1,6 +1,6 @@
 import "./Analysis.css";
 import React, { useEffect, useState } from "react";
-import { Space, Table, Button, notification, Input } from "antd";
+import { Space, Table, Button, notification, Input, Tooltip } from "antd";
 import EditCreateAnalysis from "./Edit-Create/EditCreateAnalysis";
 import { DeleteFilled, EditFilled, PlusCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import Notification from "../../components/Notification/Notification";
@@ -66,12 +66,16 @@ const Analysis = () => {
       align: "center",
       render: (_, record) => (
         <Space size="middle">
-          <Button className="actions" onClick={() => showEditCreateModal(record, 'Edit')}>
-            <EditFilled className="edit-icon"/>
-          </Button>
-          <Button className="actions" onClick={() => showDeleteModal(record)}>
-            <DeleteFilled className="delete-icon" />
-          </Button>
+          <Tooltip title='Editar'>
+            <Button className="actions" onClick={() => showEditCreateModal(record, 'Edit')}>
+              <EditFilled className="edit-icon"/>
+            </Button>
+          </Tooltip>
+          <Tooltip title='Eliminar'>
+            <Button className="actions" onClick={() => showDeleteModal(record)}>
+              <DeleteFilled className="delete-icon" />
+            </Button>
+          </Tooltip>
         </Space>
       ),
     },

@@ -8,16 +8,71 @@ const moment = require('moment-timezone');
 router.get('/', verificaToken, async (req, res) => {
   try {
     const [rows] = await (await Conexion).execute(
-      'SELECT p.cedula AS cedula_paciente, p.paciente, m.nombre_apellido AS nombre_medico, re.fecha FROM realizar_examen re INNER JOIN pacientes p ON re.id_paciente = p.id_paciente INNER JOIN Medico m ON re.id_medico = m.id_medico'
+      `SELECT *
+        FROM 
+          realizar_examen re 
+        INNER JOIN 
+          pacientes p ON re.id_paciente = p.id_paciente 
+        INNER JOIN 
+          medico m ON re.id_medico = m.id_medico 
+        INNER JOIN 
+          analisis a ON re.id_analisis = a.id_analisis 
+        INNER JOIN 
+          examenes e ON re.id_examen = e.id_examen
+        ORDER BY 
+          p.id_paciente, re.fecha, m.id_medico, a.id_analisis, e.id_examen`
     );
-    const paciente = rows.map(row => ({
-      ...row,
-      fecha: moment(row.fecha).format('YYYY-MM-DD HH:mm:ss')
-    }));
-    res.json({ mantexamen: paciente });
+    const result = {};
+    rows.forEach(row => {
+      if (!result[row.id_paciente]) {
+        result[row.id_paciente] = {
+          id_realizar: row.id_realizar,
+          fecha: row.fecha,
+          id_paciente: row.id_paciente,
+          cedula: row.cedula,
+          paciente: row.paciente,
+          edad: row.edad,
+          sexo: row.sexo,
+          celular: row.celular,
+          fecha_de_ingreso: row.fecha_de_ingreso,
+          medico: []
+        };
+      }
+
+      let medico = result[row.id_paciente].medico.find(m => m.id_medico === row.id_medico);
+      if (!medico) {
+        medico = {
+          id_medico: row.id_medico,
+          nombre_apellido: row.nombre_apellido,
+          especialidad: row.especialidad,
+          direccion: row.direccion,
+          analisis: []
+        };
+        result[row.id_paciente].medico.push(medico);
+      }
+
+      let analisis = medico.analisis.find(a => a.id_analisis === row.id_analisis);
+      if (!analisis) {
+        analisis = {
+          id_analisis: row.id_analisis,
+          analisis: row.analisis,
+          examen: []
+        };
+        medico.analisis.push(analisis);
+      }
+
+      if (!analisis.examen.find(e => e.id_examen === row.id_examen)) {
+        analisis.examen.push({
+          id_examen: row.id_examen,
+          examen: row.examen
+        });
+      }
+    });
+    const response = Object.values(result);
+    res.json({ mantexamen: response });
   } catch (error) {
     console.error('Error fetching users:', error);
-    res.status(500).json({ error: 'Error al obtener usuarios.' });
+    res.status(500).json({ error: 'Error las ordenes de examen' });
   }
 });
 

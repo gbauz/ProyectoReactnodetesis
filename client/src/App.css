@@ -56,6 +56,10 @@
   color: #1a6ab9;
 }
 
+.actions .download-icon {
+  color: #33d15a;
+}
+
 /* Styles Search Input */
 .input-group {
   border-radius: 20px;

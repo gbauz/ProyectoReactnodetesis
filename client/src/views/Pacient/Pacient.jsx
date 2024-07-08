@@ -1,6 +1,6 @@
 import "./Pacient.css";
 import React, { useEffect, useState } from "react";
-import { Space, Table, Tag, Button, notification, Input } from "antd";
+import { Space, Table, Tag, Button, notification, Input, Tooltip } from "antd";
 import EditCreatePacient from "./Edit-Create/EditCreatePacient";
 import PacienteService from "../../services/PacientService";
 import { DeleteFilled, EditFilled, PlusCircleOutlined, SearchOutlined } from "@ant-design/icons";
@@ -135,12 +135,16 @@ const Paciente = () => {
       align: "center",
       render: (_, record) => (
         <Space size="middle">
-          <Button className="actions" onClick={() => showEditCreateModal(record, 'Edit')}>
-            <EditFilled className="edit-icon"/>
-          </Button>
-          <Button className="actions" onClick={() => showDeleteModal(record)}>
-            <DeleteFilled className="delete-icon" />
-          </Button>
+          <Tooltip title='Editar'>
+            <Button className="actions" onClick={() => showEditCreateModal(record, 'Edit')}>
+              <EditFilled className="edit-icon"/>
+            </Button>
+          </Tooltip>
+          <Tooltip title='Eliminar'>
+            <Button className="actions" onClick={() => showDeleteModal(record)}>
+              <DeleteFilled className="delete-icon" />
+            </Button>
+          </Tooltip>
         </Space>
       ),
     },
