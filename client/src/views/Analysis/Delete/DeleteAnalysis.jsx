@@ -9,7 +9,7 @@ const DeleteAnalysis = ({ isDeleteModalOpen, handleDelete, handleDeleteCancel, i
 
   const onFinish = async () => {
     try {
-      response = await AnalysisService.deleteAnalysis(initialValues.id_analisis);
+      response = await AnalysisService.deleteAnalysis(initialValues.id_analisis, initialValues.analisis);
     } catch (error) {
       setError(error);
     } finally {

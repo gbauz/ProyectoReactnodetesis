@@ -12,6 +12,7 @@ const pacientesRouter = require('./modelo/pacientes');
 const medicoRouter = require('./modelo/medico');
 const analisisRouter = require('./modelo/analisis');
 const examenesRouter = require('./modelo/examenes');
+const manten_examenesRouter = require('./modelo/manten_examenes');
 
 
 function exception_routes(paths, fn) {
@@ -47,6 +48,7 @@ app.use('/api/pacientes', pacientesRouter);
 app.use('/api/medico', medicoRouter);
 app.use('/api/analisis', analisisRouter);
 app.use('/api/examenes', examenesRouter);
+app.use('/api/mantenexamenes', manten_examenesRouter);
 
 app.use(express.static(path.join(__dirname, 'client', 'build')));
 

@@ -29,7 +29,7 @@ const EditCreateExam = ({ isModalOpen, handleSubmit, handleCancel, initialValues
     // setloadingSelect(true);
     try {
       response = await AnalysisService.getAnalysis();
-      setDataAnalysis(response.data.users);
+      setDataAnalysis(response.data.analisis);
     } catch (error) {
       setDataAnalysis('');
       setError(error);

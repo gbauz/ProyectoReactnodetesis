@@ -30,7 +30,7 @@ const Paciente = () => {
     setLoading(true);
     try {
       const response = await PacienteService.getPatients();
-      setData(response.data.users);
+      setData(response.data.pacientes);
       // console.log(response);
     } catch (error) {
       setError(error);

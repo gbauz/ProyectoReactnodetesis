@@ -30,7 +30,7 @@ const Exam = () => {
     setLoading(true);
     try {
       const response = await ExamService.getExam();
-      setData(response.data.users);
+      setData(response.data.examenes);
     } catch (error) {
       setError(error);
     } finally {

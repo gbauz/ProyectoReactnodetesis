@@ -28,7 +28,7 @@ const Analysis = () => {
     setLoading(true);
     try {
       const response = await AnalysisService.getAnalysis();
-      setData(response.data.users);
+      setData(response.data.analisis);
     } catch (error) {
       setError(error);
     } finally {
