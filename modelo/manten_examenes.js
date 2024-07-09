@@ -8,7 +8,11 @@ const moment = require('moment-timezone');
 router.get('/', verificaToken, async (req, res) => {
   try {
     const [rows] = await (await Conexion).execute(
-      `SELECT *
+      `SELECT 
+        re.id_realizar, re.fecha, p.id_paciente, p.cedula AS paciente_cedula, p.paciente,
+        p.edad, p.sexo, p.celular AS paciente_celular, re.id_medico, m.cedula AS medico_cedula, 
+        m.nombre_apellido, m.celular AS medico_celular, m.direccion, esp.id_especialidad, 
+        esp.nombre, re.id_analisis, a.analisis, re.id_examen, e.examen
         FROM 
           realizar_examen re 
         INNER JOIN 
@@ -16,11 +20,13 @@ router.get('/', verificaToken, async (req, res) => {
         INNER JOIN 
           medico m ON re.id_medico = m.id_medico 
         INNER JOIN 
+          especialidad esp ON m.id_especialidad = esp.id_especialidad
+        INNER JOIN 
           analisis a ON re.id_analisis = a.id_analisis 
         INNER JOIN 
           examenes e ON re.id_examen = e.id_examen
         ORDER BY 
-          p.id_paciente, re.fecha, m.id_medico, a.id_analisis, e.id_examen`
+          p.id_paciente, re.fecha, m.id_medico, a.id_analisis, e.id_examen;`
     );
     const result = {};
     rows.forEach(row => {
@@ -29,12 +35,11 @@ router.get('/', verificaToken, async (req, res) => {
           id_realizar: row.id_realizar,
           fecha: row.fecha,
           id_paciente: row.id_paciente,
-          cedula: row.cedula,
+          paciente_cedula: row.paciente_cedula,
           paciente: row.paciente,
           edad: row.edad,
           sexo: row.sexo,
-          celular: row.celular,
-          fecha_de_ingreso: row.fecha_de_ingreso,
+          celular: row.paciente_celular,
           medico: []
         };
       }
@@ -43,8 +48,11 @@ router.get('/', verificaToken, async (req, res) => {
       if (!medico) {
         medico = {
           id_medico: row.id_medico,
+          medico_cedula: row.medico_cedula,
           nombre_apellido: row.nombre_apellido,
-          especialidad: row.especialidad,
+          medico_celular: row.medico_celular,
+          id_especialidad: row.id_especialidad,
+          especialidad: row.nombre,
           direccion: row.direccion,
           analisis: []
         };

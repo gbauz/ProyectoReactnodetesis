@@ -20,8 +20,6 @@ const createExam = async (examData) => {
 
 const editExam = async (id, examData) => {
   try {
-    console.log(id);
-    console.log(examData);
     const response = await apiClient.put(`examenes/${id}`, examData);
     return response;
   } catch (error) {

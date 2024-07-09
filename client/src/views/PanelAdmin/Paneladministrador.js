@@ -5,16 +5,16 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Users from '../Usuarios/Users';
 import Roles from '../Usuarios/roles';
-import Auditoria from '../Usuarios/auditoria';
 import './AdminPage.css';
 import labLogo from '../Login/image/GB-LAB.png';
 import Uri from '../../environment/environment';
-import Paciente from '../Pacient/Pacient';
 import Medic from '../Medic/Medic';
 import ExaminationOrder from '../ExaminationOrder/ExaminationOrder';
 import Audit from '../Audit/Audit';
 import Analysis from '../Analysis/Analysis';
 import Exam from '../Exam/Exam';
+import Specialty from '../Specialty/Specialty';
+import Patient from '../Patient/Patient';
 const AdminPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -144,7 +144,7 @@ const AdminPage = () => {
           </>
         );
       case 'Pacientes':
-        return <Paciente />;
+        return <Patient />;
       case 'Medico':
         return <Medic />
       case 'users':
@@ -159,6 +159,8 @@ const AdminPage = () => {
         return <Analysis />;
       case 'Examenes':
         return <Exam />;
+      case 'Especialidad':
+        return <Specialty />;
       case 'reports':
         return <div>Reportes</div>;
       default:
@@ -192,6 +194,8 @@ const AdminPage = () => {
         return 'Examenes';
       case 'reports':
         return 'Reportes';
+      case 'Especialidad':
+        return 'Especialidad';
       default:
         return '';
     }
@@ -319,6 +323,9 @@ const AdminPage = () => {
                     break;
                   case 'Reportes':
                     componentKey = 'reports';
+                    break;
+                  case 'Especialidad':
+                    componentKey = 'Especialidad';
                     break;
                   default:
                     componentKey = category.toLowerCase();

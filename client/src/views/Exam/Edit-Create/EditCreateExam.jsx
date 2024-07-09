@@ -75,7 +75,7 @@ const EditCreateExam = ({ isModalOpen, handleSubmit, handleCancel, initialValues
         <Form.Item name="examen" label="Nombre" rules={[{ required: true, message: 'Por favor ingrese el nombre!' }]}>
           <Input />
         </Form.Item>
-        <Form.Item name="id_analisis" label="Análisis" rules={[{ required: true, message: 'Por favor seleccione el sexo!' }]}>
+        <Form.Item name="id_analisis" label="Análisis" rules={[{ required: true, message: 'Por favor seleccione el análisis!' }]}>
           {/* <Select loading={loadingSelect} options={analisisOptions} /> */}
           <Select options={analisisOptions} />
         </Form.Item>

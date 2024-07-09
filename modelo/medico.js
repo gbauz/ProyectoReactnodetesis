@@ -47,7 +47,6 @@ router.post('/', verificaToken, auditoriaMiddleware((req) => `Creó Médico con 
 router.put('/:cedula', verificaToken, auditoriaMiddleware((req) => `Editó Médico con cédula: ${req.body.cedula}`), async (req, res) => {
   const medicoCedula = req.params.cedula;
   const { nombre_apellido, id_especialidad, celular, direccion } = req.body;
-
   try {
     const [existingMedicoRows] = await (await Conexion).execute(
       'SELECT * FROM Medico WHERE cedula = ?',
@@ -60,7 +59,7 @@ router.put('/:cedula', verificaToken, auditoriaMiddleware((req) => `Editó Médi
 
     await (await Conexion).execute(
       'UPDATE Medico SET nombre_apellido = ?, celular = ?, direccion = ? , id_especialidad = ? WHERE cedula = ?',
-      [nombre_apellido, celular, direccion, medicoCedula, id_especialidad]
+      [nombre_apellido, celular, direccion, id_especialidad, medicoCedula]
     );
 
     res.json({ success: true, message: 'Médico actualizado correctamente.' });

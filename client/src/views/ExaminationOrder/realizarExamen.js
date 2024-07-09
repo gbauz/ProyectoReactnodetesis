@@ -28,9 +28,9 @@ const RealizarExamenes = () => {
   useEffect(() => {
     const fetchSession = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) {
-          setError('Token no encontrado en localStorage');
+          setError('Token no encontrado en sessionStorage');
           return;
         }
 
@@ -54,9 +54,9 @@ const RealizarExamenes = () => {
 
     const fetchPacientes = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) {
-          setError('Token no encontrado en localStorage');
+          setError('Token no encontrado en sessionStorage');
           return;
         }
 
@@ -76,9 +76,9 @@ const RealizarExamenes = () => {
 
     const fetchMedicos = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) {
-          setError('Token no encontrado en localStorage');
+          setError('Token no encontrado en sessionStorage');
           return;
         }
 
@@ -98,9 +98,9 @@ const RealizarExamenes = () => {
 
     const fetchAnalisis = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) {
-          setError('Token no encontrado en localStorage');
+          setError('Token no encontrado en sessionStorage');
           return;
         }
 
@@ -134,9 +134,9 @@ const RealizarExamenes = () => {
       }
 
       try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) {
-          setError('Token no encontrado en localStorage');
+          setError('Token no encontrado en sessionStorage');
           return;
         }
 
@@ -214,9 +214,9 @@ const RealizarExamenes = () => {
       alert('Debe seleccionar un paciente, un médico y agregar al menos un examen.');
       return;
     }
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (!token) {
-      setError('Token no encontrado en localStorage');
+      setError('Token no encontrado en sessionStorage');
       return;
     }
   

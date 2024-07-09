@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Form, Input, Modal, Select } from "antd";
-import './EditCreatePacient.css'
-import PacientService from "../../../services/PacientService";
+import './EditCreatePatient.css'
+import PatientService from "../../../services/PatientService";
 
 const EditCreatePacient = ({ isModalOpen, handleSubmit, handleCancel, initialValues, action }) => {
   const [form]                    = Form.useForm();
@@ -19,15 +19,13 @@ const EditCreatePacient = ({ isModalOpen, handleSubmit, handleCancel, initialVal
       form.resetFields();
       setIsEditing(false);
     }
-    // console.log(form);
-    // console.log(initialValues);
   }, [isModalOpen, initialValues, form, action]);
 
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      if (action=='Edit') response = await PacientService.editPatient(values.cedula, values);
-      if (action=='Create') response = await PacientService.createPatient(values);
+      if (action=='Edit') response = await PatientService.editPatient(values.cedula, values);
+      if (action=='Create') response = await PatientService.createPatient(values);
     } catch (error) {
       setError(error);
     }finally {

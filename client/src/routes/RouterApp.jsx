@@ -4,7 +4,7 @@ import Error from "../views/Error/Error";
 import Home from "../views/Home/Home";
 import AdminPage from "../views/PanelAdmin/Paneladministrador";
 import Users from "../views/Usuarios/Users";
-import Paciente from "../views/Pacient/Pacient";
+import Patient from "../views/Patient/Patient";
 import Roles from "../views/Usuarios/roles";
 import Resultados from "../views/Results/Results";
 import { Route, Routes } from "react-router-dom";
@@ -17,7 +17,7 @@ const RouterApp = () => {
         <Route path="/" element={<Home />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/users" element={<Users />} />
-        <Route path="/paciente" element={<Paciente />} />
+        <Route path="/paciente" element={<Patient />} />
         <Route path="/roles" element={<Roles />} />
         <Route path="/resultado" element={<Resultados />} />
         <Route path="*" element={<Error />} />

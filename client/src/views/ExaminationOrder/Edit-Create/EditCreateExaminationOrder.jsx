@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Button, Form, Input, Modal, Select } from "antd";
 import './EditCreateExaminationOrder.css'
 import ExaminationOrderService from "../../../services/ExaminationOrderService";
+import PatientService from "../../../services/PatientService";
 
 const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, initialValues, action }) => {
-  const [form]                    = Form.useForm();
-  const [isEditing, setIsEditing] = useState(false);
-  const [error, setError]         = useState(null);
-  const [loading, setLoading]     = useState(false);
+  const [form]                              = Form.useForm();
+  const [isEditing, setIsEditing]           = useState(false);
+  const [error, setError]                   = useState(null);
+  const [loading, setLoading]               = useState(false);
+  // const [loadingSelect, setloadingSelect]   = useState(false);
+  const [dataPatient, setDataPatient]     = useState([]);
   let response = '';
 
   useEffect(() => {
@@ -19,9 +22,35 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
       form.resetFields();
       setIsEditing(false);
     }
-    // console.log(form);
-    // console.log(initialValues);
-  }, [initialValues, form]);
+    console.log(initialValues);
+    getPatients();
+  }, [isModalOpen, initialValues, form, action]);
+
+  const getPatients = async () => {
+    // setloadingSelect(true);
+    try {
+      response = await PatientService.getPatients();
+      setDataPatient(response.data.pacientes);
+    } catch (error) {
+      setDataPatient('');
+      setError(error);
+    } finally {
+      // setLoading(false);
+    }
+  }
+
+  const PacientOptions = dataPatient.map(item => ({
+    value: item.id_paciente,
+    label: item.paciente,
+    cedula: item.cedula
+  }));
+
+  const handlePatientChange = (value) => {
+    const selectedPatient = PacientOptions.find(option => option.value === value);
+    form.setFieldsValue({
+      cedula: selectedPatient ? selectedPatient.cedula : ''
+    });
+  };
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -41,7 +70,7 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
 
   return (
     <Modal
-      title={isEditing ? "Editar Paciente" : "Crear Paciente"}
+      title={isEditing ? "Editar Orden de Examen" : "Crear Orden de Examen"}
       open={isModalOpen}
       onCancel={handleCancel}
       centered
@@ -49,14 +78,12 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
       footer={null}
     >
       <Form form={form} layout="vertical" onFinish={onFinish}>
-        {/* <Form.Item name="id" hidden>
-          <Input />
-        </Form.Item> */}
-        <Form.Item name="paciente" label="Nombre" rules={[{ required: true, message: 'Por favor ingrese el nombre!' }]}>
-          <Input />
+        <Form.Item name="id_paciente" label="Paciente" rules={[{ required: true, message: 'Por favor seleccione un paciente!' }]}>
+          {/* <Select loading={loadingSelect} options={analisisOptions} /> */}
+          <Select options={PacientOptions} onChange={handlePatientChange}/>
         </Form.Item>
-        <Form.Item name="cedula" label="Cedula" rules={[{ required: true, message: 'Por favor ingrese la cédula!' }]}>
-          <Input />
+        <Form.Item name="cedula" label="Cédula" rules={[{ required: true, message: 'Por favor ingrese la cédula!' }]}>
+          <Input disabled/>
         </Form.Item>
         <Form.Item name="edad" label="Edad" rules={[{ required: true, message: 'Por favor ingrese la edad!' }]}>
           <Input />

@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Button, Form, Input, Modal, Select } from "antd";
 import './EditCreateMedic.css'
 import MedicService from "../../../services/MedicService";
+import SpecialtyService from "../../../services/SpecialtyService";
 
 const EditCreateMedic = ({ isModalOpen, handleSubmit, handleCancel, initialValues, action }) => {
-  const [form]                    = Form.useForm();
-  const [isEditing, setIsEditing] = useState(false);
-  const [error, setError]         = useState(null);
-  const [loading, setLoading]     = useState(false);
+  const [form]                              = Form.useForm();
+  const [isEditing, setIsEditing]           = useState(false);
+  const [error, setError]                   = useState(null);
+  const [loading, setLoading]               = useState(false);
+  // const [loadingSelect, setloadingSelect]   = useState(false);
+  const [dataSpecialty, setDataSpecialty]   = useState([]);
   let response;
 
   useEffect(() => {
@@ -19,7 +22,26 @@ const EditCreateMedic = ({ isModalOpen, handleSubmit, handleCancel, initialValue
       form.resetFields();
       setIsEditing(false);
     }
+    getAnalysis();
   }, [isModalOpen, initialValues, form, action]);
+
+  const getAnalysis = async () => {
+    // setloadingSelect(true);
+    try {
+      response = await SpecialtyService.getSpecialty();
+      setDataSpecialty(response.data.especialidades);
+    } catch (error) {
+      setDataSpecialty('');
+      setError(error);
+    } finally {
+      // setLoading(false);
+    }
+  }
+
+  const specialtyOptions = dataSpecialty.map(item => ({
+    value: item.id_especialidad,
+    label: item.nombre
+  }));
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -56,8 +78,9 @@ const EditCreateMedic = ({ isModalOpen, handleSubmit, handleCancel, initialValue
         <Form.Item name="cedula" label="Cedula" rules={[{ required: true, message: 'Por favor ingrese la cédula!' }]}>
           <Input />
         </Form.Item>
-        <Form.Item name="especialidad" label="Especialidad" rules={[{ required: true, message: 'Por favor ingrese la especialidad!' }]}>
-          <Input />
+        <Form.Item name="id_especialidad" label="Especialidad" rules={[{ required: true, message: 'Por favor seleccione la especialidad!' }]}>
+          {/* <Select loading={loadingSelect} options={analisisOptions} /> */}
+          <Select options={specialtyOptions} />
         </Form.Item>
         <Form.Item name="celular" label="Teléfono" rules={[{ required: true, message: 'Por favor ingrese el teléfono!' }]}>
           <Input />

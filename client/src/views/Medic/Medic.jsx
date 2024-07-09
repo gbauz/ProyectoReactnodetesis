@@ -43,11 +43,11 @@ const Medic = () => {
 
   //Llenar filtros
   data.forEach(element => {
-    if (!uniqueEspecialidad.has(element.especialidad)) {
-      uniqueEspecialidad.add(element.especialidad);
+    if (!uniqueEspecialidad.has(element.nombre)) {
+      uniqueEspecialidad.add(element.nombre);
       filterEspecialidad.push({
-        text: element.especialidad,
-        value: element.especialidad,
+        text: element.nombre,
+        value: element.nombre,
       });
     }
   });
@@ -63,7 +63,7 @@ const Medic = () => {
       },
     },
     {
-      title: "Cedula",
+      title: "Cédula",
       dataIndex: "cedula",
       align: "center",
       sorter: {
@@ -73,18 +73,18 @@ const Medic = () => {
     },
     {
       title: "Especialidad",
-      dataIndex: "especialidad",
+      dataIndex: "nombre",
       align: "center",
       sorter: {
-        compare: (a, b) => a.especialidad.localeCompare(b.especialidad),
+        compare: (a, b) => a.nombre.localeCompare(b.nombre),
         multiple: 3,
       },
       filters: filterEspecialidad,
-      onFilter: (value, data) => data.especialidad.startsWith(value),
+      onFilter: (value, data) => data.nombre.startsWith(value),
       filterSearch: true,
     },
     {
-      title: "Telefono",
+      title: "Teléfono",
       dataIndex: "celular",
       align: "center",
     },
@@ -98,7 +98,7 @@ const Medic = () => {
       },
     },
     {
-      title: "Action",
+      title: "Acciones",
       key: "action",
       align: "center",
       render: (_, record) => (

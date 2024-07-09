@@ -1,216 +1,434 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Form, Table } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { Modal, Button, Table, Form, Row, Col } from 'react-bootstrap';
 import Uri from '../../environment/environment';
 
-const EditarExamenModal = ({ examen, onClose }) => {
+const RealizarExamenes = () => {
+  const [paciente, setPaciente] = useState(null);
+  const [medico, setMedico] = useState(null);
+  const [error, setError] = useState(null);
+  const [userPermissions, setUserPermissions] = useState([]);
+  const [showPacienteModal, setShowPacienteModal] = useState(false);
+  const [showMedicoModal, setShowMedicoModal] = useState(false);
+  const [pacientes, setPacientes] = useState([]);
+  const [medicos, setMedicos] = useState([]);
+  const [searchPaciente, setSearchPaciente] = useState('');
+  const [searchMedico, setSearchMedico] = useState('');
   const [analisis, setAnalisis] = useState([]);
   const [examenes, setExamenes] = useState([]);
   const [selectedAnalisis, setSelectedAnalisis] = useState('');
   const [selectedExamen, setSelectedExamen] = useState('');
-  const [analisisList, setAnalisisList] = useState([]);
-  const [examenesList, setExamenesList] = useState([]);
-  const [error, setError] = useState(null); // Error general de la tabla
+  const [examenesSeleccionados, setExamenesSeleccionados] = useState([]);
 
   useEffect(() => {
-    // Fetch analisis and examenes from API
-    const fetchAnalisis = async () => {
-        try {
-          const token = sessionStorage.getItem('token');
-          if (!token) {
-            setError('Token no encontrado en sessionStorage');
-            return;
-          }
-  
-          const response = await fetch(Uri+'analisis', {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
-  
-          if (response.ok) {
-            const data = await response.json();
-            setAnalisisList(data.analisis);
-           
-  
-          } else {
-            setError('Error al obtener la lista de análisis');
-          }
-        } catch (error) {
-          console.error('Error al obtener la lista de análisis:', error);
-          setError('Error al obtener la lista de análisis');
+    const fetchSession = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError('Token no encontrado en localStorage');
+          return;
         }
-      };
 
-      const fetchExamenes = async () => {
-        try {
-          const token = sessionStorage.getItem('token');
-          if (!token) {
-            console.error('Token no encontrado en sessionStorage');
-            return;
+        const sessionResponse = await fetch(Uri+'session', {
+          headers: {
+            Authorization: `Bearer ${token}`
           }
-    
-          const examenesResponse = await fetch(Uri+'examenes', {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
-    
-          if (examenesResponse.ok) {
-            const examenesData = await examenesResponse.json();
-            setExamenesList(examenesData.users);
-            
-          } else {
-            console.error('Error fetching examenes:', examenesResponse.statusText);
-          }
-        } catch (error) {
-          console.error('Error fetching examenes:', error);
+        });
+
+        if (sessionResponse.ok) {
+          const sessionData = await sessionResponse.json();
+          setUserPermissions(sessionData.user.permissions);
+        } else {
+          setError('Error al obtener la sesión del usuario.');
         }
-      };
+      } catch (error) {
+        console.error('Error al obtener la sesión del usuario:', error);
+        setError('Error al obtener la sesión del usuario.');
+      }
+    };
 
-    fetchAnalisis();
-    fetchExamenes();
+    const fetchPacientes = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError('Token no encontrado en localStorage');
+          return;
+        }
+
+        const response = await fetch(Uri+'pacientes', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setPacientes(data.users);
+        } else {
+          setError('Error al obtener la lista de pacientes');
+        }
+      } catch (error) {
+        console.error('Error al obtener la lista de pacientes:', error);
+        setError('Error al obtener la lista de pacientes');
+      }
+    };
+
+    const fetchMedicos = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError('Token no encontrado en localStorage');
+          return;
+        }
+
+        const response = await fetch(Uri+'medico', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setMedicos(data.medicos);
+        } else {
+          setError('Error al obtener la lista de médicos');
+        }
+      } catch (error) {
+        console.error('Error al obtener la lista de médicos:', error);
+        setError('Error al obtener la lista de médicos');
+      }
+    };
+
+    fetchSession();
+    fetchPacientes();
+    fetchMedicos();
   }, []);
 
-  const handleAddAnalisis = () => {
-    if (selectedAnalisis) {
-      setAnalisis([...analisis, selectedAnalisis]);
-      setSelectedAnalisis('');
+  useEffect(() => {
+    const fetchAnalisis = async () => {
+      if (!medico) return;
+
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError('Token no encontrado en localStorage');
+          return;
+        }
+
+        const response = await fetch(Uri+`analisis?especialidad=${medico.nombre}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setAnalisis(data.analisis);
+          setSelectedAnalisis('');
+          setSelectedExamen('');
+          setExamenes([]);
+        } else {
+          setError('Error al obtener la lista de análisis');
+        }
+      } catch (error) {
+        console.error('Error al obtener la lista de análisis:', error);
+        setError('Error al obtener la lista de análisis');
+      }
+    };
+
+    fetchAnalisis();
+  }, [medico]);
+
+  useEffect(() => {
+    const fetchExamenes = async () => {
+      if (!selectedAnalisis) {
+        setExamenes([]);
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError('Token no encontrado en localStorage');
+          return;
+        }
+
+        const response = await fetch(Uri+`examenes/${selectedAnalisis}/examenes`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setExamenes(data);
+          setError(null);
+        
+        } else {
+          setError('Error al obtener la lista de exámenes');
+        }
+      } catch (error) {
+        console.error('Error al obtener la lista de exámenes:', error);
+        setError('Error al obtener la lista de exámenes');
+      }
+    };
+
+    fetchExamenes();
+  }, [selectedAnalisis]);
+
+  const handlePacienteSelect = (paciente) => {
+    setPaciente(paciente);
+    setShowPacienteModal(false);
+  };
+
+  const handleMedicoSelect = (medico) => {
+    setMedico(medico);
+    setShowMedicoModal(false);
+  };
+
+  const filteredPacientes = pacientes.filter(p =>
+    p.paciente.toLowerCase().includes(searchPaciente.toLowerCase())
+  );
+
+  const filteredMedicos = medicos.filter(m =>
+    m.nombre_apellido.toLowerCase().includes(searchMedico.toLowerCase())
+  );
+
+  const handleAgregarExamen = () => {
+    if (selectedAnalisis && selectedExamen) {
+      const analisisSeleccionado = analisis.find(a => a.id_analisis === parseInt(selectedAnalisis));
+      const examenSeleccionado = examenes.find(e => e.id_examen === parseInt(selectedExamen));
+
+      if (analisisSeleccionado && examenSeleccionado) {
+        setExamenesSeleccionados([
+          ...examenesSeleccionados,
+          { 
+            id_analisis: analisisSeleccionado.id_analisis,
+            analisis: analisisSeleccionado.analisis,
+            id_examen: examenSeleccionado.id_examen,
+            examen: examenSeleccionado.examen 
+          }
+        ]);
+        setSelectedAnalisis('');
+        setSelectedExamen('');
+      } else {
+        setError('No se encontró el análisis o examen seleccionado.');
+      }
     }
   };
 
-  const handleAddExamen = () => {
-    if (selectedExamen) {
-      setExamenes([...examenes, selectedExamen]);
-      setSelectedExamen('');
+  const handleEliminarExamen = (index) => {
+    const newExamenesSeleccionados = [...examenesSeleccionados];
+    newExamenesSeleccionados.splice(index, 1);
+    setExamenesSeleccionados(newExamenesSeleccionados);
+  };
+
+  const handleRegistrarExamenes = async () => {
+    if (!paciente || !medico || !examenesSeleccionados.length) {
+      alert('Debe seleccionar un paciente, un médico y agregar al menos un examen.');
+      return;
     }
-  };
 
-  const handleDeleteAnalisis = (analisisToDelete) => {
-    setAnalisis(analisis.filter(a => a !== analisisToDelete));
-  };
-
-  const handleDeleteExamen = (examenToDelete) => {
-    setExamenes(examenes.filter(e => e !== examenToDelete));
-  };
-
-  const handleSave = async () => {
-    // Save updated examen to the API
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('Token no encontrado en localStorage');
+      return;
+    }
+  
     try {
-      const token = sessionStorage.getItem('token');
-      const response = await fetch(Uri+`mantenexamenes/${examen.id_realizar}`, {
-        method: 'PUT',
+      const response = await fetch(Uri+'mantenexamenes', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ analisis, examenes })
+        body: JSON.stringify({
+          id_paciente: paciente.id_paciente,
+          id_medico: medico.id_medico,
+          examenes: examenesSeleccionados.map(e => ({ 
+            id_examen: e.id_examen,
+            id_analisis: e.id_analisis
+          })),
+        })
       });
-
+      
       if (response.ok) {
-        onClose();
+        setExamenesSeleccionados([]);
+        setPaciente(null);
+        setMedico(null);
       } else {
-        console.error('Error saving examen:', response.statusText);
+        const errorData = await response.json();
+        setError(errorData.error || 'Error en la operación.');
       }
     } catch (error) {
-      console.error('Error saving examen:', error);
+      console.error('Error en la operación:', error);
+      setError('Error en la operación.');
     }
   };
 
   return (
-    <Modal show onHide={onClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>Editar Examen</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <Form>
-          <Form.Group controlId="analisis">
+    <div className="container mt-4">
+      <h4>Realizar Exámenes</h4>
+      <Row className="mb-3">
+        <Col>
+          <Form.Group>
+            <Form.Label>Paciente</Form.Label>
+            <div className="input-group">
+              <Form.Control
+                type="text"
+                value={paciente ? paciente.paciente : ''}
+                readOnly
+              />
+              <Button variant="primary" onClick={() => setShowPacienteModal(true)}>Buscar Paciente</Button>
+            </div>
+          </Form.Group>
+        </Col>
+        <Col>
+          <Form.Group>
+            <Form.Label>Médico</Form.Label>
+            <div className="input-group">
+              <Form.Control
+                type="text"
+                value={medico ? medico.nombre_apellido : ''}
+                readOnly
+              />
+              <Button variant="primary" onClick={() => setShowMedicoModal(true)}>Buscar Médico</Button>
+            </div>
+          </Form.Group>
+        </Col>
+      </Row>
+      <Row className="mb-3">
+        <Col>
+          <Form.Group>
             <Form.Label>Análisis</Form.Label>
             <Form.Control
               as="select"
               value={selectedAnalisis}
               onChange={(e) => setSelectedAnalisis(e.target.value)}
+              disabled={!analisis.length}
             >
-              <option value="">Seleccionar análisis</option>
-              {analisisList.map((analisis) => (
-                <option key={analisis.id_analisis} value={analisis.analisis}>
-                  {analisis.analisis}
+              <option value="">Seleccione un análisis</option>
+              {analisis.map((a) => (
+                <option key={a.id_analisis} value={a.id_analisis}>
+                  {a.analisis}
                 </option>
               ))}
             </Form.Control>
-            <Button variant="secondary" onClick={handleAddAnalisis} className="mt-2">
-              Agregar Análisis
-            </Button>
           </Form.Group>
-          <Form.Group controlId="examen">
+        </Col>
+        <Col>
+          <Form.Group>
             <Form.Label>Exámenes</Form.Label>
             <Form.Control
               as="select"
               value={selectedExamen}
               onChange={(e) => setSelectedExamen(e.target.value)}
+              disabled={!selectedAnalisis}
             >
-              <option value="">Seleccionar examen</option>
-              {/* {examenesList.map((examen) => (
-                <option key={examen.id_examen} value={examen.examen}>
-                  {examen.examen}
+              <option value="">Seleccione un examen</option>
+              {examenes.map((e) => (
+                <option key={e.id_examen} value={e.id_examen}>
+                  {e.examen}
                 </option>
-              ))} */}
+              ))}
             </Form.Control>
-            <Button variant="secondary" onClick={handleAddExamen} className="mt-2">
-              Agregar Examen
-            </Button>
           </Form.Group>
-        </Form>
-        <Table striped bordered hover className="mt-3">
-          <thead>
-            <tr>
-              <th>Análisis</th>
-              <th>Acciones</th>
+        </Col>
+      </Row>
+      <Button variant="success" onClick={handleAgregarExamen} disabled={!selectedAnalisis || !selectedExamen}>Agregar Examen</Button>
+      <Table striped bordered hover className="mt-4">
+        <thead>
+          <tr>
+            <th>Análisis</th>
+            <th>Examen</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {examenesSeleccionados.map((examen, index) => (
+            <tr key={index}>
+              <td>{examen.analisis}</td>
+              <td>{examen.examen}</td>
+              <td>
+                <Button variant="danger" onClick={() => handleEliminarExamen(index)}>Eliminar</Button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {analisis.map((a, index) => (
-              <tr key={index}>
-                <td>{a}</td>
-                <td>
-                  <Button variant="danger" onClick={() => handleDeleteAnalisis(a)}>
-                    Eliminar
-                  </Button>
-                </td>
+          ))}
+        </tbody>
+      </Table>
+      <Button variant="primary" onClick={handleRegistrarExamenes} disabled={!examenesSeleccionados.length}>Registrar Exámenes</Button>
+
+      <Modal show={showPacienteModal} onHide={() => setShowPacienteModal(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Buscar Paciente</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form.Group>
+            <Form.Label>Buscar por Nombre o Cédula</Form.Label>
+            <Form.Control
+              type="text"
+              value={searchPaciente}
+              onChange={(e) => setSearchPaciente(e.target.value)}
+            />
+          </Form.Group>
+          <Table striped bordered hover className="mt-3">
+            <thead>
+              <tr>
+                <th>Cédula</th>
+                <th>Nombre</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
-        <Table striped bordered hover className="mt-3">
-          <thead>
-            <tr>
-              <th>Exámenes</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {examenes.map((e, index) => (
-              <tr key={index}>
-                <td>{e}</td>
-                <td>
-                  <Button variant="danger" onClick={() => handleDeleteExamen(e)}>
-                    Eliminar
-                  </Button>
-                </td>
+            </thead>
+            <tbody>
+              {filteredPacientes.map((p) => (
+                <tr key={p.cedula} onClick={() => handlePacienteSelect(p)} style={{ cursor: 'pointer' }}>
+                  <td>{p.cedula}</td>
+                  <td>{p.paciente}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowPacienteModal(false)}>Cerrar</Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showMedicoModal} onHide={() => setShowMedicoModal(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Buscar Médico</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form.Group>
+            <Form.Label>Buscar por Nombre o Cédula</Form.Label>
+            <Form.Control
+              type="text"
+              value={searchMedico}
+              onChange={(e) => setSearchMedico(e.target.value)}
+            />
+          </Form.Group>
+          <Table striped bordered hover className="mt-3">
+            <thead>
+              <tr>
+                <th>Cédula</th>
+                <th>Nombre</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={onClose}>
-          Cancelar
-        </Button>
-        <Button variant="primary" onClick={handleSave}>
-          Guardar
-        </Button>
-      </Modal.Footer>
-    </Modal>
+            </thead>
+            <tbody>
+              {filteredMedicos.map((m) => (
+                <tr key={m.cedula} onClick={() => handleMedicoSelect(m)} style={{ cursor: 'pointer' }}>
+                  <td>{m.cedula}</td>
+                  <td>{m.nombre_apellido}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowMedicoModal(false)}>Cerrar</Button>
+        </Modal.Footer>
+      </Modal>
+    </div>
   );
 };
 
-export default EditarExamenModal;
+export default RealizarExamenes;

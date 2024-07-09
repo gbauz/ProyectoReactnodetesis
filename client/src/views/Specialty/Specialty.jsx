@@ -1,17 +1,15 @@
-import "./Pacient.css";
+import "./Specialty.css";
 import React, { useEffect, useState } from "react";
-import { Space, Table, Tag, Button, notification, Input, Tooltip } from "antd";
-import EditCreatePacient from "./Edit-Create/EditCreatePacient";
-import PacienteService from "../../services/PacientService";
+import { Space, Table, Button, notification, Input, Tooltip } from "antd";
+import EditCreateEspecialty from "./Edit-Create/EditCreateSpecialty";
 import { DeleteFilled, EditFilled, PlusCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import Notification from "../../components/Notification/Notification";
-import DeletePacient from "./Delete/DeletePacient";
+import DeleteSpecialty from "./Delete/DeleteSpecialty";
 import moment from 'moment';
+import SpecialtyService from "../../services/SpecialtyService";
 
-const Paciente = () => {
+const Specialty = () => {
   let columns                         = [];
-  let filterSexo                      = [];
-  let uniqueSexos                     = new Set();
   const [data, setData]               = useState([]);
   const [error, setError]             = useState(null);
   const [loading, setLoading]         = useState(false);
@@ -26,12 +24,11 @@ const Paciente = () => {
       position: ["bottomRight"]
     },
   });
-  const fetchPatients = async () => {
+  const fetchAnalysis = async () => {
     setLoading(true);
     try {
-      const response = await PacienteService.getPatients();
-      setData(response.data.pacientes);
-      // console.log(response);
+      const response = await SpecialtyService.getSpecialty();
+      setData(response.data.especialidades);
     } catch (error) {
       setError(error);
     } finally {
@@ -40,94 +37,28 @@ const Paciente = () => {
   };
   
   useEffect(() => {
-    fetchPatients();
+    fetchAnalysis();
   }, []);
-
-  //Llenar filtros
-  data.forEach(element => {
-    if (!uniqueSexos.has(element.sexo)) {
-      uniqueSexos.add(element.sexo);
-      filterSexo.push({
-        text: element.sexo,
-        value: element.sexo,
-      });
-    }
-  });
 
   //Llenar columnas
   columns = [
     {
       title: "Nombre",
-      dataIndex: "paciente",
+      dataIndex: "nombre",
       sorter: {
-        compare: (a, b) => a.paciente.localeCompare(b.paciente),
+        compare: (a, b) => a.nombre.localeCompare(b.nombre),
         multiple: 1,
       },
     },
-    {
-      title: "Cedula",
-      dataIndex: "cedula",
-      align: "center",
-      sorter: {
-        compare: (a, b) => a.cedula - b.cedula,
-        multiple: 2,
-      },
-    },
-    {
-      title: "Edad",
-      dataIndex: "edad",
-      align: "center",
-      sorter: {
-        compare: (a, b) => a.edad - b.edad,
-        multiple: 3,
-      },
-    },
-    {
-      title: "Sexo",
-      dataIndex: "sexo",
-      sorter: {
-        compare: (a, b) => a.sexo.localeCompare(b.sexo),
-        multiple: 4,
-      },
-      filters: filterSexo,
-      onFilter: (value, data) => data.sexo.startsWith(value),
-      filterSearch: true,
-    },
-    {
-      title: "Telefono",
-      dataIndex: "celular",
-      align: "center",
-    },
-    {
-      title: "Fecha de ingreso",
-      dataIndex: "fecha_de_ingreso",
-      align: "center",
-      sorter: {
-        compare: (a, b) => new Date(a.fecha_de_ingreso) - new Date(b.fecha_de_ingreso),
-        multiple: 5,
-      },
-      render: (text) => moment(text).format("DD-MM-YYYY HH:mm:ss"),
-    },
     // {
-    //   title: "Tags",
-    //   key: "tags",
-    //   dataIndex: "tags",
+    //   title: "Fecha",
+    //   dataIndex: "fecha",
     //   align: "center",
-    //   render: (_, { tags }) => (
-    //     <>
-    //       {tags.map((tag) => {
-    //         let color = tag.length > 5 ? "geekblue" : "green";
-    //         if (tag === "loser") {
-    //           color = "volcano";
-    //         }
-    //         return (
-    //           <Tag color={color} key={tag}>
-    //             {tag.toUpperCase()}
-    //           </Tag>
-    //         );
-    //       })}
-    //     </>
-    //   ),
+    //   sorter: {
+    //     compare: (a, b) => new Date(a.fecha) - new Date(b.fecha),
+    //     multiple: 2,
+    //   },
+    //   render: (text) => moment(text).format("DD-MM-YYYY HH:mm:ss"),
     // },
     {
       title: "Action",
@@ -152,9 +83,6 @@ const Paciente = () => {
 
   //Propiedades de la tabla
   const handleTableChange = (pagination, filters, sorter) => {
-    console.log(pagination)
-    console.log(filters)
-    console.log(sorter)
     setTableParams({
       pagination,
       filters,
@@ -163,8 +91,8 @@ const Paciente = () => {
     });
   };
   const filteredData = data.filter(item => 
-    item.paciente.toLowerCase().includes(searchText.toLowerCase()) || 
-    item.cedula.toLowerCase().includes(searchText.toLowerCase())
+    item.nombre.toLowerCase().includes(searchText.toLowerCase())
+    // item.fecha.toLowerCase().includes(searchText.toLowerCase())
   );
 
   //Modal
@@ -183,7 +111,7 @@ const Paciente = () => {
   const handleSubmit = (axiosResponse) => {
     Notification(api, axiosResponse);
     setIsModalOpen(false);
-    fetchPatients();
+    fetchAnalysis();
   };
   
   //Delete
@@ -198,18 +126,18 @@ const Paciente = () => {
   const handleDelete = (axiosResponse) => {
     Notification(api, axiosResponse);
     setIsDeleteModalOpen(false);
-    fetchPatients();
+    fetchAnalysis();
   };
 
   return (
-    <div className="paciente">
+    <div className="specialty">
       <div className="header-content">
-        <h3>Paciente</h3>
+        <h3>Especialidad</h3>
         <div className="d-flex p-0 m-0 align-items-center">
           <div className="input-group d-flex border align-items-center me-3">
             <SearchOutlined className="mx-2"/>
             <Input className="rounded-pill"
-              placeholder="Buscar paciente"
+              placeholder="Buscar análisis"
               value={searchText}
               onChange={e => setSearchText(e.target.value)}
             />
@@ -225,16 +153,16 @@ const Paciente = () => {
         loading={loading}
         columns={columns}
         dataSource={filteredData}
-        rowKey={"id_paciente"}
+        rowKey={"id_especialidad"}
         pagination={tableParams.pagination}
         onChange={handleTableChange} />
-      <EditCreatePacient
+      <EditCreateEspecialty
         isModalOpen={isModalOpen}
         handleCancel={handleCancel}
         handleSubmit={handleSubmit}
         initialValues={currentItem}
         action={action} />
-      <DeletePacient 
+      <DeleteSpecialty 
         isDeleteModalOpen={isDeleteModalOpen}
         handleDelete={handleDelete}
         handleDeleteCancel={handleDeleteCancel}
@@ -243,4 +171,4 @@ const Paciente = () => {
   );
 };
 
-export default Paciente;
+export default Specialty;

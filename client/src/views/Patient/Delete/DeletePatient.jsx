@@ -1,15 +1,15 @@
 import React, { useState } from "react";
-import "./DeletePacient.css";
-import PacientService from "../../../services/PacientService";
+import "./DeletePatient.css";
+import PatientService from "../../../services/PatientService";
 import { Button, Modal } from "antd";
 
-const DeletePacient = ({ isDeleteModalOpen, handleDelete, handleDeleteCancel, initialValues }) => {
+const DeletePatient = ({ isDeleteModalOpen, handleDelete, handleDeleteCancel, initialValues }) => {
   const [error, setError] = useState(null);
   let response;
 
   const onFinish = async () => {
     try {
-      response = await PacientService.deletePatient(initialValues.cedula);
+      response = await PatientService.deletePatient(initialValues.cedula);
     } catch (error) {
       setError(error);
     } finally {
@@ -41,4 +41,4 @@ const DeletePacient = ({ isDeleteModalOpen, handleDelete, handleDeleteCancel, in
   );
 };
 
-export default DeletePacient;
+export default DeletePatient;
