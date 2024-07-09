@@ -13,6 +13,7 @@ const medicoRouter = require('./modelo/medico');
 const analisisRouter = require('./modelo/analisis');
 const examenesRouter = require('./modelo/examenes');
 const manten_examenesRouter = require('./modelo/manten_examenes');
+const espcialidadRouter = require('./modelo/especialidad');
 
 
 function exception_routes(paths, fn) {
@@ -22,7 +23,7 @@ function exception_routes(paths, fn) {
   }
 }
 
-const whitelist = ['https://localhost', 'http://localhost:3010', 'http://localhost:3000'];
+const whitelist = ['https://localhost', 'http://localhost:3010',  'http://localhost:3000'];
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || whitelist.some(domain => origin.includes(domain))) {
@@ -49,6 +50,7 @@ app.use('/api/medico', medicoRouter);
 app.use('/api/analisis', analisisRouter);
 app.use('/api/examenes', examenesRouter);
 app.use('/api/mantenexamenes', manten_examenesRouter);
+app.use('/api/especialidades', espcialidadRouter);
 
 app.use(express.static(path.join(__dirname, 'client', 'build')));
 
