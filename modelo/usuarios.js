@@ -76,7 +76,7 @@ router.post('/logout', verificaToken, (req, res) => {
 router.get('/users', verificaToken, async (req, res) => {
   try {
     const [rows] = await (await Conexion).execute(
-      'SELECT u.cedula, u.nombre, u.correo_electronico, r.nombre AS rol FROM Usuario u JOIN Rol r ON u.rol_id = r.id_rol'
+      'SELECT u.cedula, u.nombre, u.correo_electronico, u.rol_id, r.nombre AS rol FROM Usuario u JOIN Rol r ON u.rol_id = r.id_rol'
     );
     res.json({ users: rows });
   } catch (error) {

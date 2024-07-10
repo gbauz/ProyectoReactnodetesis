@@ -10,15 +10,16 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
   const [error, setError]                   = useState(null);
   const [loading, setLoading]               = useState(false);
   // const [loadingSelect, setloadingSelect]   = useState(false);
-  const [dataPatient, setDataPatient]     = useState([]);
-  let response = '';
+  const [dataPatient, setDataPatient]       = useState([]);
+  const [PacientOptions, setPacientOptions] = useState('');
+  let response;
 
   useEffect(() => {
-    if (action=='Edit') {
+    if (action==='Edit') {
       form.setFieldsValue(initialValues);
       setIsEditing(true);
     } 
-    if (action=='Create'){
+    if (action==='Create'){
       form.resetFields();
       setIsEditing(false);
     }
@@ -26,11 +27,21 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
     getPatients();
   }, [isModalOpen, initialValues, form, action]);
 
+  //Lógica de Pacientes
   const getPatients = async () => {
     // setloadingSelect(true);
     try {
       response = await PatientService.getPatients();
-      setDataPatient(response.data.pacientes);
+      const patients = response.data.pacientes.map(patient => ({
+        ...patient,
+        paciente_cedula: patient.cedula,
+      }));
+      setDataPatient(patients);
+      setPacientOptions(dataPatient.map(item => ({
+        value: item.id_paciente,
+        label: item.paciente_cedula,
+        paciente: item.paciente
+      })));
     } catch (error) {
       setDataPatient('');
       setError(error);
@@ -38,25 +49,19 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
       // setLoading(false);
     }
   }
-
-  const PacientOptions = dataPatient.map(item => ({
-    value: item.id_paciente,
-    label: item.paciente,
-    cedula: item.cedula
-  }));
-
+  const filterPatient = (input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase());
   const handlePatientChange = (value) => {
     const selectedPatient = PacientOptions.find(option => option.value === value);
     form.setFieldsValue({
-      cedula: selectedPatient ? selectedPatient.cedula : ''
+      paciente: selectedPatient ? selectedPatient.paciente : ''
     });
   };
 
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      if (action=='Edit') response = await ExaminationOrderService.editPatient(values.cedula, values);
-      if (action=='Create') response = await ExaminationOrderService.createPatient(values);
+      if (action==='Edit') response = await ExaminationOrderService.editPatient(values.cedula, values);
+      if (action==='Create') response = await ExaminationOrderService.createPatient(values);
     } catch (error) {
       setError(error);
     }finally {
@@ -78,13 +83,26 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
       footer={null}
     >
       <Form form={form} layout="vertical" onFinish={onFinish}>
-        <Form.Item name="id_paciente" label="Paciente" rules={[{ required: true, message: 'Por favor seleccione un paciente!' }]}>
+        <Form.Item name="id_paciente" label="Cédula del paciente" rules={[{ required: true, message: 'Por favor ingrese un número de cédula!' }]}>
           {/* <Select loading={loadingSelect} options={analisisOptions} /> */}
-          <Select options={PacientOptions} onChange={handlePatientChange}/>
+          <Select showSearch 
+            filterOption={filterPatient}
+            options={PacientOptions} 
+            onChange={handlePatientChange}/>
         </Form.Item>
-        <Form.Item name="cedula" label="Cédula" rules={[{ required: true, message: 'Por favor ingrese la cédula!' }]}>
+        <Form.Item name="paciente" label="Paciente" rules={[{ required: true, message: 'Por favor busque un paciente!' }]}>
           <Input disabled/>
         </Form.Item>
+        {/* <Form.Item name="id_medico" label="Cédula del médico" rules={[{ required: true, message: 'Por favor ingrese un número de cédula!' }]}>
+          <Select loading={loadingSelect} options={analisisOptions} />
+          <Select showSearch 
+            filterOption={filterPatient}
+            options={PacientOptions} 
+            onChange={handlePatientChange}/>
+        </Form.Item>
+        <Form.Item name="nombre_apellido" label="Médico" rules={[{ required: true, message: 'Por favor busque un médico!' }]}>
+          <Input disabled/>
+        </Form.Item> */}
         <Form.Item name="edad" label="Edad" rules={[{ required: true, message: 'Por favor ingrese la edad!' }]}>
           <Input />
         </Form.Item>

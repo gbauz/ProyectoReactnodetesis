@@ -15,6 +15,7 @@ import Analysis from '../Analysis/Analysis';
 import Exam from '../Exam/Exam';
 import Specialty from '../Specialty/Specialty';
 import Patient from '../Patient/Patient';
+import User from '../Users/User';
 const AdminPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -148,7 +149,7 @@ const AdminPage = () => {
       case 'Medico':
         return <Medic />
       case 'users':
-        return <Users />;
+        return <User />;
       case 'roles':
         return <Roles />;
       case 'auditoria':

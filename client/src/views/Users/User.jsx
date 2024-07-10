@@ -1,17 +1,19 @@
 import "./User.css";
 import React, { useEffect, useState } from "react";
-import { Space, Table, Tag, Button, notification, Input } from "antd";
+import { Space, Table, Button, notification, Input, Tooltip } from "antd";
 import EditCreateUser from "./Edit-Create/EditCreateUser";
-import PacienteService from "../../services/PacientService";
-import { DeleteFilled, EditFilled, PlusCircleOutlined, SearchOutlined } from "@ant-design/icons";
-import Notification from "../Notification/Notification";
+import { DeleteFilled, EditFilled, FilePdfOutlined, FormOutlined, PlusCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import DeleteUser from "./Delete/DeleteUser";
 import moment from 'moment';
+import Notification from "../../components/Notification/Notification";
+import UserService from "../../services/UserService";
+import jsPDF from "jspdf";
+import Password from "./Password/Password";
 
 const User = () => {
   let columns                         = [];
-  let filterSexo                      = [];
-  let uniqueSexos                     = new Set();
+  let filterRol                       = [];
+  let uniqueRol                       = new Set();
   const [data, setData]               = useState([]);
   const [error, setError]             = useState(null);
   const [loading, setLoading]         = useState(false);
@@ -26,12 +28,12 @@ const User = () => {
       position: ["bottomRight"]
     },
   });
-  const fetchPatients = async () => {
+  const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await PacienteService.getPatients();
+      const response = await UserService.getUsers();
       setData(response.data.users);
-      // console.log(response);
+      console.log(response);
     } catch (error) {
       setError(error);
     } finally {
@@ -40,16 +42,16 @@ const User = () => {
   };
   
   useEffect(() => {
-    fetchPatients();
+    fetchUsers();
   }, []);
 
   //Llenar filtros
   data.forEach(element => {
-    if (!uniqueSexos.has(element.sexo)) {
-      uniqueSexos.add(element.sexo);
-      filterSexo.push({
-        text: element.sexo,
-        value: element.sexo,
+    if (!uniqueRol.has(element.rol)) {
+      uniqueRol.add(element.rol);
+      filterRol.push({
+        text: element.rol,
+        value: element.rol,
       });
     }
   });
@@ -58,89 +60,67 @@ const User = () => {
   columns = [
     {
       title: "Nombre",
-      dataIndex: "paciente",
+      dataIndex: "nombre",
       sorter: {
         compare: (a, b) => a.paciente.localeCompare(b.paciente),
         multiple: 1,
       },
     },
     {
-      title: "Cedula",
+      title: "Cédula",
       dataIndex: "cedula",
       align: "center",
       sorter: {
-        compare: (a, b) => a.cedula - b.cedula,
+        compare: (a, b) => a.cedula.localeCompare(b.cedula),
         multiple: 2,
       },
     },
     {
-      title: "Edad",
-      dataIndex: "edad",
+      title: "E-mail",
+      dataIndex: "correo_electronico",
       align: "center",
-      sorter: {
-        compare: (a, b) => a.edad - b.edad,
-        multiple: 3,
-      },
     },
     {
-      title: "Sexo",
-      dataIndex: "sexo",
+      title: "Rol",
+      dataIndex: "rol",
       sorter: {
-        compare: (a, b) => a.sexo.localeCompare(b.sexo),
+        compare: (a, b) => a.rol.localeCompare(b.rol),
         multiple: 4,
       },
-      filters: filterSexo,
-      onFilter: (value, data) => data.sexo.startsWith(value),
+      filters: filterRol,
+      onFilter: (value, data) => data.rol.startsWith(value),
       filterSearch: true,
     },
     {
-      title: "Telefono",
-      dataIndex: "celular",
+      title: "Contraseña",
+      key: "password",
       align: "center",
+      render: (_, record) => (
+        <Space size="middle">
+          <Tooltip title='Cambiar contraseña'>
+            <Button className="actions" onClick={() => showModifyModal(record)}>
+              <FormOutlined className="edit-icon"/>
+            </Button>
+          </Tooltip>
+        </Space>
+      ),
     },
     {
-      title: "Fecha de ingreso",
-      dataIndex: "fecha_de_ingreso",
-      align: "center",
-      sorter: {
-        compare: (a, b) => new Date(a.fecha_de_ingreso) - new Date(b.fecha_de_ingreso),
-        multiple: 5,
-      },
-      render: (text) => moment(text).format('DD-MM-YYYY'),
-    },
-    // {
-    //   title: "Tags",
-    //   key: "tags",
-    //   dataIndex: "tags",
-    //   align: "center",
-    //   render: (_, { tags }) => (
-    //     <>
-    //       {tags.map((tag) => {
-    //         let color = tag.length > 5 ? "geekblue" : "green";
-    //         if (tag === "loser") {
-    //           color = "volcano";
-    //         }
-    //         return (
-    //           <Tag color={color} key={tag}>
-    //             {tag.toUpperCase()}
-    //           </Tag>
-    //         );
-    //       })}
-    //     </>
-    //   ),
-    // },
-    {
-      title: "Action",
+      title: "Acciones",
       key: "action",
       align: "center",
       render: (_, record) => (
         <Space size="middle">
-          <Button className="actions" onClick={() => showEditCreateModal(record, 'Edit')}>
-            <EditFilled className="edit-icon"/>
-          </Button>
-          <Button className="actions" onClick={() => showDeleteModal(record)}>
-            <DeleteFilled className="delete-icon" />
-          </Button>
+          <Tooltip title='Editar'>
+            <Button className="actions" onClick={() => showEditCreateModal(record, 'Edit')}>
+              <EditFilled className="edit-icon"/>
+            </Button>
+          </Tooltip>
+          <Tooltip title='Eliminar'>
+            <Button className="actions" onClick={() => showDeleteModal(record)}>
+              <DeleteFilled className="delete-icon" />
+            </Button>
+          </Tooltip>
         </Space>
       ),
     },
@@ -148,9 +128,6 @@ const User = () => {
 
   //Propiedades de la tabla
   const handleTableChange = (pagination, filters, sorter) => {
-    console.log(pagination)
-    console.log(filters)
-    console.log(sorter)
     setTableParams({
       pagination,
       filters,
@@ -159,8 +136,8 @@ const User = () => {
     });
   };
   const filteredData = data.filter(item => 
-    item.paciente.toLowerCase().includes(searchText.toLowerCase()) || 
-    item.cedula.toLowerCase().includes(searchText.toLowerCase())
+    item.cedula.toLowerCase().includes(searchText.toLowerCase()) || 
+    item.nombre.toLowerCase().includes(searchText.toLowerCase())
   );
 
   //Modal
@@ -179,7 +156,7 @@ const User = () => {
   const handleSubmit = (axiosResponse) => {
     Notification(api, axiosResponse);
     setIsModalOpen(false);
-    fetchPatients();
+    fetchUsers();
   };
   
   //Delete
@@ -194,36 +171,70 @@ const User = () => {
   const handleDelete = (axiosResponse) => {
     Notification(api, axiosResponse);
     setIsDeleteModalOpen(false);
-    fetchPatients();
+    fetchUsers();
+  };
+
+  //Modify Password
+  const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
+  const showModifyModal = (item) => {
+    setCurrentItem(item);
+    setIsModifyModalOpen(true);
+  };
+  const handleModifyCancel = () => {
+    setIsModifyModalOpen(false);
+  };
+  const handleModify = (axiosResponse) => {
+    Notification(api, axiosResponse);
+    setIsModifyModalOpen(false);
+    fetchUsers();
+  };
+
+  //Crear Reporte PDF
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    doc.text(20, 20, 'Reporte de Usuarios');
+    const usersData = data.map(user => [user.nombre, user.cedula, user.correo_electronico, user.rol]);
+    doc.autoTable({
+      head: [['Nombre', 'Cédula', 'Correo Electrónico', 'Rol']],
+      body: usersData,
+    });
+    doc.save('reporte_usuarios.pdf');
   };
 
   return (
-    <div className="paciente">
+    <div className="usuario">
       <div className="header-content">
-        <h3>Paciente</h3>
+        <h3>Usuario</h3>
         <div className="d-flex p-0 m-0 align-items-center">
-          <div className="input-group d-flex border align-items-center me-3">
+          <div className="input-group d-flex border align-items-center me-2">
             <SearchOutlined className="mx-2"/>
             <Input className="rounded-pill"
-              placeholder="Buscar paciente"
+              placeholder="Buscar usuario"
               value={searchText}
               onChange={e => setSearchText(e.target.value)}
             />
           </div>
+          <Button className="rounded-pill me-2" type="primary" onClick={generatePDF}>
+            <FilePdfOutlined /> Reporte
+          </Button>
           <Button className="rounded-pill" type="primary" onClick={() => showEditCreateModal(null, 'Create')}>
             <PlusCircleOutlined /> Crear
           </Button>
         </div>
       </div>
       {contextHolder}
-      <Table
-        responsive
+      <Table responsive
         loading={loading}
         columns={columns}
         dataSource={filteredData}
         rowKey={"cedula"}
         pagination={tableParams.pagination}
         onChange={handleTableChange} />
+      {/* <Password 
+        isModifyModalOpen={isModifyModalOpen}
+        handleModify={handleModify}
+        handleModifyCancel={handleModifyCancel}
+        initialValues={currentItem} /> */}
       <EditCreateUser
         isModalOpen={isModalOpen}
         handleCancel={handleCancel}

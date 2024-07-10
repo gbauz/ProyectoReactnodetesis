@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./DeleteUser.css";
-import PacientService from "../../../services/PacientService";
 import { Button, Modal } from "antd";
+import UserService from "../../../services/UserService";
 
 const DeleteUser = ({ isDeleteModalOpen, handleDelete, handleDeleteCancel, initialValues }) => {
   const [error, setError] = useState(null);
@@ -9,8 +9,7 @@ const DeleteUser = ({ isDeleteModalOpen, handleDelete, handleDeleteCancel, initi
 
   const onFinish = async () => {
     try {
-      response = await PacientService.deletePatient(initialValues.cedula);
-      console.log(response);
+      response = await UserService.deleteUser(initialValues.cedula);
     } catch (error) {
       setError(error);
     } finally {
@@ -22,14 +21,14 @@ const DeleteUser = ({ isDeleteModalOpen, handleDelete, handleDeleteCancel, initi
 
   return (
     <Modal
-      title="Eliminar Paciente"
+      title="Eliminar Usuario"
       open={isDeleteModalOpen}
       onCancel={handleDeleteCancel}
       centered
       maskClosable={false}
       footer={null}
     >
-      <p>¿Estás seguro de que deseas eliminar este paciente?</p>
+      <p>¿Estás seguro de que deseas eliminar este usuario?</p>
       <div className="footer">
         <Button key="back" onClick={handleDeleteCancel} style={{ marginRight: "15px" }}>
           Cancelar

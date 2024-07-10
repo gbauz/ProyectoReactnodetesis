@@ -85,7 +85,7 @@ const Analysis = () => {
       render: (text) => moment(text).format("DD-MM-YYYY HH:mm:ss"),
     },
     {
-      title: "Action",
+      title: "Acciones",
       key: "action",
       align: "center",
       render: (_, record) => (

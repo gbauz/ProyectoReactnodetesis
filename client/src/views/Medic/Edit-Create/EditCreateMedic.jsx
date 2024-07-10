@@ -5,31 +5,36 @@ import MedicService from "../../../services/MedicService";
 import SpecialtyService from "../../../services/SpecialtyService";
 
 const EditCreateMedic = ({ isModalOpen, handleSubmit, handleCancel, initialValues, action }) => {
-  const [form]                              = Form.useForm();
-  const [isEditing, setIsEditing]           = useState(false);
-  const [error, setError]                   = useState(null);
-  const [loading, setLoading]               = useState(false);
+  const [form]                                  = Form.useForm();
+  const [isEditing, setIsEditing]               = useState(false);
+  const [error, setError]                       = useState(null);
+  const [loading, setLoading]                   = useState(false);
   // const [loadingSelect, setloadingSelect]   = useState(false);
-  const [dataSpecialty, setDataSpecialty]   = useState([]);
+  const [dataSpecialty, setDataSpecialty]       = useState([]);
+  const [specialtyOptions, setSpecialtyOptions] = useState('');
   let response;
 
   useEffect(() => {
-    if (action=='Edit') {
+    if (action==='Edit') {
       form.setFieldsValue(initialValues);
       setIsEditing(true);
     } 
-    if (action=='Create'){
+    if (action==='Create'){
       form.resetFields();
       setIsEditing(false);
     }
-    getAnalysis();
+    getSpecialty();
   }, [isModalOpen, initialValues, form, action]);
 
-  const getAnalysis = async () => {
+  const getSpecialty = async () => {
     // setloadingSelect(true);
     try {
       response = await SpecialtyService.getSpecialty();
       setDataSpecialty(response.data.especialidades);
+      setSpecialtyOptions(dataSpecialty.map(item => ({
+        value: item.id_especialidad,
+        label: item.nombre
+      })));
     } catch (error) {
       setDataSpecialty('');
       setError(error);
@@ -37,17 +42,13 @@ const EditCreateMedic = ({ isModalOpen, handleSubmit, handleCancel, initialValue
       // setLoading(false);
     }
   }
-
-  const specialtyOptions = dataSpecialty.map(item => ({
-    value: item.id_especialidad,
-    label: item.nombre
-  }));
+  const filterSpecialty = (input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase());
 
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      if (action=='Edit') response = await MedicService.editMedic(values.cedula, values);
-      if (action=='Create') response = await MedicService.createMedic(values);
+      if (action==='Edit') response = await MedicService.editMedic(values.cedula, values);
+      if (action==='Create') response = await MedicService.createMedic(values);
     } catch (error) {
       setError(error);
     }finally {
@@ -80,7 +81,7 @@ const EditCreateMedic = ({ isModalOpen, handleSubmit, handleCancel, initialValue
         </Form.Item>
         <Form.Item name="id_especialidad" label="Especialidad" rules={[{ required: true, message: 'Por favor seleccione la especialidad!' }]}>
           {/* <Select loading={loadingSelect} options={analisisOptions} /> */}
-          <Select options={specialtyOptions} />
+          <Select options={specialtyOptions} showSearch filterOption={filterSpecialty}/>
         </Form.Item>
         <Form.Item name="celular" label="Teléfono" rules={[{ required: true, message: 'Por favor ingrese el teléfono!' }]}>
           <Input />
