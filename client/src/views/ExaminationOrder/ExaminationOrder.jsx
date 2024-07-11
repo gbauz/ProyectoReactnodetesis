@@ -45,15 +45,13 @@ const ExaminationOrder = () => {
 
   //Llenar filtros
   data.forEach(element => {
-    element.medico.forEach(medic => {
-      if (!uniqueMedic.has(medic.nombre_apellido)) {
-        uniqueMedic.add(medic.nombre_apellido);
-        filterMedic.push({
-          text: medic.nombre_apellido,
-          value: medic.nombre_apellido,
-        });
-      }
-    })
+    if (!uniqueMedic.has(element.nombre_apellido)) {
+      uniqueMedic.add(element.nombre_apellido);
+      filterMedic.push({
+        text: element.nombre_apellido,
+        value: element.nombre_apellido,
+      });
+    }
   });
 
   //Llenar columnas
@@ -67,33 +65,43 @@ const ExaminationOrder = () => {
       },
     },
     {
+      title: "Cédula",
+      dataIndex: "paciente_cedula",
+      sorter: {
+        compare: (a, b) => a.paciente_cedula.localeCompare(b.paciente_cedula),
+        multiple: 2,
+      },
+    },
+    {
       title: "Médico",
-      dataIndex: "medico",
+      dataIndex: "nombre_apellido",
+      sorter: {
+        compare: (a, b) => a.nombre_apellido.localeCompare(b.nombre_apellido),
+        multiple: 3,
+      },
+      filters: filterMedic,
+      onFilter: (value, data) => data.nombre_apellido.startsWith(value),
+      filterSearch: true,
+    },
+    {
+      title: "Especialidad",
+      dataIndex: "especialidad",
       align: "center",
-      render: (_, { medico }) => (
-        <>
-          {medico.map((medic) => {
-            return (
-              <Tag key={medic.id_medico}>
-                 {medic.nombre_apellido} ({medic.especialidad})
-              </Tag>
-            );
-          })}
-        </>
-      ),
+      sorter: {
+        compare: (a, b) => a.especialidad.localeCompare(b.especialidad),
+        multiple: 4,
+      },
     },
     {
       title: "Análisis",
       dataIndex: "analisis",
       align: "center",
-      render: (_, { medico }) => (
+      render: (_, { analisis }) => (
         <>
-          {medico.map((medic) => 
-            medic.analisis.map((analysis) => (
-              <Tag key={analysis.id_analisis}>
-                {analysis.analisis}
-              </Tag>
-            ))
+          {analisis.map((analysis) => 
+            <Tag key={analysis.id_analisis}>
+              {analysis.analisis}
+            </Tag>
           )}
         </>
       ),
@@ -102,17 +110,16 @@ const ExaminationOrder = () => {
       title: "Examen",
       dataIndex: "examen",
       align: "center",
-      render: (_, { medico }) => (
+      render: (_, { analisis }) => (
         <>
-          {medico.map((medic) => 
-            medic.analisis.map((analysis) => 
+          {analisis.map((analysis) => 
               analysis.examen.map((exam) => (
                 <Tag key={exam.id_examen}>
                   {exam.examen}
                 </Tag>
               )
             ))
-          )}
+          }
         </>
       ),
     },
@@ -122,12 +129,12 @@ const ExaminationOrder = () => {
       align: "center",
       sorter: {
         compare: (a, b) => new Date(a.fecha) - new Date(b.fecha),
-        multiple: 6,
+        multiple: 5,
       },
       render: (text) => moment(text).format('DD-MM-YYYY HH:mm:ss'),
     },
     {
-      title: "Action",
+      title: "Acciones",
       key: "action",
       align: "center",
       render: (_, record) => (
@@ -163,7 +170,10 @@ const ExaminationOrder = () => {
   };
 
   const filteredData = data.filter(item => 
-    item.paciente.toLowerCase().includes(searchText.toLowerCase())
+    item.paciente.toLowerCase().includes(searchText.toLowerCase()) ||
+    item.nombre_apellido.toLowerCase().includes(searchText.toLowerCase()) ||
+    item.paciente_cedula.toLowerCase().includes(searchText.toLowerCase()) ||
+    item.especialidad.toLowerCase().includes(searchText.toLowerCase())
   );
 
   //Modal

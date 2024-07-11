@@ -9,10 +9,10 @@ router.get('/', verificaToken, async (req, res) => {
   try {
     const [rows] = await (await Conexion).execute(
       `SELECT 
-        re.id_realizar, re.fecha, p.id_paciente, p.cedula AS paciente_cedula, p.paciente,
-        p.edad, p.sexo, p.celular AS paciente_celular, re.id_medico, m.cedula AS medico_cedula, 
-        m.nombre_apellido, m.celular AS medico_celular, m.direccion, esp.id_especialidad, 
-        esp.nombre, re.id_analisis, a.analisis, re.id_examen, e.examen
+        re.id_realizar, re.id_paciente, re.id_medico, re.id_examen, re.id_analisis, re.fecha, 
+        p.cedula AS paciente_cedula, p.paciente, p.edad, p.sexo, p.celular AS paciente_celular,
+		    m.cedula AS medico_cedula, m.nombre_apellido, m.celular AS medico_celular,
+		    m.direccion, esp.id_especialidad, esp.nombre, a.analisis, e.examen
         FROM 
           realizar_examen re 
         INNER JOIN 
@@ -26,12 +26,15 @@ router.get('/', verificaToken, async (req, res) => {
         INNER JOIN 
           examenes e ON re.id_examen = e.id_examen
         ORDER BY 
-          p.id_paciente, re.fecha, m.id_medico, a.id_analisis, e.id_examen;`
+          re.fecha DESC`
     );
-    const result = {};
+    const result = [];
     rows.forEach(row => {
-      if (!result[row.id_paciente]) {
-        result[row.id_paciente] = {
+      let existingEntry = result.find(
+        r => r.id_paciente === row.id_paciente && r.id_medico === row.id_medico
+      );
+      if (!existingEntry) {
+        existingEntry = {
           id_realizar: row.id_realizar,
           fecha: row.fecha,
           id_paciente: row.id_paciente,
@@ -40,35 +43,26 @@ router.get('/', verificaToken, async (req, res) => {
           edad: row.edad,
           sexo: row.sexo,
           celular: row.paciente_celular,
-          medico: []
-        };
-      }
-
-      let medico = result[row.id_paciente].medico.find(m => m.id_medico === row.id_medico);
-      if (!medico) {
-        medico = {
           id_medico: row.id_medico,
           medico_cedula: row.medico_cedula,
           nombre_apellido: row.nombre_apellido,
           medico_celular: row.medico_celular,
+          direccion: row.direccion,
           id_especialidad: row.id_especialidad,
           especialidad: row.nombre,
-          direccion: row.direccion,
           analisis: []
         };
-        result[row.id_paciente].medico.push(medico);
+        result.push(existingEntry);
       }
-
-      let analisis = medico.analisis.find(a => a.id_analisis === row.id_analisis);
+      let analisis = existingEntry.analisis.find(a => a.id_analisis === row.id_analisis);
       if (!analisis) {
         analisis = {
           id_analisis: row.id_analisis,
           analisis: row.analisis,
           examen: []
         };
-        medico.analisis.push(analisis);
+        existingEntry.analisis.push(analisis);
       }
-
       if (!analisis.examen.find(e => e.id_examen === row.id_examen)) {
         analisis.examen.push({
           id_examen: row.id_examen,
@@ -76,8 +70,7 @@ router.get('/', verificaToken, async (req, res) => {
         });
       }
     });
-    const response = Object.values(result);
-    res.json({ mantexamen: response });
+    res.json({ mantexamen: result });
   } catch (error) {
     console.error('Error fetching users:', error);
     res.status(500).json({ error: 'Error las ordenes de examen' });

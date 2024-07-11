@@ -4,11 +4,10 @@ import { Space, Table, Button, notification, Input, Tooltip } from "antd";
 import EditCreateUser from "./Edit-Create/EditCreateUser";
 import { DeleteFilled, EditFilled, FilePdfOutlined, FormOutlined, PlusCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import DeleteUser from "./Delete/DeleteUser";
-import moment from 'moment';
 import Notification from "../../components/Notification/Notification";
 import UserService from "../../services/UserService";
 import jsPDF from "jspdf";
-import Password from "./Password/Password";
+import PasswordUser from "./Password/PasswordUser";
 
 const User = () => {
   let columns                         = [];
@@ -230,11 +229,11 @@ const User = () => {
         rowKey={"cedula"}
         pagination={tableParams.pagination}
         onChange={handleTableChange} />
-      {/* <Password 
+      <PasswordUser 
         isModifyModalOpen={isModifyModalOpen}
         handleModify={handleModify}
         handleModifyCancel={handleModifyCancel}
-        initialValues={currentItem} /> */}
+        initialValues={currentItem} />
       <EditCreateUser
         isModalOpen={isModalOpen}
         handleCancel={handleCancel}

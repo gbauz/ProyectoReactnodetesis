@@ -36,9 +36,19 @@ const deleteUser = async (id) => {
   }
 };
 
+const changePassword = async (id, userData) => {
+  try {
+    const response = await apiClient.put(`users/${id}/password`, userData);
+    return response;
+  } catch (error) {
+    return error;
+  }
+};
+
 export default {
   getUsers,
   createUser,
   editUser,
   deleteUser,
+  changePassword
 };
