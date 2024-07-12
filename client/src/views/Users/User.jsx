@@ -203,7 +203,7 @@ const User = () => {
   return (
     <div className="usuario">
       <div className="header-content">
-        <h3>Usuario</h3>
+        <h3>Usuarios</h3>
         <div className="d-flex p-0 m-0 align-items-center">
           <div className="input-group d-flex border align-items-center me-2">
             <SearchOutlined className="mx-2"/>
