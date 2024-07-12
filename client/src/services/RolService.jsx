@@ -1,6 +1,6 @@
 import apiClient from "./AxiosAPI";
 
-const getRol = async () => {
+const getRols = async () => {
   try {
     const response = await apiClient.get("roles");
     return response;
@@ -9,36 +9,38 @@ const getRol = async () => {
   }
 };
 
-// const createUser = async (userData) => {
-//   try {
-//     const response = await apiClient.post("users", userData);
-//     return response;
-//   } catch (error) {
-//     return error;
-//   }
-// };
+const createRol = async (rolData) => {
+  try {
+    const response = await apiClient.post("roles", rolData);
+    return response;
+  } catch (error) {
+    return error;
+  }
+};
 
-// const editUser = async (id, userData) => {
-//   try {
-//     const response = await apiClient.put(`users/${id}`, userData);
-//     return response;
-//   } catch (error) {
-//     return error;
-//   }
-// };
+const editRol = async (id, rolData) => {
+  try {
+    console.log(id);
+    console.log(rolData);
+    const response = await apiClient.put(`roles/${id}`, rolData);
+    return response;
+  } catch (error) {
+    return error;
+  }
+};
 
-// const deleteUser = async (id) => {
-//   try {
-//     const response = await apiClient.delete(`users/${id}`);
-//     return response;
-//   } catch (error) {
-//     return error;
-//   }
-// };
+const deleteRol = async (id) => {
+  try {
+    const response = await apiClient.delete(`roles/${id}`);
+    return response;
+  } catch (error) {
+    return error;
+  }
+};
 
 export default {
-  getRol,
-//   createUser,
-//   editUser,
-//   deleteUser,
+  getRols,
+  createRol,
+  editRol,
+  deleteRol,
 };

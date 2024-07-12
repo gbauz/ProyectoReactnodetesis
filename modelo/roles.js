@@ -36,7 +36,7 @@ router.post('/', verificaToken, auditoriaMiddleware((req) => `Creó Rol: ${req.b
     const rolId = result.insertId;
 
     if (permisos && permisos.length > 0) {
-      const permisosValues = permisos.map(permisoId => [rolId, permisoId]);
+      const permisosValues = permisos.map(permisoId => [rolId, permisoId.id_permiso]);
       await (await Conexion).query(
         'INSERT INTO Roles_Permisos (id_rol, id_permiso) VALUES ?',
         [permisosValues]
@@ -64,7 +64,7 @@ router.put('/:id', verificaToken, auditoriaMiddleware((req) => `Editó Rol: ${re
     await (await Conexion).execute('DELETE FROM Roles_Permisos WHERE id_rol = ?', [roleId]);
 
     if (permisos && permisos.length > 0) {
-      const permisosValues = permisos.map(permisoId => [roleId, permisoId]);
+      const permisosValues = permisos.map(permisoId => [roleId, permisoId.id_permiso]);
       await (await Conexion).query(
         'INSERT INTO Roles_Permisos (id_rol, id_permiso) VALUES ?',
         [permisosValues]

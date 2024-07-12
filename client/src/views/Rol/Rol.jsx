@@ -1,17 +1,14 @@
-import "./Patient.css";
+import "./Rol.css";
 import React, { useEffect, useState } from "react";
-import { Space, Table, Tag, Button, notification, Input, Tooltip } from "antd";
-import EditCreatePacient from "./Edit-Create/EditCreatePatient";
-import PatienteService from "../../services/PatientService";
+import { Space, Table, Button, notification, Input, Tooltip, Tag } from "antd";
 import { DeleteFilled, EditFilled, PlusCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import Notification from "../../components/Notification/Notification";
-import DeletePatient from "./Delete/DeletePatient";
-import moment from 'moment';
+import RolService from "../../services/RolService";
+import EditCreateRol from "./Edit-Create/EditCreateRol";
+import DeleteRol from "./Delete/DeleteRol";
 
-const Patient = () => {
+const Rol = () => {
   let columns                         = [];
-  let filterSexo                      = [];
-  let uniqueSexos                     = new Set();
   const [data, setData]               = useState([]);
   const [error, setError]             = useState(null);
   const [loading, setLoading]         = useState(false);
@@ -20,17 +17,18 @@ const Patient = () => {
   const [tableParams, setTableParams] = useState({
     pagination: {
       current: 1,
-      pageSize: 7,
-      pageSizeOptions: [7, 10, 20, 50, 100],
+      pageSize: 5,
+      pageSizeOptions: [5, 10, 20, 50, 100],
       showQuickJumper: true,
       position: ["bottomRight"]
     },
   });
-  const fetchPatients = async () => {
+  const fetchRols = async () => {
     setLoading(true);
     try {
-      const response = await PatienteService.getPatients();
-      setData(response.data.pacientes);
+      const response = await RolService.getRols();
+      setData(response.data.roles);
+      console.log(response.data.roles);
     } catch (error) {
       setError(error);
     } finally {
@@ -39,73 +37,32 @@ const Patient = () => {
   };
   
   useEffect(() => {
-    fetchPatients();
+    fetchRols();
   }, []);
-
-  //Llenar filtros
-  data.forEach(element => {
-    if (!uniqueSexos.has(element.sexo)) {
-      uniqueSexos.add(element.sexo);
-      filterSexo.push({
-        text: element.sexo,
-        value: element.sexo,
-      });
-    }
-  });
 
   //Llenar columnas
   columns = [
     {
       title: "Nombre",
-      dataIndex: "paciente",
+      dataIndex: "nombre",
       sorter: {
-        compare: (a, b) => a.paciente.localeCompare(b.paciente),
+        compare: (a, b) => a.nombre.localeCompare(b.nombre),
         multiple: 1,
       },
     },
     {
-      title: "Cédula",
-      dataIndex: "cedula",
+      title: "Permisos",
+      dataIndex: "permisos",
       align: "center",
-      sorter: {
-        compare: (a, b) => a.cedula - b.cedula,
-        multiple: 2,
-      },
-    },
-    {
-      title: "Edad",
-      dataIndex: "edad",
-      align: "center",
-      sorter: {
-        compare: (a, b) => a.edad - b.edad,
-        multiple: 3,
-      },
-    },
-    {
-      title: "Sexo",
-      dataIndex: "sexo",
-      sorter: {
-        compare: (a, b) => a.sexo.localeCompare(b.sexo),
-        multiple: 4,
-      },
-      filters: filterSexo,
-      onFilter: (value, data) => data.sexo.startsWith(value),
-      filterSearch: true,
-    },
-    {
-      title: "Teléfono",
-      dataIndex: "celular",
-      align: "center",
-    },
-    {
-      title: "Fecha de ingreso",
-      dataIndex: "fecha_de_ingreso",
-      align: "center",
-      sorter: {
-        compare: (a, b) => new Date(a.fecha_de_ingreso) - new Date(b.fecha_de_ingreso),
-        multiple: 5,
-      },
-      render: (text) => moment(text).format("DD-MM-YYYY HH:mm:ss"),
+      render: (_, { permisos }) => (
+        <>
+          {permisos.map((permission) => 
+            <Tag key={permission.id_permiso}>
+              {permission.permiso_nombre}
+            </Tag>
+          )}
+        </>
+      ),
     },
     {
       title: "Acciones",
@@ -138,8 +95,7 @@ const Patient = () => {
     });
   };
   const filteredData = data.filter(item => 
-    item.paciente.toLowerCase().includes(searchText.toLowerCase()) || 
-    item.cedula.toLowerCase().includes(searchText.toLowerCase())
+    item.nombre.toLowerCase().includes(searchText.toLowerCase())
   );
 
   //Modal
@@ -158,7 +114,7 @@ const Patient = () => {
   const handleSubmit = (axiosResponse) => {
     Notification(api, axiosResponse);
     setIsModalOpen(false);
-    fetchPatients();
+    fetchRols();
   };
   
   //Delete
@@ -173,18 +129,18 @@ const Patient = () => {
   const handleDelete = (axiosResponse) => {
     Notification(api, axiosResponse);
     setIsDeleteModalOpen(false);
-    fetchPatients();
+    fetchRols();
   };
 
   return (
-    <div className="paciente">
+    <div className="rol">
       <div className="header-content">
-        <h3>Paciente</h3>
+        <h3>Roles</h3>
         <div className="d-flex p-0 m-0 align-items-center">
           <div className="input-group d-flex border align-items-center me-3">
             <SearchOutlined className="mx-2"/>
             <Input className="rounded-pill"
-              placeholder="Buscar paciente"
+              placeholder="Buscar rol"
               value={searchText}
               onChange={e => setSearchText(e.target.value)}
             />
@@ -195,20 +151,21 @@ const Patient = () => {
         </div>
       </div>
       {contextHolder}
-      <Table responsive
+      <Table
+        responsive
         loading={loading}
         columns={columns}
         dataSource={filteredData}
-        rowKey={"id_paciente"}
+        rowKey={"id_rol"}
         pagination={tableParams.pagination}
         onChange={handleTableChange} />
-      <EditCreatePacient
+      <EditCreateRol
         isModalOpen={isModalOpen}
         handleCancel={handleCancel}
         handleSubmit={handleSubmit}
         initialValues={currentItem}
         action={action} />
-      <DeletePatient 
+      <DeleteRol
         isDeleteModalOpen={isDeleteModalOpen}
         handleDelete={handleDelete}
         handleDeleteCancel={handleDeleteCancel}
@@ -217,4 +174,4 @@ const Patient = () => {
   );
 };
 
-export default Patient;
+export default Rol;

@@ -82,6 +82,7 @@ const User = () => {
     {
       title: "Rol",
       dataIndex: "rol",
+      align: "center",
       sorter: {
         compare: (a, b) => a.rol.localeCompare(b.rol),
         multiple: 4,
