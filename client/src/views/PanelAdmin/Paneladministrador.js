@@ -105,7 +105,7 @@ const AdminPage = () => {
       case 'inicio':
         return (
           <>
-            <h2>{`Bienvenido, ${userName}!`}</h2>
+            <h3>{`Bienvenido, ${userName}!`}</h3>
            {/*  <div className="card mb-4">
               <div className="card-body">
                 <h5 className="card-title">Estadísticas del Panel</h5>
@@ -212,9 +212,13 @@ const AdminPage = () => {
     'Roles': 'fas fa-user-tag',
     'Auditoria': 'fas fa-file',
     'Pacientes': 'fas fa-user-plus',
-    'Resultados': 'fas fa-vials',
-    'Examenes': 'fas fa-file-medical',
-    // Añade más categorías y sus íconos aquí
+    'Medico': 'fa-solid fa-user-doctor',
+    'Realizar Examenes': 'fas fa-file-medical',
+    'Resultados de Examen': 'fas fa-vials',
+    'Analisis': 'fa-solid fa-notes-medical',
+    'Examenes': 'fas fa-file-medical-alt',
+    'Especialidad': 'fas fa-briefcase-medical',
+
   };
   const principalCategories = ['Registro de Pacientes', 'Registro de Resultados', 'Generar Examenes'];
   const configuracionesCategories = ['Usuarios', 'Roles', 'Auditoria'];
@@ -280,7 +284,7 @@ const AdminPage = () => {
                   <i className="fas fa-user"></i> {userName} <i className="fas fa-chevron-down"></i>
                 </button>
                 {/* Submenu para el perfil del usuario */}
-                <div className="collapse" id="userProfileSubMenu">
+                {/* <div className="collapse" id="userProfileSubMenu">
                   <ul className="nav flex-column">
                     <li className="nav-item">
                       <a className="nav-link text-white" href="#">Perfil</a>
@@ -289,7 +293,7 @@ const AdminPage = () => {
                       <a className="nav-link text-white" href="#">Ajustes</a>
                     </li>
                   </ul>
-                </div>
+                </div> */}
               </li>
               <li className="nav-item">
                 <button className="nav-link text-white btn btn-link" onClick={() => { setView('inicio'); toggleSidebar(); }}>

@@ -69,13 +69,22 @@ router.put('/:id', verificaToken, auditoriaMiddleware((req) => `Editó Análisis
   });
 
 // Endpoint para eliminar analisis
-router.delete('/:id_analisis', verificaToken, async (req, res) => {
-  const analisisId = req.params.id_analisis;
+router.delete('/:id', verificaToken, async (req, res) => {
+  const analisisId = req.params.id;
   const usuario_nombre = req.user.name; // Asumiendo que el middleware verificaToken añade el nombre del usuario logueado a req.user
   const ip_usuario = getClientIp(req);
   const accion = `Eliminó Análisis con ID: ${analisisId}`;
 
   try {
+
+    const [[analisisWithExamen]] = await (await Conexion).execute(
+      'SELECT COUNT(*) AS count FROM Examenes e INNER JOIN Analisis a ON e.id_analisis = a.id_analisis WHERE a.id_analisis = ?',
+      [analisisId]
+    );
+
+    if (analisisWithExamen.count > 0) {
+      return res.status(400).json({ error: 'No se puede eliminar el Analisis porque está asignado a uno o más examenes.' });
+    }
     
     await (await Conexion).execute('DELETE FROM Analisis WHERE id_analisis = ?', [analisisId]);
 
