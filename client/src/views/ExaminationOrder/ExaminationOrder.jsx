@@ -7,6 +7,7 @@ import { DeleteFilled, EditFilled, FilePdfOutlined, PlusCircleOutlined, SearchOu
 import Notification from "../../components/Notification/Notification";
 import DeleteExaminationOrder from "./Delete/DeleteExaminationOrder";
 import moment from 'moment';
+import PDFExaminationOrder from "../../components/PDF/PDFExaminationOrder";
 
 const ExaminationOrder = () => {
   let columns                         = [];
@@ -31,7 +32,6 @@ const ExaminationOrder = () => {
     try {
       const response = await ExaminationOrderService.getExaminationOrder();
       setData(response.data.mantexamen);
-      console.log(response.data.mantexamen);
     } catch (error) {
       setError(error);
     } finally {
@@ -53,6 +53,10 @@ const ExaminationOrder = () => {
       });
     }
   });
+
+  const generatePDF = (data) => {
+    PDFExaminationOrder(data)
+  };
 
   //Llenar columnas
   columns = [
@@ -140,7 +144,7 @@ const ExaminationOrder = () => {
       render: (_, record) => (
         <Space size="middle">
           <Tooltip title='Descargar orden'>
-            <Button className="actions" onClick={() => downloadOrder(record)}>
+            <Button className="actions" onClick={() => generatePDF(record)}>
               <FilePdfOutlined className="download-icon"/>
             </Button>
           </Tooltip>
@@ -209,11 +213,6 @@ const ExaminationOrder = () => {
     setIsDeleteModalOpen(false);
     fetchExaminationOrder();
   };
-
-  //Descargar Orden
-  const downloadOrder = (data) => {
-    console.log(data);
-  }
 
   return (
     <div className="paciente">

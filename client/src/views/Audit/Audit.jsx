@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { Table, Button, Input } from "antd";
 import { FilePdfOutlined, SearchOutlined } from "@ant-design/icons";
 import moment from "moment";
-import jsPDF from 'jspdf';
 import AuditService from "../../services/AuditService";
+import PDFAudit from "../../components/PDF/PDFAudit";
 
 const Audit = () => {
   let columns                         = [];
@@ -95,21 +95,7 @@ const Audit = () => {
   );
 
   const generatePDF = () => {
-    const doc = new jsPDF();
-    doc.text(20, 20, "Reporte de Auditoría");
-    const auditoriaData = data.map((entry) => [
-      entry.usuario_nombre,
-      entry.ip_usuario,
-      entry.fecha,
-      entry.accion,
-    ]);
-    doc.autoTable({
-      head: [
-        ["Nombre de Usuario", "IP del Usuario", "Fecha", "Acción Realizada"],
-      ],
-      body: auditoriaData,
-    });
-    doc.save("reporte_auditoria.pdf");
+    PDFAudit(data);
   };
 
   return (
