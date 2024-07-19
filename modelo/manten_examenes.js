@@ -110,20 +110,51 @@ router.post('/', verificaToken, async (req, res) => {
 });
 
 router.delete('/:id', verificaToken, async (req, res) => {
-  const userId = req.params.id;
-  //const usuario_nombre = req.user.name; // Asumiendo que el middleware verificaToken añade el nombre del usuario logueado a req.user
-  //const ip_usuario = getClientIp(req);
-  //const accion = `Eliminó usuario: ${userId}`;
+  const examenId = req.params.id;
 
   try {
-    
-    await (await Conexion).execute('DELETE FROM Realizar_examen WHERE id_realizar = ?', [userId]);
+    // Verifica que el examenId no es undefined
+    if (!examenId) {
+      return res.status(400).json({ error: 'ID del examen no proporcionado.' });
+    }
 
-    //await registrarAuditoria(usuario_nombre, ip_usuario, accion);
-    res.json({ success: true, message: 'Analisis eliminado correctamente.' });
+    await (await Conexion).execute('DELETE FROM realizar_examen WHERE id_realizar = ?', [examenId]);
+
+    console.log('Examen eliminado con ID:', examenId);
+
+    res.json({ success: true, message: 'Examen eliminado correctamente.' });
   } catch (error) {
-    console.error('Error deleting user:', error);
-    res.status(500).json({ error: 'Error al eliminar usuario.' });
+    console.error('Error deleting examen:', error);
+    res.status(500).json({ error: 'Error al eliminar examen.' });
   }
 });
+// Endpoint para editar un examen realizado
+router.put('/:id', verificaToken, async (req, res) => {
+  const examenId = req.params.id;
+  const { id_paciente, id_medico, id_examen, id_analisis} = req.body;
+
+  // Verifica que los parámetros requeridos no sean undefined
+  if (!id_paciente || !id_medico || !id_examen || !id_analisis) {
+    return res.status(400).json({ error: 'Datos incompletos o inválidos' });
+  }
+
+  try {
+    // Actualizar el examen realizado en la base de datos
+    const [result] = await (await Conexion).execute(
+      'UPDATE realizar_examen SET id_paciente = ?, id_medico = ?, id_examen = ?, id_analisis = ? WHERE id_realizar = ?',
+      [id_paciente, id_medico, id_examen, id_analisis, examenId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Examen no encontrado.' });
+    }
+
+    res.json({ success: true, message: 'Examen actualizado correctamente.' });
+  } catch (error) {
+    console.error('Error updating examen:', error);
+    res.status(500).json({ error: 'Error al actualizar examen.' });
+  }
+});
+
+
 module.exports = router;
