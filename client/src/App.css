@@ -80,3 +80,8 @@
   box-shadow: none;
   outline: none;
 }
+
+.footer{
+  display: flex;
+  justify-content: end;
+}

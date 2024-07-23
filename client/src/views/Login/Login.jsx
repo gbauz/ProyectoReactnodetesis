@@ -5,22 +5,20 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import './login.css';
 import labLogo from './image/GB-LAB1.png';
 import LoginService from '../../services/LoginService';
+import { useAuth } from '../../services/AuthProvider';
 
 const Login = () => {
   const [cedula, setCedula]     = useState('');
   const [password, setPassword] = useState('');
   const [error, setError]       = useState('');
-  const navigate                = useNavigate();
+  const { login }               = useAuth();
 
   const handleLogin = async (e) => {
     try {
       e.preventDefault();
       const axiosResponse = await LoginService.logIn(JSON.stringify({ cedula: cedula, contraseña: password }));
-      if (axiosResponse.status == '200') {
-        const data = await axiosResponse.data;
-        const { token } = data;
-        sessionStorage.setItem('token', token);
-        navigate('/admin', {replace: true});
+      if (axiosResponse.status === 200) {
+        login(axiosResponse.data.token);
       } else {
         setError(axiosResponse.response.data.error);
       }

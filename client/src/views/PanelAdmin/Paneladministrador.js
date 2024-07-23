@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -17,6 +16,8 @@ import Specialty from '../Specialty/Specialty';
 import Patient from '../Patient/Patient';
 import User from '../Users/User';
 import Rol from '../Rol/Rol';
+import { useAuth } from '../../services/AuthProvider';
+
 const AdminPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,7 +26,7 @@ const AdminPage = () => {
   const [categories, setCategories] = useState(new Set());
   const [view, setView] = useState('inicio');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const navigate = useNavigate();
+  const { logout } = useAuth();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -96,8 +97,7 @@ const AdminPage = () => {
   }, []);
 
   const handleLogout = () => {
-    sessionStorage.removeItem('token');
-    navigate('/login', {replace: true});
+    logout();
   };
 
   const renderContent = () => {

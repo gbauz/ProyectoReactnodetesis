@@ -4,11 +4,16 @@ import { Routes, Route, BrowserRouter } from "react-router-dom"; // Importa Rout
 import Login from "./views/Login/Login"; // Importa el componente Login
 import RouterApp from "./routes/RouterApp";
 import ProtectedRoutes from "./routes/ProtectedRoutes";
+import { Modal } from "antd";
+import useTokenExpiration from "./hooks/UseTokenExpiration";
+import { Button } from "bootstrap/dist/js/bootstrap.bundle.min";
 
 function App() {
+  const { isModalVisible, handleOk } = useTokenExpiration();
+
   return (
-    <BrowserRouter>
-      <Routes>{/* Configuración de rutas */}
+    <div>
+      <Routes>
         <Route path="/*" element={
           <ProtectedRoutes>
             <RouterApp />
@@ -16,7 +21,19 @@ function App() {
         } />
         <Route path="/login" element={<Login />} />
       </Routes>
-    </BrowserRouter>
+      <Modal centered
+        title="Su sesión expiró"
+        open={isModalVisible}
+        onCancel={handleOk}
+        onOk={handleOk}
+        maskClosable={false}
+        footer={null}
+      >
+        <Button style={{background: '#4096FF', color:'white'}} onClick={handleOk}>
+          Aceptar
+        </Button>
+      </Modal>
+    </div>
   );
 }
 
