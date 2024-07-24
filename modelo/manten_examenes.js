@@ -155,6 +155,35 @@ router.put('/:id', verificaToken, async (req, res) => {
     res.status(500).json({ error: 'Error al actualizar examen.' });
   }
 });
+// Nuevo endpoint para obtener médico y análisis/exámenes según el paciente seleccionado
+router.get('/:id', verificaToken, async (req, res) => {
 
+  const id_paciente = req.params.id;
+
+  try {
+    const [medicoResult] = await (await Conexion).execute(
+      'SELECT m.nombre_apellido FROM realizar_examen re INNER JOIN Medico m ON re.id_medico = m.id_medico WHERE re.id_paciente = ?',
+      [id_paciente]
+    );
+
+    console.log(id_paciente);
+
+    if (medicoResult.length === 0) {
+      return res.status(404).json({ error: 'Médico no encontrado para el paciente proporcionado.' });
+    }
+
+    const medico = medicoResult[0];
+
+    const [analisisYExamenesResult] = await (await Conexion).execute(
+      'SELECT a.analisis, e.examen FROM realizar_examen re INNER JOIN analisis a ON re.id_analisis = a.id_analisis INNER JOIN examenes e ON re.id_examen = e.id_examen WHERE re.id_paciente = ?',
+      [id_paciente]
+    );
+
+    res.json({ medico, analisisYExamenes: analisisYExamenesResult });
+  } catch (error) {
+    console.error('Error fetching médico and análisis/exámenes:', error);
+    res.status(500).json({ error: 'Error al obtener médico y análisis/exámenes.' });
+  }
+});
 
 module.exports = router;

@@ -15,7 +15,7 @@ router.get('/', verificaToken, async (req, res) => {
       res.json({ especialidades: rows });
     } catch (error) {
       console.error('Error fetching users:', error);
-      res.status(500).json({ error: 'Error al obtener usuarios.' });
+      res.status(500).json({ error: 'Error al obtener especialidades.' });
     }
 });
 
@@ -56,7 +56,7 @@ router.post('/', verificaToken, async (req, res) => {
     }
 });
 
-// Endpoint para eliminar un usuario
+// Endpoint para eliminar una especialidad
 router.delete('/:id', verificaToken, async (req, res) => {
   const especialidadId = req.params.id;
   const usuario_nombre = req.user.name; // Asumiendo que el middleware verificaToken añade el nombre del usuario logueado a req.user

@@ -27,11 +27,11 @@ function App() {
         onCancel={handleOk}
         onOk={handleOk}
         maskClosable={false}
-        footer={null}
+        
       >
-        <Button style={{background: '#4096FF', color:'white'}} onClick={handleOk}>
+        {/* <Button style={{background: '#4096FF', color:'white'}} onClick={handleOk}>
           Aceptar
-        </Button>
+        </Button> */}
       </Modal>
     </div>
   );

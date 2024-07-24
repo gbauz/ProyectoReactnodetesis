@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (newToken) => {
-    const expiration = new Date().getTime() + 2 * 60 * 1000;
+    const expiration = new Date().getTime() + 60 * 60 * 1000;
     setToken(newToken);
     setExpirationTime(expiration);
     sessionStorage.setItem("token", newToken);
