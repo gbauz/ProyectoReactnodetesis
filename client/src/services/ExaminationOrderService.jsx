@@ -11,7 +11,6 @@ const getExaminationOrder = async () => {
 
 const createExaminationOrder = async (orderData) => {
   try {
-    // console.log(orderData);
     const response = await apiClient.post("mantenexamenes", orderData);
     return response;
   } catch (error) {
@@ -21,10 +20,10 @@ const createExaminationOrder = async (orderData) => {
 
 const editExaminationOrder = async (id, orderData) => {
   try {
-    // console.log(orderData);
-    // console.log(id);
-    const response = await apiClient.put(`mantenexamenes/${id}`, orderData);
-    return response;
+    console.log(orderData);
+    console.log(id);
+    // const response = await apiClient.put(`mantenexamenes/${id}`, orderData);
+    // return response;
   } catch (error) {
     return error;
   }
@@ -32,7 +31,6 @@ const editExaminationOrder = async (id, orderData) => {
 
 const deleteExaminationOrder = async (id) => {
   try {
-    // console.log(id);
     const response = await apiClient.delete(`mantenexamenes/${id}`);
     return response;
   } catch (error) {

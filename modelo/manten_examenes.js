@@ -35,7 +35,7 @@ router.get('/', verificaToken, async (req, res) => {
       );
       if (!existingEntry) {
         existingEntry = {
-          id_realizar: row.id_realizar,
+          id: row.id_realizar,
           fecha: row.fecha,
           id_paciente: row.id_paciente,
           paciente_cedula: row.paciente_cedula,
@@ -65,6 +65,7 @@ router.get('/', verificaToken, async (req, res) => {
       }
       if (!analisis.examen.find(e => e.id_examen === row.id_examen)) {
         analisis.examen.push({
+          id_realizar: row.id_realizar,
           id_examen: row.id_examen,
           examen: row.examen
         });
@@ -79,30 +80,17 @@ router.get('/', verificaToken, async (req, res) => {
 
 // Endpoint para agregar un nuevo examen realizado
 router.post('/', verificaToken, async (req, res) => {
-  const { id_paciente, id_medico, examenes } = req.body;
-
+  const { id_paciente, id_medico, id_examen, id_analisis } = req.body;
   // Verifica que los parámetros requeridos no sean undefined
-  if (!id_paciente || !id_medico || !examenes || !Array.isArray(examenes)) {
+  if (!id_paciente || !id_medico || !id_examen  || !id_analisis) {
     return res.status(400).json({ error: 'Datos incompletos o inválidos' });
   }
-
   try {
-    // Preparar los datos para la inserción
-    const values = examenes.map(examen => [id_paciente, id_medico, examen.id_examen, examen.id_analisis]);
-
-    // Construir la consulta SQL dinámica
-    let sql = 'INSERT INTO realizar_examen (id_paciente, id_medico, id_examen, id_analisis) VALUES ';
-    sql += values.map(() => '(?, ?, ?, ?)').join(', ');
-
-    // Obtener los valores de la matriz para la inserción
-    const flattenedValues = values.reduce((acc, val) => acc.concat(val), []);
-    console.log(values)
-
-    // Insertar los nuevos exámenes realizados en la base de datos
-    const [result] = await (await Conexion).execute(sql, flattenedValues);
-
-    // Respondemos con el ID del nuevo registro insertado
-    res.json({ id_realizar: result.insertId });
+    await (await Conexion).execute(
+      'INSERT INTO realizar_examen (id_paciente, id_medico, id_analisis, id_examen) VALUES (?, ?, ?, ?)',
+      [id_paciente, id_medico, id_analisis, id_examen]
+    );
+    res.json({ success: true, message: 'Examen realizado creado correctamente.' });
   } catch (error) {
     console.error('Error al insertar examen realizado:', error);
     res.status(500).json({ error: 'Error al insertar examen realizado.' });
@@ -111,17 +99,12 @@ router.post('/', verificaToken, async (req, res) => {
 
 router.delete('/:id', verificaToken, async (req, res) => {
   const examenId = req.params.id;
-
   try {
     // Verifica que el examenId no es undefined
     if (!examenId) {
       return res.status(400).json({ error: 'ID del examen no proporcionado.' });
     }
-
     await (await Conexion).execute('DELETE FROM realizar_examen WHERE id_realizar = ?', [examenId]);
-
-    console.log('Examen eliminado con ID:', examenId);
-
     res.json({ success: true, message: 'Examen eliminado correctamente.' });
   } catch (error) {
     console.error('Error deleting examen:', error);

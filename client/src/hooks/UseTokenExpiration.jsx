@@ -10,7 +10,7 @@ const useTokenExpiration = () => {
     const checkTokenExpiration = () => {
       const currentTime = new Date().getTime();
       const timeLeft = expirationTime - currentTime;
-      if (timeLeft <= 1 * 60 * 1000) setIsModalVisible(true); //Mostrar el modal antes de 1 min de acabarse
+      if (timeLeft <= 5 * 60 * 1000) setIsModalVisible(true); //Mostrar el modal antes de 5 min de acabarse
     };
     const intervalId = setInterval(checkTokenExpiration, 1000); // Verificar cada segundo
     return () => clearInterval(intervalId);

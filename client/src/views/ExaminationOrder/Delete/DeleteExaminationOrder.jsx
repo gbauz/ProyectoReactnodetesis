@@ -9,8 +9,11 @@ const DeleteExaminationOrder = ({ isDeleteModalOpen, handleDelete, handleDeleteC
 
   const onFinish = async () => {
     try {
-      response = await ExaminationOrderService.deletePatient(initialValues.cedula);
-      console.log(response);
+      for (const analysis of initialValues.analisis) {
+        for (const examen of analysis.examen) {
+          response = await ExaminationOrderService.deleteExaminationOrder(examen.id_realizar);
+        }
+      }
     } catch (error) {
       setError(error);
     } finally {

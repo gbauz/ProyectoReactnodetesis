@@ -30,7 +30,7 @@ const EditCreateUser = ({ isModalOpen, handleSubmit, handleCancel, initialValues
   const getRol = async () => {
     // setloadingSelect(true);
     try {
-      response = await RolService.getRol();
+      response = await RolService.getRols();
       const rols = response.data.roles.map(rol => ({
         ...rol,
         rol_id: rol.id_rol,

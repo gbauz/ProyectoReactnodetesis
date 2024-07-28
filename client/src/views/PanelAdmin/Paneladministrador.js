@@ -104,7 +104,7 @@ const AdminPage = () => {
     switch (view) {
       case 'inicio':
         return (
-          <>
+          <div style={{marginTop:'8%', marginLeft: '1%', marginRight:'1%'}}>
             <h3>{`Bienvenido, ${userName}!`}</h3>
            {/*  <div className="card mb-4">
               <div className="card-body">
@@ -143,7 +143,7 @@ const AdminPage = () => {
                 </div>
               </div>
             </div>
-          </>
+          </div>
         );
       case 'Pacientes':
         return <Patient />;
@@ -239,7 +239,7 @@ const AdminPage = () => {
     <div>
       {/* Barra superior */}
       {isAuthenticated && (
-        <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <nav className="navbar navbar-expand-lg navbar-dark bg-dark position-fixed w-100">
           <a className="navbar-brand" href="#">&nbsp;&nbsp;&nbsp;&nbsp;Laboratorio Clínico GB-Lab</a>
           <button className="navbar-toggler" type="button" onClick={toggleSidebar}>
             <span className="navbar-toggler-icon"></span>
@@ -358,7 +358,7 @@ const AdminPage = () => {
           </div>
         )}
 
-        <div className={`content p-4`}>
+        <div className={`content`}>
           {isAuthenticated ? renderContent() : <h1>No tienes permiso para acceder a esta página.</h1>}
         </div>
       </div>

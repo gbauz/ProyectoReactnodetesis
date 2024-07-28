@@ -19,7 +19,7 @@ const EditCreateRol = ({ isModalOpen, handleSubmit, handleCancel, initialValues,
       defaultCurrent: 1,
       pageSizeOptions: [4, 10, 20, 50, 100],
       showQuickJumper: true,
-      position: ["bottomCenter"]
+      position: ["bottomRight"]
     },
   });
   let response;
@@ -134,6 +134,7 @@ const EditCreateRol = ({ isModalOpen, handleSubmit, handleCancel, initialValues,
       centered
       maskClosable={false}
       footer={null}
+      width={800}
     >
       <Form form={form} layout="vertical" onFinish={onFinish}>
         {/* <Form.Item name="id" hidden>

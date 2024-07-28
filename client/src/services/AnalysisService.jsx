@@ -9,6 +9,15 @@ const getAnalysis = async () => {
   }
 };
 
+const getAnalysisMedic = async (name) => {
+  try {
+    const response = await apiClient.get(`analisis?especialidad=${name}`);
+    return response;
+  } catch (error) {
+    return error;
+  }
+};
+
 const createAnalysis = async (analysisData) => {
   try {
     const response = await apiClient.post("analisis", analysisData);
@@ -38,6 +47,7 @@ const deleteAnalysis = async (id) => {
 
 export default {
   getAnalysis,
+  getAnalysisMedic,
   createAnalysis,
   editAnalysis,
   deleteAnalysis,

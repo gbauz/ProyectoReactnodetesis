@@ -15,8 +15,8 @@ const Audit = () => {
   const [tableParams, setTableParams] = useState({
     pagination: {
       current: 1,
-      pageSize: 8,
-      pageSizeOptions: [8, 10, 20, 50, 100],
+      pageSize: 7,
+      pageSizeOptions: [7, 10, 20, 50, 100],
       showQuickJumper: true,
       position: ["bottomRight"],
     },

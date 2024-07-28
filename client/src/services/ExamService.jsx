@@ -9,6 +9,15 @@ const getExam = async () => {
   }
 };
 
+const getExamAnalysis = async (id_analisis) => {
+  try {
+    const response = await apiClient.get(`examenes/${id_analisis}/examenes`);
+    return response;
+  } catch (error) {
+    return error;
+  }
+};
+
 const createExam = async (examData) => {
   try {
     const response = await apiClient.post("examenes", examData);
@@ -38,6 +47,7 @@ const deleteExam = async (id) => {
 
 export default {
   getExam,
+  getExamAnalysis,
   createExam,
   editExam,
   deleteExam,

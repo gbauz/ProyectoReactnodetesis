@@ -21,8 +21,8 @@ const ExaminationOrder = () => {
   const [tableParams, setTableParams] = useState({
     pagination: {
       current: 1,
-      pageSize: 7,
-      pageSizeOptions: [7, 10, 20, 50, 100],
+      pageSize: 4,
+      pageSizeOptions: [4, 10, 20, 50, 100],
       showQuickJumper: true,
       position: ["bottomRight"]
     },
@@ -238,7 +238,7 @@ const ExaminationOrder = () => {
         loading={loading}
         columns={columns}
         dataSource={filteredData}
-        rowKey={"id_realizar"}
+        rowKey={"id"}
         pagination={tableParams.pagination}
         onChange={handleTableChange} />
       <EditCreateExaminationOrder
