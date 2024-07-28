@@ -18,17 +18,6 @@ const createExaminationOrder = async (orderData) => {
   }
 };
 
-const editExaminationOrder = async (id, orderData) => {
-  try {
-    console.log(orderData);
-    console.log(id);
-    // const response = await apiClient.put(`mantenexamenes/${id}`, orderData);
-    // return response;
-  } catch (error) {
-    return error;
-  }
-};
-
 const deleteExaminationOrder = async (id) => {
   try {
     const response = await apiClient.delete(`mantenexamenes/${id}`);
@@ -38,9 +27,18 @@ const deleteExaminationOrder = async (id) => {
   }
 };
 
+const lastExaminationOrder = async () => {
+  try {
+    const response = await apiClient.get("mantenexamenes/last/exam");
+    return response;
+  } catch (error) {
+    return error;
+  }
+};
+
 export default {
   getExaminationOrder,
   createExaminationOrder,
-  editExaminationOrder,
   deleteExaminationOrder,
+  lastExaminationOrder
 };

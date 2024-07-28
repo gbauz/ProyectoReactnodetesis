@@ -169,4 +169,17 @@ router.get('/:id', verificaToken, async (req, res) => {
   }
 });
 
+// Endpoint para obtener el ultimo id registrado
+router.get('/last/exam', verificaToken, async (req, res) => {
+  try {
+    const [rows] = await (await Conexion).execute(
+      'SELECT id_realizar FROM realizar_examen ORDER BY id_realizar DESC LIMIT 1;'
+    );
+    res.json({ mantexamen: rows });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Error las ordenes de examen' });
+  }
+});
+
 module.exports = router;

@@ -241,17 +241,21 @@ const ExaminationOrder = () => {
         rowKey={"id"}
         pagination={tableParams.pagination}
         onChange={handleTableChange} />
-      <EditCreateExaminationOrder
-        isModalOpen={isModalOpen}
-        handleCancel={handleCancel}
-        handleSubmit={handleSubmit}
-        initialValues={currentItem}
-        action={action} />
-      <DeleteExaminationOrder 
-        isDeleteModalOpen={isDeleteModalOpen}
-        handleDelete={handleDelete}
-        handleDeleteCancel={handleDeleteCancel}
-        initialValues={currentItem} />
+      {isModalOpen && (
+        <EditCreateExaminationOrder
+          isModalOpen={isModalOpen}
+          handleCancel={handleCancel}
+          handleSubmit={handleSubmit}
+          initialValues={currentItem}
+          action={action} />
+      )}
+      {isDeleteModalOpen && (
+        <DeleteExaminationOrder 
+          isDeleteModalOpen={isDeleteModalOpen}
+          handleDelete={handleDelete}
+          handleDeleteCancel={handleDeleteCancel}
+          initialValues={currentItem} />
+      )}
     </div>
   );
 };

@@ -41,15 +41,35 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
   const [examOptions, setExamOptions] = useState('');
   const [selectedExam, setSelectedExam] = useState('');
 
+  const [examenesInitial, setExamenesInitial] = useState([]);
   const [examenesSeleccionados, setExamenesSeleccionados] = useState([]);
+  const [dataLastID , setDataLastID] = useState([]);
 
   useEffect(() => {
     if (action==='Edit') {
+      let nuevosExamenesSeleccionados = [];
       form.setFieldsValue(initialValues);
       setIsEditing(true);
       setSelectedPatient(initialValues.id_paciente)
       setSelectedMedic(initialValues.id_medico);
       getAnalysis(initialValues.especialidad);
+      for (const analysis of initialValues.analisis) {
+        for (const examen of analysis.examen) {
+          nuevosExamenesSeleccionados.push({
+            id: examen.id_realizar,
+            id_paciente: initialValues.id_paciente,
+            paciente: initialValues.paciente,
+            id_medico: initialValues.id_medico,
+            medico: initialValues.nombre_apellido,
+            id_analisis: analysis.id_analisis,
+            analisis: analysis.analisis,
+            id_examen: examen.id_examen,
+            examen: examen.examen,
+          });
+        }
+      }
+      setExamenesInitial(nuevosExamenesSeleccionados);
+      setExamenesSeleccionados(nuevosExamenesSeleccionados);
     } 
     if (action==='Create'){
       form.resetFields();
@@ -57,9 +77,9 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
       setSelectedPatient('')
       setSelectedMedic('');
     }
-    console.log(initialValues);
     getPatients();
     getMedic();
+    setDataLastID(getLastID());
   }, [isModalOpen, initialValues, form, action]);
 
   useEffect(() => {
@@ -86,15 +106,12 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
     try {
       response = await PatientService.getPatients();
       const patients = response.data.pacientes.map(patient => ({
-        ...patient,
-        paciente_cedula: patient.cedula,
+        value: patient.id_paciente,
+        label: patient.cedula,
+        paciente: patient.paciente
       }));
       setDataPatient(patients);
-      setPacientOptions(dataPatient.map(item => ({
-        value: item.id_paciente,
-        label: item.paciente_cedula,
-        paciente: item.paciente
-      })));
+      setPacientOptions(patients);
     } catch (error) {
       setDataPatient('');
       setError(error);
@@ -117,16 +134,13 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
     try {
       response = await MedicService.getMedics();
       const medics = response.data.medicos.map(medic => ({
-        ...medic,
-        medico_cedula: medic.cedula,
+        value: medic.id_medico,
+        label: medic.cedula,
+        nombre_apellido: medic.nombre_apellido,
+        nombre: medic.nombre
       }));
       setDataMedic(medics);
-      setMedicOptions(dataMedic.map(item => ({
-        value: item.id_medico,
-        label: item.medico_cedula,
-        nombre_apellido: item.nombre_apellido,
-        nombre: item.nombre
-      })));
+      setMedicOptions(medics);
     } catch (error) {
       setDataMedic('');
       setError(error);
@@ -185,34 +199,50 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
     setSelectedExam(value);
   };
 
+  //Lógica de último registrado
+  const getLastID = async () => {
+    // setloadingSelect(true);
+    try {
+      response = await ExaminationOrderService.lastExaminationOrder();
+      setDataLastID(response.data.mantexamen);
+    } catch (error) {
+      setDataLastID([]);
+      setError(error);
+    } finally {
+      // setLoading(false);
+    }
+  }
+
   const handleAgregarExamen = () => {
     if (selectedAnalisis && selectedExam && selectedPatient) {
       //Busco las coincidencias
-      const pacienteSeleccionado = dataPatient.find(a => a.id_paciente === parseInt(selectedPatient));
-      const medicoSeleccionado = dataMedic.find(a => a.id_medico === parseInt(selectedMedic));
+      const pacienteSeleccionado = dataPatient.find(a => a.value === parseInt(selectedPatient));
+      const medicoSeleccionado = dataMedic.find(a => a.value === parseInt(selectedMedic));
       const analisisSeleccionado = dataAnalysis.find(a => a.id_analisis === parseInt(selectedAnalisis));
       const examenSeleccionado = dataExam.find(e => e.id_examen === parseInt(selectedExam));
       if (analisisSeleccionado && examenSeleccionado) {
         const isDuplicate = examenesSeleccionados.some(examen => 
-          examen.id_paciente === pacienteSeleccionado.id_paciente &&
+          examen.id_paciente === pacienteSeleccionado.value &&
           examen.id_analisis === analisisSeleccionado.id_analisis &&
           examen.id_examen === examenSeleccionado.id_examen
         );
         if (!isDuplicate) {
+          let newId = dataLastID.length ? dataLastID[0].id_realizar + 1 : examenesSeleccionados.length + 1;
           setExamenesSeleccionados([
             ...examenesSeleccionados,
             { 
-              id: (examenesSeleccionados.length + 1)+"",
-              id_paciente: pacienteSeleccionado.id_paciente,
+              id: newId.toString(),
+              id_paciente: pacienteSeleccionado.value,
               paciente: pacienteSeleccionado.paciente,
-              id_medico: medicoSeleccionado.id_medico,
+              id_medico: medicoSeleccionado.value,
               medico: medicoSeleccionado.nombre_apellido,
               id_analisis: analisisSeleccionado.id_analisis,
               analisis: analisisSeleccionado.analisis,
               id_examen: examenSeleccionado.id_examen,
-              examen: examenSeleccionado.examen 
+              examen: examenSeleccionado.examen
             }
           ]);
+          setDataLastID([{ id_realizar: newId }]);
         }
         setSelectedAnalisis('');
         setSelectedExam('');
@@ -292,32 +322,48 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
     });
   };
 
-  const handleCancelModal = () => {
+  const clean = () => {
     setDataAnalysis([]);
     setDataExam([]);
     setAnalysisOptions([]);
     setExamOptions([])
     setExamenesSeleccionados([]);
+    setExamenesInitial([]);
     setSelectedPatient('');
     setSelectedMedic('');
     setSelectedAnalisis('');
     setSelectedExam('');
+    setDataLastID([]);
     form.resetFields();
+  }
+
+  const handleCancelModal = () => {
+    clean();
     handleCancel();
   };
 
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      console.log(typeof(values)); //Es un objeto
-      if (action==='Edit') response = await ExaminationOrderService.editExaminationOrder(values.id, values);
-      if (action==='Create') {
-        const examenesData = examenesSeleccionados.map(examen => ({
+      const examenesData = examenesSeleccionados.map(examen => ({
           id_paciente: examen.id_paciente,
           id_medico: examen.id_medico,
           id_analisis: examen.id_analisis,
           id_examen: examen.id_examen
         }));
+      if (action==='Edit') {
+        //Eliminar los examenes anteriores
+        console.log(examenesInitial);
+        for (const examen of examenesInitial) {
+          await ExaminationOrderService.deleteExaminationOrder(examen.id);
+        }
+        //Agregar los nuevos examenes
+        console.log(examenesData);
+        for (const examen of examenesData) {
+          response = await ExaminationOrderService.createExaminationOrder(examen);
+        }
+      }
+      if (action==='Create') {
         for (const examen of examenesData) {
           response = await ExaminationOrderService.createExaminationOrder(examen);
         }
@@ -328,7 +374,7 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
       setLoading(false);
       if (response) {
         handleSubmit(response);
-        form.resetFields();
+        clean();
       }
     }
   };
@@ -384,7 +430,7 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
             </Row>
             <Row>
               <Col span={24}>
-                <Form.Item name="id_analisis" label="Análisis" rules={[{ required: true, message: 'Por favor busque un análisis!' }]}>
+                <Form.Item name="id_analisis" label="Análisis">
                   <Select showSearch
                     filterOption={filterAnalysis}
                     options={AnalysisOptions}
@@ -397,7 +443,7 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
             </Row>
             <Row>
               <Col span={24}>
-                <Form.Item name="id_examen" label="Exámenes" rules={[{ required: true, message: 'Por favor busque un examen!' }]}>
+                <Form.Item name="id_examen" label="Exámenes">
                   <Select showSearch
                     filterOption={filterExam}
                     options={examOptions}
@@ -427,7 +473,7 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
           <Button key="back" onClick={handleCancelModal} style={{marginRight:'15px'}}>
             Cancelar
           </Button>
-          <Button htmlType="submit" style={{background: '#4096FF', color:'white'}} loading={loading}>
+          <Button htmlType="submit" style={{background: '#4096FF', color:'white'}} loading={loading} disabled={!examenesSeleccionados.length}>
             {isEditing ? "Editar" : "Crear"}
           </Button>
         </Form.Item>
