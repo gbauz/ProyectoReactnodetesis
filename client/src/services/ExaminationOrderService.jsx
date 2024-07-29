@@ -36,9 +36,25 @@ const lastExaminationOrder = async () => {
   }
 };
 
+const getExamID = async (id_paciente, id_examen, id_analisis) => {
+  try {
+    const response = await apiClient.get("mantenexamenes/obtener/examen", {
+      params: {
+        id_paciente: id_paciente,
+        id_examen: id_examen,
+        id_analisis: id_analisis,
+      },
+    });
+    return response;
+  } catch (error) {
+    return error;
+  }
+};
+
 export default {
   getExaminationOrder,
   createExaminationOrder,
   deleteExaminationOrder,
-  lastExaminationOrder
+  lastExaminationOrder,
+  getExamID
 };

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Col, Form, Input, Modal, Row, Select, Space, Table, Tooltip } from "antd";
+import { Button, Col, Form, Input, Modal, notification, Row, Select, Space, Table, Tooltip } from "antd";
 import './EditCreateExaminationOrder.css'
 import ExaminationOrderService from "../../../services/ExaminationOrderService";
 import PatientService from "../../../services/PatientService";
@@ -7,12 +7,14 @@ import MedicService from "../../../services/MedicService";
 import AnalysisService from "../../../services/AnalysisService";
 import ExamService from "../../../services/ExamService";
 import { DeleteFilled } from "@ant-design/icons";
+import Notification from "../../../components/Notification/Notification";
 
 const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, initialValues, action }) => {
   const [form]                              = Form.useForm();
   const [isEditing, setIsEditing]           = useState(false);
   const [error, setError]                   = useState(null);
   const [loading, setLoading]               = useState(false);
+  const [api, contextHolder]                = notification.useNotification(); //Notification
   const [tableParams, setTableParams] = useState({
     pagination: {
       current: 1,
@@ -201,19 +203,27 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
 
   //Lógica de último registrado
   const getLastID = async () => {
-    // setloadingSelect(true);
     try {
       response = await ExaminationOrderService.lastExaminationOrder();
       setDataLastID(response.data.mantexamen);
     } catch (error) {
       setDataLastID([]);
       setError(error);
-    } finally {
-      // setLoading(false);
     }
   }
 
-  const handleAgregarExamen = () => {
+  //Lógica de obtener por ID
+  const getExamID = async (id_paciente, id_examen, id_analisis) => {
+    try {
+      response = await ExaminationOrderService.getExamID(id_paciente, id_examen, id_analisis);
+      return response.data.mantexamen;
+    } catch (error) {
+      setError(error);
+      return [];
+    }
+  }
+
+  const handleAgregarExamen = async () => {
     if (selectedAnalisis && selectedExam && selectedPatient) {
       //Busco las coincidencias
       const pacienteSeleccionado = dataPatient.find(a => a.value === parseInt(selectedPatient));
@@ -221,12 +231,15 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
       const analisisSeleccionado = dataAnalysis.find(a => a.id_analisis === parseInt(selectedAnalisis));
       const examenSeleccionado = dataExam.find(e => e.id_examen === parseInt(selectedExam));
       if (analisisSeleccionado && examenSeleccionado) {
+        //Buscar duplicados en la base de datos
+        const dataExamID = await getExamID(pacienteSeleccionado.value, analisisSeleccionado.id_analisis, examenSeleccionado.id_examen);
+        //Buscar dupicados en el arreglo
         const isDuplicate = examenesSeleccionados.some(examen => 
           examen.id_paciente === pacienteSeleccionado.value &&
           examen.id_analisis === analisisSeleccionado.id_analisis &&
           examen.id_examen === examenSeleccionado.id_examen
         );
-        if (!isDuplicate) {
+        if (!isDuplicate && !dataExamID.length) {
           let newId = dataLastID.length ? dataLastID[0].id_realizar + 1 : examenesSeleccionados.length + 1;
           setExamenesSeleccionados([
             ...examenesSeleccionados,
@@ -243,6 +256,16 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
             }
           ]);
           setDataLastID([{ id_realizar: newId }]);
+        } else {
+          let axiosResponse = {
+            status: 400,
+            response: {
+              data: {
+                error: "El examen seleccionado ya ha sido registrado!"
+              }
+            }
+          }
+          Notification(api, axiosResponse);
         }
         setSelectedAnalisis('');
         setSelectedExam('');
@@ -353,12 +376,10 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
         }));
       if (action==='Edit') {
         //Eliminar los examenes anteriores
-        console.log(examenesInitial);
         for (const examen of examenesInitial) {
           await ExaminationOrderService.deleteExaminationOrder(examen.id);
         }
         //Agregar los nuevos examenes
-        console.log(examenesData);
         for (const examen of examenesData) {
           response = await ExaminationOrderService.createExaminationOrder(examen);
         }
@@ -389,6 +410,7 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
       footer={null}
       width={1000}
     >
+      {contextHolder}
       <Form form={form} layout="vertical" onFinish={onFinish} preserve={false}>
         <Row align={"middle"}>
           <Col span={8}>

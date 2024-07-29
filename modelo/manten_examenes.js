@@ -182,4 +182,22 @@ router.get('/last/exam', verificaToken, async (req, res) => {
   }
 });
 
+// Endpoint para obtener examen
+router.get('/obtener/examen', verificaToken, async (req, res) => {
+  try {
+    const { id_paciente, id_examen, id_analisis } = req.query;
+    if (!id_paciente || !id_examen || !id_analisis) {
+      return res.status(400).json({ error: 'Datos incompletos o inválidos' });
+    }
+    const [rows] = await (await Conexion).execute(
+      'SELECT * FROM `realizar_examen` WHERE `id_paciente`=? AND `id_examen`=? AND `id_analisis`=?;',
+      [id_paciente, id_examen, id_analisis]
+    );
+    res.json({ mantexamen: rows });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Error las ordenes de examen' });
+  }
+});
+
 module.exports = router;
