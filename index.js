@@ -3,7 +3,7 @@ const path = require('path');
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3010;
-const app_url = process.env.REACT_APP_BASE_URL || 'https://proyecto-reactnodetesis-lafuy8kec-giovannis-projects-58685ad4.vercel.app/' || 3010 ;
+const app_url = process.env.REACT_APP_BASE_URL || 'https://proyecto-reactnodetesis-brown.vercel.app' || 3010 ;
 
 //console.log(app_url);
 
@@ -28,7 +28,7 @@ function exception_routes(paths, fn) {
   }
 }
 
-const whitelist = ['https://localhost', 'http://localhost:3010',  'http://localhost:3000', 'proyecto-reactnodetesis.vercel.app'];
+const whitelist = ['https://localhost', 'http://localhost:3010',  'http://localhost:3000', 'https://proyecto-reactnodetesis-brown.vercel.app/'];
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || whitelist.some(domain => origin.includes(domain))) {
