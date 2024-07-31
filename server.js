@@ -5,6 +5,8 @@ const app = express();
 const port = process.env.PORT || 3010;
 const app_url = process.env.REACT_APP_BASE_URL || 'proyecto-reactnodetesis.vercel.app';
 
+//console.log(app_url);
+
 const usuariosRouter = require('./modelo/usuarios');
 const rolesRouter = require('./modelo/roles');
 const permisosRouter = require('./modelo/permisos');
