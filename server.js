@@ -66,5 +66,5 @@ app.get('*', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Servidor escuchando en http://localhost:${app_url}`);
+  console.log(`Servidor escuchando en http://localhost:${port}`);
 });
