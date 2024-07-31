@@ -3,7 +3,7 @@ const path = require('path');
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3010;
-const app_url = process.env.REACT_APP_BASE_URL || 'proyecto-reactnodetesis.vercel.app';
+const app_url = process.env.REACT_APP_BASE_URL || 'https://proyecto-reactnodetesis-lafuy8kec-giovannis-projects-58685ad4.vercel.app/';
 
 //console.log(app_url);
 
