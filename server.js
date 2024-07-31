@@ -3,7 +3,7 @@ const path = require('path');
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3010;
-const app_url = process.env.REACT_APP_BASE_URL || 'https://proyecto-reactnodetesis-lafuy8kec-giovannis-projects-58685ad4.vercel.app/';
+const app_url = process.env.REACT_APP_BASE_URL || 'https://proyecto-reactnodetesis-lafuy8kec-giovannis-projects-58685ad4.vercel.app/' || 3010 ;
 
 //console.log(app_url);
 
@@ -66,5 +66,5 @@ app.get('*', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Servidor escuchando en http://localhost:${port}`);
+  console.log(`Servidor escuchando en http://localhost:${app_url}`);
 });
