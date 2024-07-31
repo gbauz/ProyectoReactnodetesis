@@ -6,6 +6,7 @@ const port = process.env.PORT || 3010;
 const app_url = process.env.REACT_APP_BASE_URL || 'https://proyecto-reactnodetesis-brown.vercel.app' || 3010 ;
 
 //console.log(app_url);
+//console.log(app_url);
 
 const usuariosRouter = require('./modelo/usuarios');
 const rolesRouter = require('./modelo/roles');
