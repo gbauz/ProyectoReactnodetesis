@@ -3,6 +3,7 @@ const path = require('path');
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3010;
+const app_url = process.env.REACT_APP_BASE_URL || 'proyecto-reactnodetesis.vercel.app';
 
 const usuariosRouter = require('./modelo/usuarios');
 const rolesRouter = require('./modelo/roles');
@@ -25,7 +26,7 @@ function exception_routes(paths, fn) {
   }
 }
 
-const whitelist = ['https://localhost', 'http://localhost:3010',  'http://localhost:3000'];
+const whitelist = ['https://localhost', 'http://localhost:3010',  'http://localhost:3000', 'proyecto-reactnodetesis.vercel.app'];
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || whitelist.some(domain => origin.includes(domain))) {
