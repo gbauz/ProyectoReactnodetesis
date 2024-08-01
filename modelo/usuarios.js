@@ -11,7 +11,7 @@ router.post('/login', async (req, res) => {
   const { cedula, contraseña } = req.body;
 
   if (!cedula || !contraseña) {
-    return res.status(400).json({ error: 'Usuario y contraseña son requeridos.' });
+    return res.status(400).json({ error: 'Usuario y contraseña son reueridos.' });
   }
 
   try {

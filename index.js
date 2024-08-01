@@ -3,8 +3,9 @@ const path = require('path');
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3010;
+const app_url = process.env.REACT_APP_BASE_URL || 'https://proyecto-reactnodetesis-brown.vercel.app' || 3010 ;
 
-//const routes = require('./routes'); // Importar el archivo de rutas
+const routes = require('./routes'); // Importar el archivo de rutas
 
 
 const whitelist = ['https://localhost', 'http://localhost:3010',  'http://localhost:3000', 'https://proyecto-reactnodetesis-brown.vercel.app'];
@@ -32,7 +33,7 @@ app.use(exception_routes(['/login', '/another_route'], cors(corsOptions)));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//app.use(routes); // Usar el archivo de rutas
+app.use(routes); // Usar el archivo de rutas
 
 app.use(express.static(path.join(__dirname, 'client', 'build')));
 
