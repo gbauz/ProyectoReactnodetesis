@@ -17,6 +17,8 @@ import Patient from '../Patient/Patient';
 import User from '../Users/User';
 import Rol from '../Rol/Rol';
 import { useAuth } from '../../services/AuthProvider';
+import ExamDetail from '../ExamDetails/ExamDetail';
+import Resultados from '../Results/Results';
 
 const AdminPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -163,8 +165,12 @@ const AdminPage = () => {
         return <Exam />;
       case 'Especialidad':
         return <Specialty />;
+      case 'Examen Detalles':
+        return <ExamDetail />
       case 'reports':
         return <div>Reportes</div>;
+      case 'Resultados de Examen':
+        return <Resultados />;
       default:
         return <div>Vista no encontrada</div>;
     }
@@ -198,6 +204,10 @@ const AdminPage = () => {
         return 'Reportes';
       case 'Especialidad':
         return 'Especialidad';
+      case 'Examen Detalles':
+        return 'Examen Detalles';
+      case 'Resultados de Examen':
+        return 'Resultados de Examen';
       default:
         return '';
     }
@@ -332,6 +342,12 @@ const AdminPage = () => {
                     break;
                   case 'Especialidad':
                     componentKey = 'Especialidad';
+                    break;
+                  case 'Examen Detalles':
+                    componentKey = 'Examen Detalles';
+                    break;
+                  case 'Resultados de Examen':
+                    componentKey = 'Resultados de Examen';
                     break;
                   default:
                     componentKey = category.toLowerCase();

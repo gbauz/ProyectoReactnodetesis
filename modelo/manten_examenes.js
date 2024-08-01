@@ -86,11 +86,16 @@ router.post('/', verificaToken, async (req, res) => {
     return res.status(400).json({ error: 'Datos incompletos o inválidos' });
   }
   try {
-    await (await Conexion).execute(
+    const conn = await Conexion;
+    await conn.beginTransaction();
+    await conn.execute(
       'INSERT INTO realizar_examen (id_paciente, id_medico, id_analisis, id_examen) VALUES (?, ?, ?, ?)',
       [id_paciente, id_medico, id_analisis, id_examen]
     );
-    res.json({ success: true, message: 'Examen realizado creado correctamente.' });
+    const [rows] = await conn.execute('SELECT LAST_INSERT_ID() AS id');
+    const lastInsertId = rows[0].id;
+    await conn.commit();
+    res.json({ success: true, message: 'Examen realizado creado correctamente.', id: lastInsertId });
   } catch (error) {
     console.error('Error al insertar examen realizado:', error);
     res.status(500).json({ error: 'Error al insertar examen realizado.' });

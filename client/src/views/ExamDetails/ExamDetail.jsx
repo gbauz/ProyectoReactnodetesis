@@ -1,13 +1,13 @@
-import "./Specialty.css";
+import "./ExamDetail.css";
 import React, { useEffect, useState } from "react";
 import { Space, Table, Button, notification, Input, Tooltip } from "antd";
-import EditCreateEspecialty from "./Edit-Create/EditCreateSpecialty";
+import EditCreateExamDetail from "./Edit-Create/EditCreateExamDetail";
 import { DeleteFilled, EditFilled, PlusCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import Notification from "../../components/Notification/Notification";
-import DeleteSpecialty from "./Delete/DeleteSpecialty";
-import SpecialtyService from "../../services/SpecialtyService";
+import DeleteExamDetail from "./Delete/DeleteExamDetail";
+import ExamDetailService from "../../services/ExamDetailService";
 
-const Specialty = () => {
+const ExamDetail = () => {
   let columns                         = [];
   const [data, setData]               = useState([]);
   const [error, setError]             = useState(null);
@@ -26,8 +26,9 @@ const Specialty = () => {
   const fetchAnalysis = async () => {
     setLoading(true);
     try {
-      const response = await SpecialtyService.getSpecialty();
-      setData(response.data.especialidades);
+      const response = await ExamDetailService.getExamDetails();
+      setData(response.data.detalles);
+      console.log(response.data.detalles);
     } catch (error) {
       setError(error);
     } finally {
@@ -42,12 +43,30 @@ const Specialty = () => {
   //Llenar columnas
   columns = [
     {
-      title: "Nombre",
-      dataIndex: "nombre",
+      title: "Examen",
+      dataIndex: "examen",
       sorter: {
-        compare: (a, b) => a.nombre.localeCompare(b.nombre),
+        compare: (a, b) => a.examen.localeCompare(b.examen),
         multiple: 1,
       },
+    },
+    {
+      title: "Detalle",
+      dataIndex: "detalle",
+      sorter: {
+        compare: (a, b) => a.detalle.localeCompare(b.detalle),
+        multiple: 2,
+      },
+    },
+    {
+      title: "Unidad",
+      dataIndex: "unidad",
+      align: "center",
+    },
+    {
+      title: "Referencia",
+      dataIndex: "valor_referencia",
+      align: "center",
     },
     {
       title: "Action",
@@ -80,7 +99,8 @@ const Specialty = () => {
     });
   };
   const filteredData = data.filter(item => 
-    item.nombre.toLowerCase().includes(searchText.toLowerCase())
+    item.examen.toLowerCase().includes(searchText.toLowerCase()) ||
+    item.detalle.toLowerCase().includes(searchText.toLowerCase())
   );
 
   //Modal
@@ -120,7 +140,7 @@ const Specialty = () => {
   return (
     <div className="specialty">
       <div className="header-content">
-        <h3>Especialidad</h3>
+        <h3>Detalles de examenes</h3>
         <div className="d-flex p-0 m-0 align-items-center">
           <div className="input-group d-flex border align-items-center me-3">
             <SearchOutlined className="mx-2"/>
@@ -141,16 +161,16 @@ const Specialty = () => {
         loading={loading}
         columns={columns}
         dataSource={filteredData}
-        rowKey={"id_especialidad"}
+        rowKey={"id_detalle"}
         pagination={tableParams.pagination}
         onChange={handleTableChange} />
-      <EditCreateEspecialty
+      <EditCreateExamDetail
         isModalOpen={isModalOpen}
         handleCancel={handleCancel}
         handleSubmit={handleSubmit}
         initialValues={currentItem}
         action={action} />
-      <DeleteSpecialty 
+      <DeleteExamDetail 
         isDeleteModalOpen={isDeleteModalOpen}
         handleDelete={handleDelete}
         handleDeleteCancel={handleDeleteCancel}
@@ -159,4 +179,4 @@ const Specialty = () => {
   );
 };
 
-export default Specialty;
+export default ExamDetail;

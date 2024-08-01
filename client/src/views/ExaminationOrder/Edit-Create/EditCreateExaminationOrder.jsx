@@ -8,6 +8,7 @@ import AnalysisService from "../../../services/AnalysisService";
 import ExamService from "../../../services/ExamService";
 import { DeleteFilled } from "@ant-design/icons";
 import Notification from "../../../components/Notification/Notification";
+import ResultService from "../../../services/ResultService";
 
 const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, initialValues, action }) => {
   const [form]                              = Form.useForm();
@@ -375,14 +376,59 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
           id_examen: examen.id_examen
         }));
       if (action==='Edit') {
-        //Eliminar los examenes anteriores
-        for (const examen of examenesInitial) {
-          await ExaminationOrderService.deleteExaminationOrder(examen.id);
-        }
+        let response;
+        let idsResult = [];
+        let result = [];
+        let idsNewOrdenExam = [];
+        let resultMap = new Map();
+
+            // id: examen.id_realizar,
+            // id_paciente: initialValues.id_paciente,
+            // paciente: initialValues.paciente,
+            // id_medico: initialValues.id_medico,
+            // medico: initialValues.nombre_apellido,
+            // id_analisis: analysis.id_analisis,
+            // analisis: analysis.analisis,
+            // id_examen: examen.id_examen,
+            // examen: examen.examen;
+
         //Agregar los nuevos examenes
         for (const examen of examenesData) {
           response = await ExaminationOrderService.createExaminationOrder(examen);
+          // for (const initial of examenesInitial){
+          //   if (initial.id_paciente)
+          // }
+          // if (response.data) {
+          //   idsNewOrdenExam.push(response.data.id);
+          //   resultMap.set(examen.uniqueAttribute, response.data.id);
+          // }
+          // if (response.data) {
+          //   idsNewOrdenExam.push({
+          //     newOrderId: response.data.id,
+          //     uniqueAttribute: examen.uniqueAttribute,
+          //   });
+          //   resultMap.set(examen.uniqueAttribute, response.data.id);
+          // }
+          // if (response.data) await ResultService.getResultID(examen.id)
+          // result = await ResultService.getResultID(examen.id);
         }
+        // Obtener los resultados anteriores
+        // for (const examen of examenesInitial) {
+        //   const result = await ResultService.getResultID(examen.id);
+        //   // if (result.data.resultadosData.length) {
+        //   //   idsResult.push({
+        //   //     oldId: examen.id,
+        //   //     oldResultId: result.data.resultadosData[0].id_resultado,
+        //   //     uniqueAttribute: examen.uniqueAttribute,
+        //   //   });
+        //   // }
+        // }
+        //Eliminar los examenes anteriores
+        for (const examen of examenesInitial) {
+          // if (result.data.resultadosData.length) idsResult.push(result.data.resultadosData[0].id_resultado);
+          await ExaminationOrderService.deleteExaminationOrder(examen.id);
+        }
+        console.log(idsResult);
       }
       if (action==='Create') {
         for (const examen of examenesData) {

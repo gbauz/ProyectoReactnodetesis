@@ -87,14 +87,49 @@ router.put('/:id', verificaToken, upload.single('file'), async (req, res) => {
 // Eliminar un resultado existente
 router.delete('/:id', verificaToken, async (req, res) => {
   const { id } = req.params;
-
   try {
     await (await Conexion).execute('DELETE FROM resultado WHERE id_resultado = ?', [id]);
-
     res.json({ success: true, message: 'Resultado eliminado exitosamente.' });
   } catch (error) {
     console.error('Error al eliminar el resultado de la base de datos:', error);
     res.status(500).json({ error: 'Error al eliminar el resultado' });
+  }
+});
+
+//Obtener resultado por id_realizar
+router.get('/obtener/:id_realizar', verificaToken, async (req, res) => {
+  try {
+    const { id_realizar } = req.params;
+    if (!id_realizar) {
+      return res.status(400).json({ error: 'Datos incompletos o inválidos' });
+    }
+    const [rows] = await (await Conexion).execute(
+      'SELECT * FROM `resultado` WHERE `id_realizar`=?',
+      [id_realizar]
+    );
+    res.json({ resultadosData: rows });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Error al obtener el resultado' });
+  }
+});
+
+//Actualizar 
+router.put('/actualizar/:id', verificaToken, async (req, res) => {
+  const { id } = req.params;
+  const { nuevoIdResultado } = req.body; // Suponiendo que envías el nuevo id_resultado en el cuerpo de la solicitud
+  if (!nuevoIdResultado) {
+    return res.status(400).json({ error: 'El nuevo id_resultado es requerido.' });
+  }
+  try {
+    await (await Conexion).execute(
+      'UPDATE `resultado` SET `id_resultado` = ? WHERE `id_resultado` = ?',
+      [nuevoIdResultado, id]
+    );
+    res.json({ success: true, message: 'id_resultado actualizado exitosamente.' });
+  } catch (error) {
+    console.error('Error al actualizar el id_resultado en la base de datos:', error);
+    res.status(500).json({ error: 'Error al actualizar el id_resultado' });
   }
 });
 
