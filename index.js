@@ -1,7 +1,16 @@
 const express = require('express');
 const path = require('path');
-const cors = require('cors');
 const app = express();
+const cors = require('cors');
+const corsConfig = {
+  origin: "*",
+  credential: true,
+  methods : ["GET","POST","PUT","DELETE"],
+
+}
+app.options("", cors(corsConfig));
+app.use(cors(corsConfig));
+
 const port = process.env.PORT || 3010;
 const app_url = process.env.REACT_APP_BASE_URL || 3010 ;
 
