@@ -67,7 +67,7 @@ const Login = () => {
                     <button className="btn btn-primary" type="submit">
                       Login
                     </button>
-                    <a href="/register" className="mt-3">¿Olvidaste tu contraseña?</a>
+                    
                   </div>
                 </form>
               </div>
