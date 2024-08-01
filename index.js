@@ -1,42 +1,11 @@
 const express = require('express');
 const path = require('path');
-const app = express();
 const cors = require('cors');
-const corsConfig = {
-  origin: "*",
-  credential: true,
-  methods : ["GET","POST","PUT","DELETE"],
-
-}
-app.options("", cors(corsConfig));
-app.use(cors(corsConfig));
-
+const app = express();
 const port = process.env.PORT || 3010;
-const app_url = process.env.REACT_APP_BASE_URL || 3010 ;
 
+//const routes = require('./routes'); // Importar el archivo de rutas
 
-
-
-const usuariosRouter = require('./modelo/usuarios');
-const rolesRouter = require('./modelo/roles');
-const permisosRouter = require('./modelo/permisos');
-const auditoriaRouter = require('./modelo/auditoria');
-const pacientesRouter = require('./modelo/pacientes');
-const medicoRouter = require('./modelo/medico');
-const analisisRouter = require('./modelo/analisis');
-const examenesRouter = require('./modelo/examenes');
-const manten_examenesRouter = require('./modelo/manten_examenes');
-const espcialidadRouter = require('./modelo/especialidad');
-const examDetalleRouter = require('./modelo/examen_detalles');
-const resultadosRouter = require('./modelo/resultados');
-
-
-function exception_routes(paths, fn) {
-  return function (req, res, next) {
-    if (paths.some(path => req.path.startsWith(path))) return next();
-    return fn(req, res, next);
-  }
-}
 
 const whitelist = ['https://localhost', 'http://localhost:3010',  'http://localhost:3000', 'https://proyecto-reactnodetesis-brown.vercel.app'];
 const corsOptions = {
@@ -51,23 +20,19 @@ const corsOptions = {
   credentials: true
 };
 
+function exception_routes(paths, fn) {
+  return function (req, res, next) {
+    if (paths.some(path => req.path.startsWith(path))) return next();
+    return fn(req, res, next);
+  }
+}
+
 app.use(exception_routes(['/login', '/another_route'], cors(corsOptions)));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api', usuariosRouter);
-app.use('/api/roles', rolesRouter);
-app.use('/api/permisos', permisosRouter);
-app.use('/api/auditoria', auditoriaRouter);
-app.use('/api/pacientes', pacientesRouter);
-app.use('/api/medico', medicoRouter);
-app.use('/api/analisis', analisisRouter);
-app.use('/api/examenes', examenesRouter);
-app.use('/api/mantenexamenes', manten_examenesRouter);
-app.use('/api/especialidades', espcialidadRouter);
-app.use('/api/examen_detalle', examDetalleRouter);
-app.use('/api/resultado', resultadosRouter);
+//app.use(routes); // Usar el archivo de rutas
 
 app.use(express.static(path.join(__dirname, 'client', 'build')));
 
