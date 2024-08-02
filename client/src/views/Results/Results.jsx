@@ -1,6 +1,6 @@
 import "./Results.css";
 import React, { useEffect, useState } from "react";
-import { Space, Table, Button, notification, Input, Tooltip } from "antd";
+import { Space, Table, Button, notification, Input, Tooltip, Tag } from "antd";
 import EditCreateEspecialty from "./Edit-Create/EditCreateResults";
 import { DeleteFilled, EditFilled, PlusCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import Notification from "../../components/Notification/Notification";
@@ -45,7 +45,7 @@ const Resultados = () => {
   columns = [
     {
       title: "Cédula paciente",
-      dataIndex: "cedula_paciente",
+      dataIndex: "paciente_cedula",
     },
     {
       title: "Paciente",
@@ -57,7 +57,7 @@ const Resultados = () => {
     },
     {
       title: "Médico",
-      dataIndex: "nombre_medico",
+      dataIndex: "nombre_apellido",
       sorter: {
         compare: (a, b) => a.nombre_medico.localeCompare(b.nombre_medico),
         multiple: 2,
@@ -67,6 +67,15 @@ const Resultados = () => {
       title: "Resultado",
       dataIndex: "resultado",
       align: "center",
+      render: (_, { examen }) => (
+        <>
+          {examen.map((exam) => 
+            <Tag key={exam.id_resultado}>
+              {exam.examen}{exam.resultado}
+            </Tag>
+          )}
+        </>
+      ),
     },
     {
       title: "Action",
@@ -98,11 +107,12 @@ const Resultados = () => {
       sortField: Array.isArray(sorter) ? undefined : sorter.field,
     });
   };
-  const filteredData = data.filter(item => 
-    item.cedula_paciente.toLowerCase().includes(searchText.toLowerCase()) ||
-    item.paciente.toLowerCase().includes(searchText.toLowerCase())        ||
-    item.nombre_medico.toLowerCase().includes(searchText.toLowerCase())
-  );
+  const filteredData = data;
+  // .filter(item => 
+  //   item.cedula_paciente.toLowerCase().includes(searchText.toLowerCase()) ||
+  //   item.paciente.toLowerCase().includes(searchText.toLowerCase())        ||
+  //   item.nombre_medico.toLowerCase().includes(searchText.toLowerCase())
+  // );
 
   //Modal
   const [isModalOpen, setIsModalOpen] = useState(false);

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button, Form, Input, Modal } from "antd";
 import './EditCreateResults.css';
-import AnalysisService from "../../../services/AnalysisService";
 import SpecialtyService from "../../../services/SpecialtyService";
 
 const EditCreateEspecialty = ({ isModalOpen, handleSubmit, handleCancel, initialValues, action }) => {

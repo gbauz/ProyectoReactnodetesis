@@ -9,18 +9,50 @@ const { verificaToken } = require('./auth');
 router.get('/', verificaToken, async (req, res) => {
   try {
     const [rows] = await (await Conexion).execute(`
-      SELECT r.id_resultado, r.resultado, p.cedula AS cedula_paciente, p.paciente, 
-             m.nombre_apellido AS nombre_medico, 
-             a.analisis, e.examen
-      FROM resultado r
-      JOIN realizar_examen re ON r.id_realizar = re.id_realizar
-      JOIN pacientes p ON re.id_paciente = p.id_paciente
-      JOIN medico m ON re.id_medico = m.id_medico
-      JOIN analisis a ON re.id_analisis = a.id_analisis
-      JOIN examenes e ON re.id_examen = e.id_examen
+      SELECT res.id_resultado, res.resultado, res.id_realizar, 
+        re.id_paciente, re.id_medico, re.id_examen, re.id_analisis, 
+        p.cedula AS paciente_cedula, p.paciente, 
+        m.cedula AS medico_cedula, m.nombre_apellido, 
+        a.analisis, e.examen 
+      FROM resultado res 
+      INNER JOIN realizar_examen re ON res.id_realizar = re.id_realizar 
+      INNER JOIN pacientes p ON re.id_paciente = p.id_paciente 
+      INNER JOIN medico m ON re.id_medico = m.id_medico 
+      INNER JOIN analisis a ON re.id_analisis = a.id_analisis 
+      INNER JOIN examenes e ON re.id_examen = e.id_examen ORDER 
+      BY re.fecha DESC;
     `);
-    
-    res.json({ resultadosData: rows });
+    const result = [];
+    rows.forEach(row => {
+      let existingEntry = result.find(
+        r => r.id_paciente === row.id_paciente && r.id_medico === row.id_medico
+      );
+      if (!existingEntry) {
+        existingEntry = {
+          id: row.id_resultado,
+          id_paciente: row.id_paciente,
+          paciente_cedula: row.paciente_cedula,
+          paciente: row.paciente,
+          id_medico: row.id_medico,
+          medico_cedula: row.medico_cedula,
+          nombre_apellido: row.nombre_apellido,
+          examen: []
+        };
+        result.push(existingEntry);
+      }
+      let existingExamen = existingEntry.examen.find(e => e.id_examen === row.id_examen);
+      if (!existingExamen) {
+        existingEntry.examen.push({
+          id_resultado: row.id_resultado,
+          resultado: row.resultado,
+          id_analisis: row.id_analisis,
+          analisis: row.analisis,
+          id_examen: row.id_examen,
+          examen: row.examen
+        });
+      }
+    });
+    res.json({ resultadosData: result });
   } catch (error) {
     console.error('Error al obtener los resultados:', error);
     res.status(500).json({ error: 'Error al obtener los resultados' });

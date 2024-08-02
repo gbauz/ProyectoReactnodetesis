@@ -46,6 +46,7 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
 
   const [examenesInitial, setExamenesInitial] = useState([]);
   const [examenesSeleccionados, setExamenesSeleccionados] = useState([]);
+  const [examenesNew, setExamenesNew] = useState([]);
   const [dataLastID , setDataLastID] = useState([]);
 
   useEffect(() => {
@@ -202,7 +203,7 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
     setSelectedExam(value);
   };
 
-  //Lógica de último registrado
+  // Lógica de último registrado
   const getLastID = async () => {
     try {
       response = await ExaminationOrderService.lastExaminationOrder();
@@ -256,6 +257,15 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
               examen: examenSeleccionado.examen
             }
           ]);
+          setExamenesNew([
+            ...examenesNew,
+            {
+              id_paciente: pacienteSeleccionado.value,
+              id_medico: medicoSeleccionado.value,
+              id_analisis: analisisSeleccionado.id_analisis,
+              id_examen: examenSeleccionado.id_examen,
+            }
+          ]);
           setDataLastID([{ id_realizar: newId }]);
         } else {
           let axiosResponse = {
@@ -274,10 +284,31 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
     }
   };
 
-  const handleEliminarExamen = (index) => {
-    const newExamenesSeleccionados = [...examenesSeleccionados];
-    newExamenesSeleccionados.splice(index, 1);
-    setExamenesSeleccionados(newExamenesSeleccionados);
+  const handleEliminarExamen = async (index) => {
+    console.log(index);
+    if (examenesSeleccionados.length > 1) {
+      for (let examen of examenesInitial){
+        if (examen.id === index.id) {
+          response = await ExaminationOrderService.deleteExaminationOrder(index.id);
+          if (response.status >= 200 && response.status < 300) {
+            const newExamenesSeleccionados = [...examenesSeleccionados];
+            newExamenesSeleccionados.splice(index, 1);
+            setExamenesSeleccionados(newExamenesSeleccionados);
+          }
+          Notification(api, response);
+        }
+      } 
+    }else{
+      let axiosResponse = {
+        status: 400,
+        response: {
+          data: {
+            error: "La orden debe tener al menos 1 examen!!"
+          }
+        }
+      }
+      Notification(api, axiosResponse);
+    }
   };
 
   //Llenar columnas
@@ -369,69 +400,8 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      const examenesData = examenesSeleccionados.map(examen => ({
-          id_paciente: examen.id_paciente,
-          id_medico: examen.id_medico,
-          id_analisis: examen.id_analisis,
-          id_examen: examen.id_examen
-        }));
-      if (action==='Edit') {
-        let response;
-        let idsResult = [];
-        let result = [];
-        let idsNewOrdenExam = [];
-        let resultMap = new Map();
-
-            // id: examen.id_realizar,
-            // id_paciente: initialValues.id_paciente,
-            // paciente: initialValues.paciente,
-            // id_medico: initialValues.id_medico,
-            // medico: initialValues.nombre_apellido,
-            // id_analisis: analysis.id_analisis,
-            // analisis: analysis.analisis,
-            // id_examen: examen.id_examen,
-            // examen: examen.examen;
-
-        //Agregar los nuevos examenes
-        for (const examen of examenesData) {
-          response = await ExaminationOrderService.createExaminationOrder(examen);
-          // for (const initial of examenesInitial){
-          //   if (initial.id_paciente)
-          // }
-          // if (response.data) {
-          //   idsNewOrdenExam.push(response.data.id);
-          //   resultMap.set(examen.uniqueAttribute, response.data.id);
-          // }
-          // if (response.data) {
-          //   idsNewOrdenExam.push({
-          //     newOrderId: response.data.id,
-          //     uniqueAttribute: examen.uniqueAttribute,
-          //   });
-          //   resultMap.set(examen.uniqueAttribute, response.data.id);
-          // }
-          // if (response.data) await ResultService.getResultID(examen.id)
-          // result = await ResultService.getResultID(examen.id);
-        }
-        // Obtener los resultados anteriores
-        // for (const examen of examenesInitial) {
-        //   const result = await ResultService.getResultID(examen.id);
-        //   // if (result.data.resultadosData.length) {
-        //   //   idsResult.push({
-        //   //     oldId: examen.id,
-        //   //     oldResultId: result.data.resultadosData[0].id_resultado,
-        //   //     uniqueAttribute: examen.uniqueAttribute,
-        //   //   });
-        //   // }
-        // }
-        //Eliminar los examenes anteriores
-        for (const examen of examenesInitial) {
-          // if (result.data.resultadosData.length) idsResult.push(result.data.resultadosData[0].id_resultado);
-          await ExaminationOrderService.deleteExaminationOrder(examen.id);
-        }
-        console.log(idsResult);
-      }
-      if (action==='Create') {
-        for (const examen of examenesData) {
+      if (examenesNew.length) {
+        for (const examen of examenesNew) {
           response = await ExaminationOrderService.createExaminationOrder(examen);
         }
       }
@@ -439,10 +409,16 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
       setError(error);
     }finally {
       setLoading(false);
-      if (response) {
-        handleSubmit(response);
-        clean();
+      if (!response) {
+        response = {
+          status: 200,
+          data: {
+            message: "La orden se ha actualizado!"
+          }
+        }
       }
+      handleSubmit(response);
+      clean();
     }
   };
 

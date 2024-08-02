@@ -7,27 +7,19 @@ const moment = require('moment-timezone');
 // Endpoint para obtener exámenes según el análisis seleccionado
 router.get('/', verificaToken, async (req, res) => {
   try {
-    const [rows] = await (await Conexion).execute(
-      `SELECT 
-        re.id_realizar, re.id_paciente, re.id_medico, re.id_examen, re.id_analisis, re.fecha, 
+    const [rows] = await (await Conexion).execute(`
+      SELECT re.id_realizar, re.id_paciente, re.id_medico, re.id_examen, re.id_analisis, re.fecha, 
         p.cedula AS paciente_cedula, p.paciente, p.edad, p.sexo, p.celular AS paciente_celular,
-		    m.cedula AS medico_cedula, m.nombre_apellido, m.celular AS medico_celular,
-		    m.direccion, esp.id_especialidad, esp.nombre, a.analisis, e.examen
-        FROM 
-          realizar_examen re 
-        INNER JOIN 
-          pacientes p ON re.id_paciente = p.id_paciente 
-        INNER JOIN 
-          medico m ON re.id_medico = m.id_medico 
-        INNER JOIN 
-          especialidad esp ON m.id_especialidad = esp.id_especialidad
-        INNER JOIN 
-          analisis a ON re.id_analisis = a.id_analisis 
-        INNER JOIN 
-          examenes e ON re.id_examen = e.id_examen
-        ORDER BY 
-          re.fecha DESC`
-    );
+		    m.cedula AS medico_cedula, m.nombre_apellido, m.celular AS medico_celular, m.direccion,
+		    esp.id_especialidad, esp.nombre, a.analisis, e.examen
+      FROM realizar_examen re 
+      INNER JOIN pacientes p ON re.id_paciente = p.id_paciente 
+      INNER JOIN medico m ON re.id_medico = m.id_medico 
+      INNER JOIN especialidad esp ON m.id_especialidad = esp.id_especialidad
+      INNER JOIN analisis a ON re.id_analisis = a.id_analisis 
+      INNER JOIN examenes e ON re.id_examen = e.id_examen
+      ORDER BY re.fecha DESC
+    `);
     const result = [];
     rows.forEach(row => {
       let existingEntry = result.find(

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Importación de Bootstrap
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './login.css';
@@ -43,8 +42,7 @@ const Login = () => {
                       type="text"
                       placeholder="Usuario"
                       value={cedula}
-                      onChange={(e) => setCedula(e.target.value)}
-                    />
+                      onChange={(e) => setCedula(e.target.value)}/>
                     <label htmlFor="input" style={{ color: '#808080', opacity: 0.8 }}>
                       Usuario <i className="fa fa-user"></i>
                     </label>
@@ -56,8 +54,7 @@ const Login = () => {
                       type="password"
                       placeholder="Contraseña"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
+                      onChange={(e) => setPassword(e.target.value)}/>
                     <label htmlFor="inputPassword" style={{ color: '#808080', opacity: 0.8 }}>
                       Contraseña <i className="fa fa-lock"></i>
                     </label>
@@ -67,7 +64,6 @@ const Login = () => {
                     <button className="btn btn-primary" type="submit">
                       Login
                     </button>
-                    
                   </div>
                 </form>
               </div>
