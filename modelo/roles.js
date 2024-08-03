@@ -11,7 +11,7 @@ router.get('/', verificaToken, async (req, res) => {
     const [roles] = await (await Conexion).execute('SELECT id_rol, nombre FROM Rol');
     const rolesWithPermissions = await Promise.all(roles.map(async (role) => {
       const [permisos] = await (await Conexion).execute(
-        'SELECT p.id_permiso, p.nombre_permiso AS permiso_nombre FROM Permisos p JOIN Roles_Permisos rp ON p.id_permiso = rp.id_permiso WHERE rp.id_rol = ?',
+        'SELECT p.id_permiso, p.nombre_permiso AS permiso_nombre FROM permisos p JOIN roles_permisos rp ON p.id_permiso = rp.id_permiso WHERE rp.id_rol = ?',
         [role.id_rol]
       );
       return { ...role, permisos };
@@ -30,7 +30,7 @@ router.post('/', verificaToken, auditoriaMiddleware((req) => `Creó Rol: ${req.b
 
   try {
     const [result] = await (await Conexion).execute(
-      'INSERT INTO Rol (nombre) VALUES (?)',
+      'INSERT INTO rol (nombre) VALUES (?)',
       [nombre]
     );
     const rolId = result.insertId;
@@ -38,7 +38,7 @@ router.post('/', verificaToken, auditoriaMiddleware((req) => `Creó Rol: ${req.b
     if (permisos && permisos.length > 0) {
       const permisosValues = permisos.map(permisoId => [rolId, permisoId.id_permiso]);
       await (await Conexion).query(
-        'INSERT INTO Roles_Permisos (id_rol, id_permiso) VALUES ?',
+        'INSERT INTO roles_permisos (id_rol, id_permiso) VALUES ?',
         [permisosValues]
       );
     }
@@ -57,16 +57,16 @@ router.put('/:id', verificaToken, auditoriaMiddleware((req) => `Editó Rol: ${re
 
   try {
     await (await Conexion).execute(
-      'UPDATE Rol SET nombre = ? WHERE id_rol = ?',
+      'UPDATE rol SET nombre = ? WHERE id_rol = ?',
       [nombre, roleId]
     );
 
-    await (await Conexion).execute('DELETE FROM Roles_Permisos WHERE id_rol = ?', [roleId]);
+    await (await Conexion).execute('DELETE FROM roles_permisos WHERE id_rol = ?', [roleId]);
 
     if (permisos && permisos.length > 0) {
       const permisosValues = permisos.map(permisoId => [roleId, permisoId.id_permiso]);
       await (await Conexion).query(
-        'INSERT INTO Roles_Permisos (id_rol, id_permiso) VALUES ?',
+        'INSERT INTO roles_permisos (id_rol, id_permiso) VALUES ?',
         [permisosValues]
       );
     }
@@ -88,7 +88,7 @@ router.delete('/:id', verificaToken, async (req, res) => {
 
   try {
     const [[usersWithRole]] = await (await Conexion).execute(
-      'SELECT COUNT(*) AS count FROM Usuario INNER JOIN Rol ON Usuario.rol_id = Rol.id_rol WHERE Rol.id_rol = ?',
+      'SELECT COUNT(*) AS count FROM usuario INNER JOIN rol ON usuario.rol_id = rol.id_rol WHERE rol.id_rol = ?',
       [roleId]
     );
 
@@ -96,8 +96,8 @@ router.delete('/:id', verificaToken, async (req, res) => {
       return res.status(400).json({ error: 'No se puede eliminar el rol porque está asignado a uno o más usuarios.' });
     }
 
-    await (await Conexion).execute('DELETE FROM Roles_Permisos WHERE id_rol = ?', [roleId]);
-    await (await Conexion).execute('DELETE FROM Rol WHERE id_rol = ?', [roleId]);
+    await (await Conexion).execute('DELETE FROM roles_permisos WHERE id_rol = ?', [roleId]);
+    await (await Conexion).execute('DELETE FROM rol WHERE id_rol = ?', [roleId]);
 
     await registrarAuditoria(usuario_nombre, ip_usuario, accion);
     

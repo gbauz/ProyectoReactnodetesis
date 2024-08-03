@@ -6,7 +6,7 @@ const { verificaToken } = require('./auth');
 // Endpoint para obtener todos los permisos
 router.get('/', verificaToken, async (req, res) => {
   try {
-    const [permisos] = await (await Conexion).execute('SELECT * FROM Permisos ORDER BY categoria');
+    const [permisos] = await (await Conexion).execute('SELECT * FROM permisos ORDER BY categoria');
     res.json({ permisos });
   } catch (error) {
     console.error('Error fetching permisos:', error);
@@ -18,7 +18,7 @@ router.post('/', verificaToken, async (req, res) => {
   const { nombre_permiso, categoria, descripcion } = req.body;
   try {
     const [result] = await (await Conexion).execute(
-      'INSERT INTO Permisos (nombre_permiso, descripcion, categoria ) VALUES (?, ?, ?)',
+      'INSERT INTO permisos (nombre_permiso, descripcion, categoria ) VALUES (?, ?, ?)',
       [nombre_permiso, descripcion, categoria]
     );
     const newPermission = {
@@ -52,7 +52,7 @@ router.get('/categorias', verificaToken, async (req, res) => {
   try {
     const { rol } = req.user; // Asegúrate de que el rol está disponible en req.user
     const [rows] = await (await Conexion).execute(
-      'SELECT p.id_permiso, p.categoria FROM Roles_Permisos rp JOIN Permisos p ON rp.id_permiso = p.id_permiso WHERE rp.id_rol = ?',
+      'SELECT p.id_permiso, p.categoria FROM roles_permisos rp JOIN permisos p ON rp.id_permiso = p.id_permiso WHERE rp.id_rol = ?',
       [rol]
     );
 

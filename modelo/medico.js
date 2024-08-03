@@ -23,7 +23,7 @@ router.post('/', verificaToken, auditoriaMiddleware((req) => `Creó Médico con 
 
   try {
     const [existingUserRows] = await (await Conexion).execute(
-      'SELECT * FROM Medico WHERE cedula = ?',
+      'SELECT * FROM medico WHERE cedula = ?',
       [cedula]
     );
 
@@ -32,7 +32,7 @@ router.post('/', verificaToken, auditoriaMiddleware((req) => `Creó Médico con 
     }
 
     await (await Conexion).execute(
-      'INSERT INTO Medico (cedula, nombre_apellido, celular, direccion, id_especialidad) VALUES (?, ?, ?, ?, ?)',
+      'INSERT INTO medico (cedula, nombre_apellido, celular, direccion, id_especialidad) VALUES (?, ?, ?, ?, ?)',
       [cedula, nombre_apellido, celular, direccion, id_especialidad]
     );
 
@@ -49,7 +49,7 @@ router.put('/:cedula', verificaToken, auditoriaMiddleware((req) => `Editó Médi
   const { nombre_apellido, id_especialidad, celular, direccion } = req.body;
   try {
     const [existingMedicoRows] = await (await Conexion).execute(
-      'SELECT * FROM Medico WHERE cedula = ?',
+      'SELECT * FROM medico WHERE cedula = ?',
       [medicoCedula]
     );
 
@@ -58,7 +58,7 @@ router.put('/:cedula', verificaToken, auditoriaMiddleware((req) => `Editó Médi
     }
 
     await (await Conexion).execute(
-      'UPDATE Medico SET nombre_apellido = ?, celular = ?, direccion = ? , id_especialidad = ? WHERE cedula = ?',
+      'UPDATE medico SET nombre_apellido = ?, celular = ?, direccion = ? , id_especialidad = ? WHERE cedula = ?',
       [nombre_apellido, celular, direccion, id_especialidad, medicoCedula]
     );
 
@@ -78,15 +78,25 @@ router.delete('/:cedula', verificaToken, async (req, res) => {
 
   try {
     const [existingMedicoRows] = await (await Conexion).execute(
-      'SELECT * FROM Medico WHERE cedula = ?',
+      'SELECT * FROM medico WHERE cedula = ?',
       [medicoCedula]
     );
 
     if (existingMedicoRows.length === 0) {
       return res.status(404).json({ error: 'Médico no encontrado.' });
+      
     }
 
-    await (await Conexion).execute('DELETE FROM Medico WHERE cedula = ?', [medicoCedula]);
+    const [[medicoWithordenExam]] = await (await Conexion).execute(
+      'SELECT COUNT(*) AS count FROM realizar_examen e INNER JOIN medico a ON e.id_medico = a.id_medico WHERE a.cedula = ?',
+      [medicoCedula]
+    );
+
+    if (medicoWithordenExam.count > 0) {
+      return res.status(400).json({ error: 'No se puede eliminar el Medico porque está asignado a uno o más ordenes de examenes.' });
+    }
+
+    await (await Conexion).execute('DELETE FROM medico WHERE cedula = ?', [medicoCedula]);
 
     await registrarAuditoria(usuario_nombre, ip_usuario, accion);
 
@@ -101,7 +111,7 @@ router.delete('/:cedula', verificaToken, async (req, res) => {
 router.get('/:id', verificaToken, async (req, res) => {
   const medicoId = req.params.id; 
   try {
-    const [rows] = await (await Conexion).execute('SELECT cedula, nombre_apellido FROM Medico WHERE cedula = ?', [medicoId]);
+    const [rows] = await (await Conexion).execute('SELECT cedula, nombre_apellido FROM medico WHERE cedula = ?', [medicoId]);
 
     if (rows.length === 1) {
       res.json({ success: true, cedula: rows[0].cedula, nombre_apellido: rows[0].nombre_apellido, message: 'Médico encontrado correctamente.' });

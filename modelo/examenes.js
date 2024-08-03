@@ -73,7 +73,7 @@ router.delete('/:id', verificaToken, async (req, res) => {
 
     
       const [[examenWithOrden]] = await (await Conexion).execute(
-        'SELECT COUNT(*) AS count FROM Realizar_Examen re INNER JOIN examenes e ON re.id_examen = e.id_examen WHERE e.id_examen = ?',
+        'SELECT COUNT(*) AS count FROM realizar_examen re INNER JOIN examenes e ON re.id_examen = e.id_examen WHERE e.id_examen = ?',
         [examenId]
       );
   
@@ -81,7 +81,7 @@ router.delete('/:id', verificaToken, async (req, res) => {
         return res.status(400).json({ error: 'No se puede eliminar el examen porque está asignado a una o más ordenes de examenes.' });
       }
     
-    await (await Conexion).execute('DELETE FROM Examenes WHERE id_examen = ?', [examenId]);
+    await (await Conexion).execute('DELETE FROM examenes WHERE id_examen = ?', [examenId]);
 
     await registrarAuditoria(usuario_nombre, ip_usuario, accion);
     res.json({ success: true, message: 'Examen eliminado correctamente.' });

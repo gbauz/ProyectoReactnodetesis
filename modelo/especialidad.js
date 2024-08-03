@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Conexion = require('../controlador/conexion');
+const { registrarAuditoria, auditoriaMiddleware } = require('../utils/auditoria');
 const { verificaToken } = require('./auth');
 const getClientIp = require('request-ip').getClientIp;
 
@@ -9,7 +10,7 @@ const getClientIp = require('request-ip').getClientIp;
 router.get('/', verificaToken, async (req, res) => {
     try {
       const [rows] = await (await Conexion).execute(
-        'SELECT * FROM Especialidad'
+        'SELECT * FROM especialidad'
       );
 
       res.json({ especialidades: rows });
@@ -20,7 +21,7 @@ router.get('/', verificaToken, async (req, res) => {
 });
 
 // Endpoint para crear especialidades
-router.post('/', verificaToken, async (req, res) => {
+router.post('/', verificaToken, auditoriaMiddleware((req) => `Creó Especialidad: ${req.body.nombre}`), async (req, res) => {
     const {nombre} = req.body;
   
     try {
@@ -38,14 +39,14 @@ router.post('/', verificaToken, async (req, res) => {
 });
 
 // Endpoint para editar un usuario
-  router.put('/:id', verificaToken, async (req, res) => {
+router.put('/:id', verificaToken, auditoriaMiddleware((req) => `Editó Especialidad: ${req.body.nombre}`), async (req, res) => {
     const especialidadId = req.params.id;
     const {nombre} = req.body;
   
     try {
    
       await (await Conexion).execute(
-        'UPDATE Especialidad SET nombre = ?  WHERE id_especialidad = ?',
+        'UPDATE especialidad SET nombre = ?  WHERE id_especialidad = ?',
         [nombre, especialidadId]
       );
   
@@ -61,21 +62,21 @@ router.delete('/:id', verificaToken, async (req, res) => {
   const especialidadId = req.params.id;
   const usuario_nombre = req.user.name; // Asumiendo que el middleware verificaToken añade el nombre del usuario logueado a req.user
   const ip_usuario = getClientIp(req);
-  const accion = `Eliminó usuario: ${especialidadId}`;
+  const accion = `Eliminó especialidad con ID: ${especialidadId}`;
 
   try {
 
-    const [[especialidadAnalisis]] = await (await Conexion).execute(
-      'SELECT COUNT(*) AS count FROM  Especialidad e  INNER JOIN Analisis a on a.id_especialidad=e.id_especialidad WHERE e.id_especialidad = ?',
+    /* const [[especialidadAnalisis]] = await (await Conexion).execute(
+      'SELECT COUNT(*) AS count FROM  especialidad e  INNER JOIN analisis a on a.id_especialidad=e.id_especialidad WHERE e.id_especialidad = ?',
       [especialidadId]
     );
 
     if (especialidadAnalisis.count > 0) {
       return res.status(400).json({ error: 'No se puede eliminar la Especialidad porque está asignado a un Analisis.' });
-    }
+    } */
 
     const [[especialidadWithMedico]] = await (await Conexion).execute(
-      'SELECT COUNT(*) AS count FROM Medico m INNER JOIN Especialidad e ON m.id_especialidad = e.id_especialidad INNER JOIN Analisis a on a.id_especialidad=e.id_especialidad WHERE e.id_especialidad = ?',
+      'SELECT COUNT(*) AS count FROM medico m INNER JOIN especialidad e ON m.id_especialidad = e.id_especialidad INNER JOIN analisis a on a.id_especialidad=e.id_especialidad WHERE e.id_especialidad = ?',
       [especialidadId]
     );
 
@@ -83,9 +84,9 @@ router.delete('/:id', verificaToken, async (req, res) => {
       return res.status(400).json({ error: 'No se puede eliminar la Especialidad porque está asignado a uno o más Medicos o a un Analisis.' });
     }
     
-    await (await Conexion).execute('DELETE FROM Especialidad WHERE id_especialidad = ?', [especialidadId]);
+    await (await Conexion).execute('DELETE FROM especialidad WHERE id_especialidad = ?', [especialidadId]);
 
-    //await registrarAuditoria(usuario_nombre, ip_usuario, accion);
+    await registrarAuditoria(usuario_nombre, ip_usuario, accion);
     res.json({ success: true, message: 'Especialidad eliminada correctamente.' });
   } catch (error) {
     console.error('Error deleting user:', error);

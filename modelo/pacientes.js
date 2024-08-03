@@ -11,7 +11,7 @@ const moment = require('moment-timezone');
 router.get('/', verificaToken, async (req, res) => {
     try {
       const [rows] = await (await Conexion).execute(
-        'SELECT * FROM Pacientes'
+        'SELECT * FROM pacientes'
       );
       const paciente = rows.map(row => ({
         ...row,
@@ -29,14 +29,14 @@ router.post('/', verificaToken, auditoriaMiddleware((req) => `Creó Paciente con
     const { cedula, paciente, edad, sexo, celular} = req.body;
     try {
       const [existingUserRows] = await (await Conexion).execute(
-        'SELECT * FROM Pacientes WHERE cedula = ?',
+        'SELECT * FROM pacientes WHERE cedula = ?',
         [cedula]
       );
       if (existingUserRows.length > 0) {
         return res.status(400).json({ error: 'Ya existe un paciente con el mismo número de cédula.' });
       }
       await (await Conexion).execute(
-        'INSERT INTO Pacientes (cedula, paciente, edad, sexo, celular) VALUES (?, ?, ?, ?, ?)',
+        'INSERT INTO pacientes (cedula, paciente, edad, sexo, celular) VALUES (?, ?, ?, ?, ?)',
         [cedula, paciente, edad, sexo, celular]
       );
       res.json({ success: true, message: 'Paciente creado correctamente.' });
@@ -53,7 +53,7 @@ router.put('/:id', verificaToken, auditoriaMiddleware((req) => `Editó Paciente 
 
     try {
       await (await Conexion).execute(
-        'UPDATE Pacientes SET paciente = ?, edad = ?, sexo = ?, celular = ?  WHERE cedula = ?',
+        'UPDATE pacientes SET paciente = ?, edad = ?, sexo = ?, celular = ?  WHERE cedula = ?',
         [paciente, edad, sexo, celular, pacienteId]
       );
       console.log(pacienteId);
@@ -74,9 +74,18 @@ router.put('/:id', verificaToken, auditoriaMiddleware((req) => `Editó Paciente 
     const accion = `Eliminó Paciente con cédula: ${pacienteId}`;
   
     try {
-      await (await Conexion).execute('DELETE FROM Pacientes WHERE cedula = ?', [pacienteId]);
 
-      console.log(pacienteId);
+      const [[pacienteWithordenExam]] = await (await Conexion).execute(
+        'SELECT COUNT(*) AS count FROM realizar_examen e INNER JOIN pacientes a ON e.id_paciente = a.id_paciente WHERE a.cedula = ?',
+        [pacienteId]
+      );
+  
+      if (pacienteWithordenExam.count > 0) {
+        return res.status(400).json({ error: 'No se puede eliminar el Paciente porque está asignado a uno o más ordenes de examenes.' });
+      }
+      await (await Conexion).execute('DELETE FROM pacientes WHERE cedula = ?', [pacienteId]);
+
+      //console.log(pacienteId);
   
       await registrarAuditoria(usuario_nombre, ip_usuario, accion);
       res.json({ success: true, message: 'Paciente eliminado correctamente.' });
@@ -92,7 +101,7 @@ router.get('/:id_paciente', verificaToken, async (req, res) => {
 
   try {
     
-    const [rows] = await (await Conexion).execute('SELECT * FROM Pacientes WHERE cedula = ?', [pacienteId]);
+    const [rows] = await (await Conexion).execute('SELECT * FROM pacientes WHERE cedula = ?', [pacienteId]);
 
     if (rows.length === 1) {
       res.json({ success: true, pacienteId, message: 'Paciente encontrado correctamente.' });

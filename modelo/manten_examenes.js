@@ -142,7 +142,7 @@ router.get('/:id', verificaToken, async (req, res) => {
 
   try {
     const [medicoResult] = await (await Conexion).execute(
-      'SELECT m.nombre_apellido FROM realizar_examen re INNER JOIN Medico m ON re.id_medico = m.id_medico WHERE re.id_paciente = ?',
+      'SELECT m.nombre_apellido FROM realizar_examen re INNER JOIN medico m ON re.id_medico = m.id_medico WHERE re.id_paciente = ?',
       [id_paciente]
     );
 

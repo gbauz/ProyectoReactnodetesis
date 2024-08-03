@@ -20,11 +20,7 @@ router.get('/', verificaToken, async (req, res) => {
 
 router.post('/', verificaToken, async (req, res) => {
     const {id_examen, detalle, unidad, valor_referencia } = req.body;
-    const usuario_nombre = req.user.name; // Asumiendo que el middleware verificaToken añade el nombre del usuario logueado a req.user
-    //const ip_usuario = getClientIp(req);
-    //const accion = `Creó Usuario con Cédula: ${cedula}`;
-  
-   
+
     try {
   
       await (await Conexion).execute(
@@ -32,7 +28,7 @@ router.post('/', verificaToken, async (req, res) => {
         [id_examen, detalle, unidad, valor_referencia]
       );
   
-      res.json({ success: true, message: 'Paciente creado correctamente.' });
+      res.json({ success: true, message: 'Examen Detalle creado correctamente.' });
     } catch (error) {
       console.error('Error creating user:', error);
       res.status(500).json({ error: 'Error al crear usuario.' });
@@ -56,7 +52,7 @@ router.put('/:id', verificaToken, async (req, res) => {
   
       //await registrarAuditoria(usuario_nombre, ip_usuario, accion);
   
-      res.json({ success: true, message: 'Usuario actualizado correctamente.' });
+      res.json({ success: true, message: 'Examen Detalle actualizado correctamente.' });
     } catch (error) {
       console.error('Error updating user:', error);
       res.status(500).json({ error: 'Error al actualizar usuario.' });
@@ -76,7 +72,7 @@ router.put('/:id', verificaToken, async (req, res) => {
       console.log(userId);
   
       //await registrarAuditoria(usuario_nombre, ip_usuario, accion);
-      res.json({ success: true, message: 'Analisis eliminado correctamente.' });
+      res.json({ success: true, message: 'Examen Detalle eliminado correctamente.' });
     } catch (error) {
       console.error('Error deleting user:', error);
       res.status(500).json({ error: 'Error al eliminar usuario.' });

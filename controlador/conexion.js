@@ -18,6 +18,4 @@ const conexion = mysql.createConnection({
 // });
 
 
-
-
 module.exports = conexion;

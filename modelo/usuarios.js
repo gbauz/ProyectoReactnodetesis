@@ -16,7 +16,7 @@ router.post('/login', async (req, res) => {
 
   try {
     const [rows] = await (await Conexion).execute(
-      'SELECT * FROM Usuario WHERE cedula = ?',
+      'SELECT * FROM usuario WHERE cedula = ?',
       [cedula]
     );
 
@@ -44,7 +44,7 @@ router.get('/session', verificaToken, async (req, res) => {
   try {
     const { cedula, email, name, rol } = req.user;
     const [rows] = await (await Conexion).execute(
-      'SELECT * FROM Roles_Permisos rp WHERE rp.id_rol = ?',
+      'SELECT * FROM roles_permisos rp WHERE rp.id_rol = ?',
       [rol]
     );
 
@@ -76,7 +76,7 @@ router.post('/logout', verificaToken, (req, res) => {
 router.get('/users', verificaToken, async (req, res) => {
   try {
     const [rows] = await (await Conexion).execute(
-      'SELECT u.cedula, u.nombre, u.correo_electronico, u.rol_id, r.nombre AS rol FROM Usuario u JOIN Rol r ON u.rol_id = r.id_rol'
+      'SELECT u.cedula, u.nombre, u.correo_electronico, u.rol_id, r.nombre AS rol FROM usuario u JOIN rol r ON u.rol_id = r.id_rol'
     );
     res.json({ users: rows });
   } catch (error) {
@@ -97,7 +97,7 @@ router.post('/users', verificaToken, auditoriaMiddleware((req) => `Creó Usuario
     }
 
     const [existingUserRows] = await (await Conexion).execute(
-      'SELECT * FROM Usuario WHERE cedula = ?',
+      'SELECT * FROM usuario WHERE cedula = ?',
       [cedula]
     );
 
@@ -108,7 +108,7 @@ router.post('/users', verificaToken, auditoriaMiddleware((req) => `Creó Usuario
     const hashedPassword = await hashPassword(contraseña);
 
     await (await Conexion).execute(
-      'INSERT INTO Usuario (cedula, nombre, correo_electronico, contraseña, rol_id) VALUES (?, ?, ?, ?, ?)',
+      'INSERT INTO usuario (cedula, nombre, correo_electronico, contraseña, rol_id) VALUES (?, ?, ?, ?, ?)',
       [cedula, nombre, correo_electronico, hashedPassword, rol_id]
     );
     res.json({ success: true, message: 'Usuario creado correctamente.' });
@@ -129,7 +129,7 @@ router.put('/users/:id', verificaToken, auditoriaMiddleware((req) => `Editó Usu
   try {
     // Verificar el rol del usuario antes de editar
     const [userRows] = await (await Conexion).execute(
-      'SELECT rol_id FROM Usuario WHERE cedula = ?',
+      'SELECT rol_id FROM usuario WHERE cedula = ?',
       [userId]
     );
 
@@ -151,7 +151,7 @@ router.put('/users/:id', verificaToken, auditoriaMiddleware((req) => `Editó Usu
     }
 
     await (await Conexion).execute(
-      'UPDATE Usuario SET nombre = ?, correo_electronico = ?, rol_id = ? WHERE cedula = ?',
+      'UPDATE usuario SET nombre = ?, correo_electronico = ?, rol_id = ? WHERE cedula = ?',
       [nombre, correo_electronico, userRol === 1 ? userRol : rol_id, userId]
     );
 
@@ -172,7 +172,7 @@ router.delete('/users/:id', verificaToken, async (req, res) => {
 
   try {
     const [userRows] = await (await Conexion).execute(
-      'SELECT rol_id FROM Usuario WHERE cedula = ?',
+      'SELECT rol_id FROM usuario WHERE cedula = ?',
       [userId]
     );
 
@@ -186,7 +186,7 @@ router.delete('/users/:id', verificaToken, async (req, res) => {
       return res.status(403).json({ error: 'No se puede eliminar a un usuario con rol Administrador.' });
     }
 
-    await (await Conexion).execute('DELETE FROM Usuario WHERE cedula = ?', [userId]);
+    await (await Conexion).execute('DELETE FROM usuario WHERE cedula = ?', [userId]);
 
     await registrarAuditoria(usuario_nombre, ip_usuario, accion);
     res.json({ success: true, message: 'Usuario eliminado correctamente.' });
@@ -213,7 +213,7 @@ router.put('/users/:id/password', verificaToken, async (req, res) => {
     const hashedPassword = await hashPassword(nuevaContraseña);
 
     await (await Conexion).execute(
-      'UPDATE Usuario SET contraseña = ? WHERE cedula = ?',
+      'UPDATE usuario SET contraseña = ? WHERE cedula = ?',
       [hashedPassword, userId]
     );
 

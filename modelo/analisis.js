@@ -10,7 +10,7 @@ const moment = require('moment-timezone');
 router.get('/', verificaToken, async (req, res) => {
   try {
       const especialidad = req.query.especialidad;
-      let query = 'SELECT * FROM Analisis a INNER JOIN Especialidad e on a.id_especialidad=e.id_especialidad';
+      let query = 'SELECT * FROM analisis a INNER JOIN especialidad e on a.id_especialidad=e.id_especialidad';
       let params = [];
 
       if (especialidad) {
@@ -39,7 +39,7 @@ router.post('/', verificaToken, auditoriaMiddleware((req) => `Creó Análisis: $
     try {
   
       await (await Conexion).execute(
-        'INSERT INTO Analisis (analisis, id_especialidad) VALUES (?, ?)',
+        'INSERT INTO analisis (analisis, id_especialidad) VALUES (?, ?)',
         [analisis, id_especialidad]
       );
   
@@ -57,7 +57,7 @@ router.put('/:id', verificaToken, auditoriaMiddleware((req) => `Editó Análisis
 
     try {
       await (await Conexion).execute(
-        'UPDATE Analisis SET analisis = ?, id_especialidad = ?  WHERE id_analisis = ?',
+        'UPDATE analisis SET analisis = ?, id_especialidad = ?  WHERE id_analisis = ?',
         [analisis, id_especialidad, analisisId]
       );
       res.json({ success: true, message: 'Análisis actualizado correctamente.' });
@@ -78,7 +78,7 @@ router.delete('/:id', verificaToken, async (req, res) => {
   try {
 
     const [[analisisWithExamen]] = await (await Conexion).execute(
-      'SELECT COUNT(*) AS count FROM Examenes e INNER JOIN Analisis a ON e.id_analisis = a.id_analisis WHERE a.id_analisis = ?',
+      'SELECT COUNT(*) AS count FROM examenes e INNER JOIN analisis a ON e.id_analisis = a.id_analisis WHERE a.id_analisis = ?',
       [analisisId]
     );
 
@@ -86,7 +86,7 @@ router.delete('/:id', verificaToken, async (req, res) => {
       return res.status(400).json({ error: 'No se puede eliminar el Analisis porque está asignado a uno o más examenes.' });
     }
     
-    await (await Conexion).execute('DELETE FROM Analisis WHERE id_analisis = ?', [analisisId]);
+    await (await Conexion).execute('DELETE FROM analisis WHERE id_analisis = ?', [analisisId]);
 
   await registrarAuditoria(usuario_nombre, ip_usuario, accion);
     res.json({ success: true, message: 'Analisis eliminado correctamente.' });
