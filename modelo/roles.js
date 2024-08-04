@@ -8,7 +8,7 @@ const getClientIp = require('request-ip').getClientIp;
 // Endpoint para obtener todos los roles
 router.get('/', verificaToken, async (req, res) => {
   try {
-    const [roles] = await (await Conexion).execute('SELECT id_rol, nombre FROM Rol');
+    const [roles] = await (await Conexion).execute('SELECT id_rol, nombre FROM rol');
     const rolesWithPermissions = await Promise.all(roles.map(async (role) => {
       const [permisos] = await (await Conexion).execute(
         'SELECT p.id_permiso, p.nombre_permiso AS permiso_nombre FROM permisos p JOIN roles_permisos rp ON p.id_permiso = rp.id_permiso WHERE rp.id_rol = ?',

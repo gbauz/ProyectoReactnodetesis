@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import Users from '../Usuarios/Users';
-import Roles from '../Usuarios/roles';
 import './AdminPage.css';
 import labLogo from '../Login/image/GB-LAB.png';
 import Uri from '../../environment/environment';
@@ -51,7 +49,6 @@ const AdminPage = () => {
           const uniqueCategories = new Set(data.permissions.map(permission => permission.categoria));
           setCategories(uniqueCategories);
           setUserPermissions(data.permissions.map(permission => permission.id_permiso));
-          // console.log(uniqueCategories);
         } else {
           console.error('Error al obtener categorías:', response.statusText);
         }
@@ -108,40 +105,34 @@ const AdminPage = () => {
         return (
           <div style={{marginTop:'8%', marginLeft: '1%', marginRight:'1%'}}>
             <h3>{`Bienvenido, ${userName}!`}</h3>
-           {/*  <div className="card mb-4">
-              <div className="card-body">
-                <h5 className="card-title">Estadísticas del Panel</h5>
-                <p>Información clave.</p>
-              </div>
-            </div> */}
             <div className="card">
               <div className="card-body">
                 <div className="row">
-                  <div className="col-md-4">
-                    <img src={labLogo} alt="Lab Logo" className="img-flui mb-2" />
-                    <h5 className="card-title">Laboratorio Clínico GB-Lab </h5>
-                    <p className="card-text">
-                      <i className="fas fa-map-marker-alt"></i> MUCHO LOTE 1 ETAPA 3 Mz: 2344 V: 1 Av. Manuel Gómez Lince, Guayaquil, Ecuador
-                    </p>
-                    <p className="card-text">
-                      <i className="fas fa-phone"></i> (04) 505-2852
-                    </p>
-                    <p className="card-text">
-                      <i className="fas fa-envelope"></i> laboratorio.gblab@gmail.com
-                    </p>
-                  </div>
-                  <div className="col-md-8">
-                    <iframe
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d997.12345!2d-79.93555!3d-2.14443!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x902d1abcde0fghij:0xabcdef12345678!2sInstituto%20Nacional%20INSPI!5e0!3m2!1sen!2sec!4v1621234567890!5m2!1sen!2sec"
-                      width="100%"
-                      height="100%"
-                      frameBorder="0"
-                      style={{ border: 0 }}
-                      allowFullScreen=""
-                      aria-hidden="false"
-                      tabIndex="0"
-                    ></iframe>
-                  </div>
+                <div className="col-md-4">
+                  <img src={labLogo} alt="Lab Logo" className="img-flui mb-2" />
+                  <h5 className="card-title">Laboratorio Clínico GB-Lab </h5>
+                  <p className="card-text">
+                    <i className="fas fa-map-marker-alt"></i> MUCHO LOTE 1 ETAPA 3 Mz: 2344 V: 1 Av. Manuel Gómez Lince, Guayaquil, Ecuador
+                  </p>
+                  <p className="card-text">
+                    <i className="fas fa-phone"></i> (04) 505-2852
+                  </p>
+                  <p className="card-text">
+                    <i className="fas fa-envelope"></i> laboratorio.gblab@gmail.com
+                  </p>
+                </div>
+                <div className="col-md-8 d-none d-md-block"> {/* Ocultar el mapa en dispositivos móviles */}
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d997.12345!2d-79.93555!3d-2.14443!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x902d1abcde0fghij:0xabcdef12345678!2sInstituto%20Nacional%20INSPI!5e0!3m2!1sen!2sec!4v1621234567890!5m2!1sen!2sec"
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    style={{ border: 0 }}
+                    allowFullScreen=""
+                    aria-hidden="false"
+                    tabIndex="0"
+                  ></iframe>
+                </div>
                 </div>
               </div>
             </div>
@@ -167,8 +158,6 @@ const AdminPage = () => {
         return <Specialty />;
       case 'Examen Detalles':
         return <ExamDetail />
-      case 'reports':
-        return <div>Reportes</div>;
       case 'Resultados de Examen':
         return <Resultados />;
       default:
@@ -200,8 +189,6 @@ const AdminPage = () => {
         return 'Realizar Examenes';
       case 'Examenes':
         return 'Examenes';
-      case 'reports':
-        return 'Reportes';
       case 'Especialidad':
         return 'Especialidad';
       case 'Examen Detalles':
@@ -264,10 +251,7 @@ const AdminPage = () => {
                   <span className="ms-2">{userName}</span>
                   &nbsp;</a>
                 <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                  <li><a className="dropdown-item" href="#">Perfil</a></li>
-                  <li><a className="dropdown-item" href="#">Ajustes</a></li>
-                  <li><hr className="dropdown-divider" /></li>
-                  <li><button className="dropdown-item" onClick={handleLogout}>Cerrar Sesión</button></li>
+                  <li><button className="dropdown-item" onClick={handleLogout}> <i className="fas fa-sign-out-alt"></i> Cerrar Sesión</button></li>
                 </ul>
               </li>
             </ul>
@@ -291,19 +275,8 @@ const AdminPage = () => {
                   aria-expanded="false"
                   aria-controls="userProfileSubMenu"
                 >
-                  <i className="fas fa-user"></i> {userName} <i className="fas fa-chevron-down"></i>
+                  <i className="fas fa-user"></i> {userName}
                 </button>
-                {/* Submenu para el perfil del usuario */}
-                {/* <div className="collapse" id="userProfileSubMenu">
-                  <ul className="nav flex-column">
-                    <li className="nav-item">
-                      <a className="nav-link text-white" href="#">Perfil</a>
-                    </li>
-                    <li className="nav-item">
-                      <a className="nav-link text-white" href="#">Ajustes</a>
-                    </li>
-                  </ul>
-                </div> */}
               </li>
               <li className="nav-item">
                 <button className="nav-link text-white btn btn-link" onClick={() => { setView('inicio'); toggleSidebar(); }}>
@@ -337,9 +310,6 @@ const AdminPage = () => {
                   case 'Examenes':
                     componentKey = 'Examenes';
                     break;
-                  case 'Reportes':
-                    componentKey = 'reports';
-                    break;
                   case 'Especialidad':
                     componentKey = 'Especialidad';
                     break;
@@ -367,7 +337,7 @@ const AdminPage = () => {
               <li className="nav-item d-lg-none">
                 <div className="nav-item">
                   <button className="nav-link text-white btn btn-link" onClick={handleLogout}>
-                    <i className="fas fa-sign-out-alt"></i>Cerrar Sesión</button>
+                    <i className="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
                 </div>
               </li>
             </ul>

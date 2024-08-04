@@ -125,6 +125,8 @@ const Audit = () => {
         rowKey={"id"}
         pagination={tableParams.pagination}
         onChange={handleTableChange}
+        scroll={{ x: 'max-content' }}
+        className="table-responsive"
       />
     </div>
   );

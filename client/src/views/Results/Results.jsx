@@ -174,7 +174,9 @@ const Resultados = () => {
         dataSource={filteredData}
         rowKey={"id_resultado"}
         pagination={tableParams.pagination}
-        onChange={handleTableChange} />
+        onChange={handleTableChange}
+        scroll={{ x: 'max-content' }}
+        className="table-responsive" />
       <EditCreateEspecialty
         isModalOpen={isModalOpen}
         handleCancel={handleCancel}

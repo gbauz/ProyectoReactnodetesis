@@ -3,10 +3,12 @@ import React, { useEffect, useState } from "react";
 import { Space, Table, Tag, Button, notification, Input, Tooltip } from "antd";
 import EditCreatePacient from "./Edit-Create/EditCreatePatient";
 import PatienteService from "../../services/PatientService";
-import { DeleteFilled, EditFilled, PlusCircleOutlined, SearchOutlined } from "@ant-design/icons";
+import { DeleteFilled, EditFilled, FilePdfOutlined, PlusCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import Notification from "../../components/Notification/Notification";
 import DeletePatient from "./Delete/DeletePatient";
 import moment from 'moment';
+import jsPDF from "jspdf";
+
 
 const Patient = () => {
   let columns                         = [];
@@ -176,6 +178,18 @@ const Patient = () => {
     fetchPatients();
   };
 
+  //Crear Reporte PDF
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    doc.text(20, 20, 'Reporte de Pacientes');
+    const usersData = data.map(pacientes => [pacientes.paciente, pacientes.cedula, pacientes.edad, pacientes.sexo, pacientes.celular, pacientes.fecha]);
+    doc.autoTable({
+      head: [['Nombre', 'Cédula', 'Edad', 'Sexo', 'Celular', 'Fecha de Ingreso']],
+      body: usersData,
+    });
+    doc.save('reporte_pacientes.pdf');
+  };
+
   return (
     <div className="paciente">
       <div className="header-content">
@@ -189,6 +203,9 @@ const Patient = () => {
               onChange={e => setSearchText(e.target.value)}
             />
           </div>
+          <Button className="rounded-pill me-2" type="primary" onClick={generatePDF}>
+            <FilePdfOutlined /> Reporte
+          </Button>
           <Button className="rounded-pill" type="primary" onClick={() => showEditCreateModal(null, 'Create')}>
             <PlusCircleOutlined /> Crear
           </Button>
@@ -201,7 +218,9 @@ const Patient = () => {
         dataSource={filteredData}
         rowKey={"id_paciente"}
         pagination={tableParams.pagination}
-        onChange={handleTableChange} />
+        onChange={handleTableChange} 
+        scroll={{ x: 'max-content' }}
+        className="table-responsive"/>
       <EditCreatePacient
         isModalOpen={isModalOpen}
         handleCancel={handleCancel}

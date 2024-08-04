@@ -1,58 +1,56 @@
-/* AdminPage.css */
-
-/* Estilos generales */
+/*Estilos Generales para mapa*/
 .navbar-dark .navbar-nav .nav-link {
-    color: rgba(255, 255, 255, 0.75);
-  }
-  .navbar-dark .navbar-nav .nav-link:hover {
-    color: rgba(255, 255, 255, 1);
-  }
-  .img-flui, .img-thumbnail {
-    height: auto;
-    max-width: 100%;
+  color: rgba(255, 255, 255, 0.75);
 }
-  
-  /* Estilos para la barra lateral en dispositivos móviles */
-  @media (max-width: 500px) {
-    .sidebar {
-      position: fixed;
-      top: 56px; /* Altura de la barra de navegación */
-      left: 0;
-      height: calc(100% - 56px);
-      background-color: #1a6ab9;
-      overflow-y: auto;
-      transition: transform 0.3s ease-in-out;
-      transform: translateX(-100%);
-    }
-  
-    .sidebar.show {
-      transform: translateX(0);
-    }
-  
-    /* .content {
-      margin-top: 56px; /* Ajusta el margen superior para dejar espacio a la barra de navegación */
-    /* } */ 
-  
-    .navbar-collapse {
-      display: none !important;
-    }
+.navbar-dark .navbar-nav .nav-link:hover {
+  color: rgba(255, 255, 255, 1);
+}
+.img-flui, .img-thumbnail {
+  height: auto;
+  max-width: 90%;
+}
+
+ /* Estilos para la barra lateral en dispositivos móviles */
+ @media (max-width: 500px) {
+  .sidebar {
+    position: fixed;
+    top: 56px; /* Altura de la barra de navegación */
+    left: 0;
+    height: calc(100% - 56px);
+    overflow-y: auto;
+    transition: transform 0.3s ease-in-out;
+    transform: translateX(-100%);
+    z-index: 99999;
   }
-  
-  /* Estilos para la barra lateral en dispositivos de escritorio */
-  @media (min-width: 769px) {
-    .sidebar {
-      width: 200px;
-      height: 100vh;
-      position: fixed;
-      left: 0;
-      background-color: #1a6ab9;
-      overflow-y: auto;
-    }
-    .content {
-      margin-left: 200px;
-      width: calc(100% - 200px);
-    }
+
+  .sidebar.show {
+    transform: translateX(0);
   }
+
+   .content {
+    margin-top: 56px; /* Ajusta el margen superior para dejar espacio a la barra de navegación */
+  } 
+
+  .navbar-collapse {
+    display: none !important;
+  }
+}
+
+/* Estilos para la barra lateral en dispositivos de escritorio */
+@media (min-width: 769px) {
+  .sidebar {
+    width: 200px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    background-color: #1a6ab9;
+    overflow-y: auto;
+  }
+  .content {
+    margin-left: 200px;
+    width: calc(100% - 200px);
+  }
+}
 
 /* AdminPage.css */
 .sidebar {
@@ -64,8 +62,6 @@
   background-color: #343a40;
   transition: width 0.3s;
 }
-
-
 
 .content {
   margin-left: 250px;

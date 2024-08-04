@@ -180,7 +180,9 @@ const Exam = () => {
         dataSource={filteredData}
         rowKey={"id_examen"}
         pagination={tableParams.pagination}
-        onChange={handleTableChange} />
+        onChange={handleTableChange} 
+        scroll={{ x: 'max-content' }}
+        className="table-responsive"/>
       <EditCreateExam
         isModalOpen={isModalOpen}
         handleCancel={handleCancel}

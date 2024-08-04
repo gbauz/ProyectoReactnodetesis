@@ -192,7 +192,8 @@ const User = () => {
   //Crear Reporte PDF
   const generatePDF = () => {
     const doc = new jsPDF();
-    doc.text(20, 20, 'Reporte de Usuarios');
+    doc.setFontSize(12);
+    doc.text('Reporte de Usuarios',20, 20,);
     const usersData = data.map(user => [user.nombre, user.cedula, user.correo_electronico, user.rol]);
     doc.autoTable({
       head: [['Nombre', 'Cédula', 'Correo Electrónico', 'Rol']],
@@ -229,7 +230,9 @@ const User = () => {
         dataSource={filteredData}
         rowKey={"cedula"}
         pagination={tableParams.pagination}
-        onChange={handleTableChange} />
+        onChange={handleTableChange}
+        scroll={{ x: 'max-content' }}
+        className="table-responsive" />
       <PasswordUser 
         isModifyModalOpen={isModifyModalOpen}
         handleModify={handleModify}

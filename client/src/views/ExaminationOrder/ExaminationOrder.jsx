@@ -8,6 +8,7 @@ import Notification from "../../components/Notification/Notification";
 import DeleteExaminationOrder from "./Delete/DeleteExaminationOrder";
 import moment from 'moment';
 import PDFExaminationOrder from "../../components/PDF/PDFExaminationOrder";
+import jsPDF from "jspdf";
 
 const ExaminationOrder = () => {
   let columns                         = [];
@@ -214,7 +215,19 @@ const ExaminationOrder = () => {
     setIsDeleteModalOpen(false);
     fetchExaminationOrder();
   };
-
+  const generatePDF2 = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(12);
+    doc.text('Reporte de Ordenes de Examenes',20, 20,);
+    const usersData = data.map(mantexamen => [mantexamen.paciente, mantexamen.paciente_cedula, 
+      mantexamen.nombre_apellido, mantexamen.especialidad
+    ]);
+    doc.autoTable({
+      head: [['Paciente', 'Cédula', 'Medico', 'Especialidad']],
+      body: usersData,
+    });
+    doc.save('reporte_OrdExamen.pdf');
+  };
   return (
     <div className="paciente">
       <div className="header-content">
@@ -228,6 +241,9 @@ const ExaminationOrder = () => {
               onChange={e => setSearchText(e.target.value)}
             />
           </div>
+          <Button className="rounded-pill me-2" type="primary" onClick={generatePDF2}>
+            <FilePdfOutlined /> Reporte
+          </Button>
           <Button className="rounded-pill" type="primary" onClick={() => showEditCreateModal(null, 'Create')}>
             <PlusCircleOutlined /> Crear
           </Button>

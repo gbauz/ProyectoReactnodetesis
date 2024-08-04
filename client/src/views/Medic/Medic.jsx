@@ -192,7 +192,9 @@ const Medic = () => {
         dataSource={filteredData}
         rowKey={"id_medico"}
         pagination={tableParams.pagination}
-        onChange={handleTableChange} />
+        onChange={handleTableChange}
+        scroll={{ x: 'max-content' }}
+        className="table-responsive" />
       <EditCreateMedic
         isModalOpen={isModalOpen}
         handleCancel={handleCancel}

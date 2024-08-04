@@ -1,5 +1,50 @@
 .audit {
   width: 100%;
-  /* height: 100vh; */
   overflow: auto;
+  padding: 15px;
 }
+
+.header-content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.header-content h3 {
+  margin: 0;
+}
+
+.header-content .d-flex {
+  flex-wrap: wrap;
+}
+
+.input-group {
+  flex: 1;
+  min-width: 200px;
+  margin-bottom: 10px;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+  }
+
+  .header-content .d-flex {
+    justify-content: center;
+  }
+
+  .input-group {
+    margin-bottom: 15px;
+  }
+
+  .audit {
+    padding: 10px;
+  }
+}
+

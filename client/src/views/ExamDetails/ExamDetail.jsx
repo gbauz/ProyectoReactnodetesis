@@ -163,7 +163,9 @@ const ExamDetail = () => {
         dataSource={filteredData}
         rowKey={"id_detalle"}
         pagination={tableParams.pagination}
-        onChange={handleTableChange} />
+        onChange={handleTableChange}
+        scroll={{ x: 'max-content' }}
+        className="table-responsive" />
       <EditCreateExamDetail
         isModalOpen={isModalOpen}
         handleCancel={handleCancel}

@@ -179,7 +179,9 @@ const Analysis = () => {
         dataSource={filteredData}
         rowKey={"id_analisis"}
         pagination={tableParams.pagination}
-        onChange={handleTableChange} />
+        onChange={handleTableChange} 
+        scroll={{ x: 'max-content' }}
+        className="table-responsive"/>
       <EditCreateAnalysis
         isModalOpen={isModalOpen}
         handleCancel={handleCancel}
