@@ -3,7 +3,6 @@ import apiClient from "./AxiosAPI";
 const getUsers = async () => {
   try {
     const response = await apiClient.get("users");
-    console.log(response)
     return response;
   } catch (error) {
     return error;

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./DeleteResults.css";
 import { Button, Modal } from "antd";
 import SpecialtyService from "../../../services/SpecialtyService";
+import ResultService from "../../../services/ResultService";
 
 const DeleteSpecialty = ({ isDeleteModalOpen, handleDelete, handleDeleteCancel, initialValues }) => {
   const [error, setError] = useState(null);
@@ -9,7 +10,9 @@ const DeleteSpecialty = ({ isDeleteModalOpen, handleDelete, handleDeleteCancel, 
 
   const onFinish = async () => {
     try {
-      response = await SpecialtyService.deleteSpecialty(initialValues.id_especialidad, initialValues.nombre);
+      console.log(initialValues);
+      response = await ResultService.deleteResult(initialValues)
+      // response = await SpecialtyService.deleteSpecialty(initialValues.id_especialidad, initialValues.nombre);
     } catch (error) {
       setError(error);
     } finally {

@@ -8,7 +8,6 @@ import AnalysisService from "../../../services/AnalysisService";
 import ExamService from "../../../services/ExamService";
 import { DeleteFilled } from "@ant-design/icons";
 import Notification from "../../../components/Notification/Notification";
-import ResultService from "../../../services/ResultService";
 
 const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, initialValues, action }) => {
   const [form]                              = Form.useForm();
@@ -54,7 +53,7 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
       let nuevosExamenesSeleccionados = [];
       form.setFieldsValue(initialValues);
       setIsEditing(true);
-      setSelectedPatient(initialValues.id_paciente)
+      setSelectedPatient(initialValues.id_paciente);
       setSelectedMedic(initialValues.id_medico);
       getAnalysis(initialValues.especialidad);
       for (const analysis of initialValues.analisis) {

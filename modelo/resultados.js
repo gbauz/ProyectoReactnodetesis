@@ -9,27 +9,26 @@ const { verificaToken } = require('./auth');
 router.get('/', verificaToken, async (req, res) => {
   try {
     const [rows] = await (await Conexion).execute(`
-      SELECT res.id_resultado, res.resultado, res.id_realizar, 
-        re.id_paciente, re.id_medico, re.id_examen, re.id_analisis, 
+      SELECT 
+        re.id_realizar, re.id_paciente, re.id_medico, re.id_examen, re.id_analisis, 
         p.cedula AS paciente_cedula, p.paciente, 
         m.cedula AS medico_cedula, m.nombre_apellido, 
-        a.analisis, e.examen 
-      FROM resultado res 
-      INNER JOIN realizar_examen re ON res.id_realizar = re.id_realizar 
+        a.analisis, e.examen,
+        res.id_resultado, res.resultado 
+      FROM realizar_examen re 
+      LEFT JOIN resultado res ON re.id_realizar = res.id_realizar
       INNER JOIN pacientes p ON re.id_paciente = p.id_paciente 
       INNER JOIN medico m ON re.id_medico = m.id_medico 
       INNER JOIN analisis a ON re.id_analisis = a.id_analisis 
-      INNER JOIN examenes e ON re.id_examen = e.id_examen ORDER 
-      BY re.fecha DESC;
+      INNER JOIN examenes e ON re.id_examen = e.id_examen 
+      ORDER BY re.fecha DESC;
     `);
-    const result = [];
+    const patientMap = new Map();
+
     rows.forEach(row => {
-      let existingEntry = result.find(
-        r => r.id_paciente === row.id_paciente && r.id_medico === row.id_medico
-      );
-      if (!existingEntry) {
-        existingEntry = {
-          id: row.id_resultado,
+      if (!patientMap.has(row.id_paciente)) {
+        patientMap.set(row.id_paciente, {
+          id: row.id_realizar,
           id_paciente: row.id_paciente,
           paciente_cedula: row.paciente_cedula,
           paciente: row.paciente,
@@ -37,22 +36,31 @@ router.get('/', verificaToken, async (req, res) => {
           medico_cedula: row.medico_cedula,
           nombre_apellido: row.nombre_apellido,
           examen: []
-        };
-        result.push(existingEntry);
-      }
-      let existingExamen = existingEntry.examen.find(e => e.id_examen === row.id_examen);
-      if (!existingExamen) {
-        existingEntry.examen.push({
-          id_resultado: row.id_resultado,
-          resultado: row.resultado,
-          id_analisis: row.id_analisis,
-          analisis: row.analisis,
-          id_examen: row.id_examen,
-          examen: row.examen
         });
       }
+      const existingEntry = patientMap.get(row.id_paciente);
+      existingEntry.examen.push({
+        id_resultado: row.id_resultado,
+        resultado: row.resultado,
+        id_realizar: row.id_realizar,
+        id_analisis: row.id_analisis,
+        analisis: row.analisis,
+        id_examen: row.id_examen,
+        examen: row.examen
+      });
     });
-    res.json({ resultadosData: result });
+    const filteredResults = [];
+    for (let [key, pacient] of patientMap) {
+      let hasNonNullResult = false;
+      for (let exam of pacient.examen) {
+        if (exam.id_resultado !== null) hasNonNullResult = true;
+        if (hasNonNullResult) {
+          filteredResults.push(pacient);
+          break;
+        }
+      }
+    }
+    res.json({ resultadosData: filteredResults });
   } catch (error) {
     console.error('Error al obtener los resultados:', error);
     res.status(500).json({ error: 'Error al obtener los resultados' });
@@ -128,40 +136,47 @@ router.delete('/:id', verificaToken, async (req, res) => {
   }
 });
 
-//Obtener resultado por id_realizar
-router.get('/obtener/:id_realizar', verificaToken, async (req, res) => {
+// Obtener por paciente y medico
+router.get('/obtener/pacmedic', verificaToken, async (req, res) => {
+  const { id_paciente, id_medico } = req.query;
   try {
-    const { id_realizar } = req.params;
-    if (!id_realizar) {
-      return res.status(400).json({ error: 'Datos incompletos o inválidos' });
+    let query = `
+      SELECT res.id_resultado, res.resultado, 
+        re.id_realizar, re.id_paciente, re.id_medico, re.id_examen, re.id_analisis, 
+        p.cedula AS paciente_cedula, p.paciente, 
+        m.cedula AS medico_cedula, m.nombre_apellido, 
+        a.analisis, e.examen 
+      FROM resultado res 
+      RIGHT JOIN realizar_examen re ON res.id_realizar = re.id_realizar 
+      INNER JOIN pacientes p ON re.id_paciente = p.id_paciente 
+      INNER JOIN medico m ON re.id_medico = m.id_medico 
+      INNER JOIN analisis a ON re.id_analisis = a.id_analisis 
+      INNER JOIN examenes e ON re.id_examen = e.id_examen
+    `;
+    const queryParams = [];
+    if (id_paciente) {
+      query += ` WHERE re.id_paciente = ?`;
+      queryParams.push(id_paciente);
     }
-    const [rows] = await (await Conexion).execute(
-      'SELECT * FROM `resultado` WHERE `id_realizar`=?',
-      [id_realizar]
-    );
-    res.json({ resultadosData: rows });
+    if (id_medico) {
+      query += ` AND re.id_medico = ?`;
+      queryParams.push(id_medico);
+    }
+    query += ` ORDER BY re.fecha DESC;`;
+    const [rows] = await (await Conexion).execute(query, queryParams);
+    const filteredResults = [];
+    for (let patient of rows) {
+      let hasNullResult = false;
+      if (patient.id_resultado === null) hasNullResult = true;
+      if (hasNullResult) {
+        filteredResults.push(patient);
+        break;
+      }
+    }
+    res.json({ resultadosData: filteredResults });
   } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({ error: 'Error al obtener el resultado' });
-  }
-});
-
-//Actualizar 
-router.put('/actualizar/:id', verificaToken, async (req, res) => {
-  const { id } = req.params;
-  const { nuevoIdResultado } = req.body; // Suponiendo que envías el nuevo id_resultado en el cuerpo de la solicitud
-  if (!nuevoIdResultado) {
-    return res.status(400).json({ error: 'El nuevo id_resultado es requerido.' });
-  }
-  try {
-    await (await Conexion).execute(
-      'UPDATE `resultado` SET `id_resultado` = ? WHERE `id_resultado` = ?',
-      [nuevoIdResultado, id]
-    );
-    res.json({ success: true, message: 'id_resultado actualizado exitosamente.' });
-  } catch (error) {
-    console.error('Error al actualizar el id_resultado en la base de datos:', error);
-    res.status(500).json({ error: 'Error al actualizar el id_resultado' });
+    console.error('Error al obtener los resultados:', error);
+    res.status(500).json({ error: 'Error al obtener los resultados' });
   }
 });
 

@@ -9,17 +9,9 @@ const getResults = async () => {
   }
 };
 
-const getResultID = async (id) => {
-    try {
-      const response = await apiClient.get(`resultado/obtener/${id}`);
-      return response;
-    } catch (error) {
-      return error;
-    }
-};
-
 const createResult = async (resultData) => {
   try {
+    console.log(resultData);
     const response = await apiClient.post("resultado", resultData);
     return response;
   } catch (error) {
@@ -36,15 +28,6 @@ const editResult = async (id, resultData) => {
   }
 };
 
-const actualizarIDResult = async (id, nuevoIdResultado) => {
-    try {
-      const response = await apiClient.put(`resultado/actualizar/${id}`, nuevoIdResultado);
-      return response;
-    } catch (error) {
-      return error;
-    }
-  };
-
 const deleteResult = async (id) => {
   try {
     const response = await apiClient.delete(`resultado/${id}`);
@@ -54,11 +37,24 @@ const deleteResult = async (id) => {
   }
 };
 
+const getResultPacientMedic = async (id_paciente, id_medico) => {
+  try {
+    const response = await apiClient.get('resultado/obtener/pacmedic', {
+      params: {
+        id_paciente: id_paciente,
+        id_medico: id_medico
+      }
+    });
+    return response;
+  } catch (error) {
+    return error;
+  }
+};
+
 export default {
   getResults,
-  getResultID,
   createResult,
   editResult,
-  actualizarIDResult,
   deleteResult,
+  getResultPacientMedic
 };

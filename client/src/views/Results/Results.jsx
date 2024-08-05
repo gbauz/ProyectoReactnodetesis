@@ -2,7 +2,7 @@ import "./Results.css";
 import React, { useEffect, useState } from "react";
 import { Space, Table, Button, notification, Input, Tooltip, Tag } from "antd";
 import EditCreateEspecialty from "./Edit-Create/EditCreateResults";
-import { DeleteFilled, EditFilled, PlusCircleOutlined, SearchOutlined } from "@ant-design/icons";
+import { DeleteFilled, EditFilled, FilePdfOutlined, PlusCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import Notification from "../../components/Notification/Notification";
 import DeleteSpecialty from "./Delete/DeleteResults";
 import SpecialtyService from "../../services/SpecialtyService";
@@ -68,13 +68,15 @@ const Resultados = () => {
       dataIndex: "resultado",
       align: "center",
       render: (_, { examen }) => (
-        <>
+        <Space size="middle">
           {examen.map((exam) => 
-            <Tag key={exam.id_resultado}>
-              {exam.examen}{exam.resultado}
-            </Tag>
+            <Tooltip title={exam.examen}>
+              <Button className="actions" onClick={() => downloadFile(exam)} disabled={(exam.id_resultado===null)?true:false}>
+                <FilePdfOutlined className={(exam.id_resultado===null)? "":"download-icon"} />
+              </Button>
+            </Tooltip>
           )}
-        </>
+        </Space>
       ),
     },
     {
@@ -107,12 +109,11 @@ const Resultados = () => {
       sortField: Array.isArray(sorter) ? undefined : sorter.field,
     });
   };
-  const filteredData = data;
-  // .filter(item => 
-  //   item.cedula_paciente.toLowerCase().includes(searchText.toLowerCase()) ||
-  //   item.paciente.toLowerCase().includes(searchText.toLowerCase())        ||
-  //   item.nombre_medico.toLowerCase().includes(searchText.toLowerCase())
-  // );
+  const filteredData = data.filter(item => 
+    item.paciente_cedula.toLowerCase().includes(searchText.toLowerCase()) ||
+    item.paciente.toLowerCase().includes(searchText.toLowerCase())        ||
+    item.nombre_apellido.toLowerCase().includes(searchText.toLowerCase())
+  );
 
   //Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -148,6 +149,10 @@ const Resultados = () => {
     fetchAnalysis();
   };
 
+  const downloadFile = (value) =>{
+    console.log(value);
+  }
+
   return (
     <div className="specialty">
       <div className="header-content">
@@ -172,7 +177,7 @@ const Resultados = () => {
         loading={loading}
         columns={columns}
         dataSource={filteredData}
-        rowKey={"id_resultado"}
+        rowKey={"id"}
         pagination={tableParams.pagination}
         onChange={handleTableChange}
         scroll={{ x: 'max-content' }}
