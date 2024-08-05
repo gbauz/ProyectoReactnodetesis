@@ -1,4 +1,7 @@
 /*Estilos Generales para mapa*/
+.navbar {
+  z-index: 99999; /* Añadido para asegurar que esté por encima de otros elementos */
+}
 .navbar-dark .navbar-nav .nav-link {
   color: rgba(255, 255, 255, 0.75);
 }

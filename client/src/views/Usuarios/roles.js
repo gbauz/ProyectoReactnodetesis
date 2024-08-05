@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import DataTable from 'react-data-table-component';
-import './usuario.css';
+import { Table, Button, Input, Space, Tooltip, Tag } from 'antd';
+import { SearchOutlined, EditFilled, DeleteFilled, PlusCircleOutlined } from '@ant-design/icons';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import RoleForm from './roleForm';
 import Uri from '../../environment/environment';
+import './usuario.css';
+
 
 const Roles = () => {
   const [roles, setRoles] = useState([]);
@@ -192,62 +194,77 @@ const Roles = () => {
 
   const columns = [
     {
-      name: 'ID',
-      selector: row => row.id_rol,
-      sortable: true,
+      title: 'ID',
+      dataIndex: 'id_rol',
+      sorter: (a, b) => a.id_rol - b.id_rol,
     },
     {
-      name: 'ROL',
-      selector: row => row.nombre,
-      sortable: true,
+      title: 'Rol',
+      dataIndex: 'nombre',
+      sorter: (a, b) => a.nombre.localeCompare(b.nombre),
     },
     {
-      name: 'PERMISOS',
-      selector: row => (
-        <ul style={{ listStyleType: 'none', padding: 0 }}>
-          {row.permisos.map(permiso => (
-            <li key={permiso.id_permiso}>{permiso.permiso_nombre}</li>
-          ))}
-        </ul>
-      ),
-      sortable: true,
-    },
-    {
-      name: 'ACCIONES',
-      cell: row => (
+      title: 'Permisos',
+      dataIndex: 'permisos',
+      align: "center",
+      render: permisos => (
         <>
+          {permisos.map(permiso => (
+            <Tag key={permiso.id_permiso}>{permiso.permiso_nombre}</Tag>
+          ))}
+        </>
+      ),
+    },
+    {
+      title: 'Acciones',
+      key: 'action',
+      render: (_, record) => (
+        <Space size="middle">
           {rolesPermissions.includes(5) && (
-            <button title="Editar" className="btn btn-primary btn-sm mr-2 action-button" onClick={() => handleEditRole(row)}>
-              <i className="fas fa-edit"></i>
-            </button>
+            <Tooltip title="Editar">
+              <Button
+                type="primary"
+                icon={<EditFilled />}
+                onClick={() => handleEditRole(record)}
+              />
+            </Tooltip>
           )}
           {rolesPermissions.includes(6) && (
-            <button title="Eliminar" className="btn btn-danger btn-sm mr-2 action-button" onClick={() => handleDeleteRole(row.id_rol)}>
-              <i className="fas fa-trash"></i>
-            </button>
+            <Tooltip title="Eliminar">
+              <Button
+                type="danger"
+                icon={<DeleteFilled />}
+                onClick={() => handleDeleteRole(record.id_rol)}
+              />
+            </Tooltip>
           )}
-        </>
+        </Space>
       ),
     },
   ];
 
   return (
-    <div className="container mt-4">
-      <h4>Roles</h4>
+    <div className="roles" >
       {!showForm ? (
         <>
+        <div className="header-content">
+        <h3>Roles</h3>
           <div className="d-flex justify-content-end mb-3">
-            <input
-              type="text"
-              className="form-control w-25 mr-2"
+            <Input
               placeholder="Buscar por rol.."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              prefix={<SearchOutlined />}
+              style={{ width: 300, marginRight: 10 }}
             />
             {rolesPermissions.includes(4) && (
-              <button className="btn btn-success mr-2" onClick={handleCreateRole}>
-                <i className="fas fa-plus"></i> Crear Rol
-              </button>
+              <Button
+                type="primary"
+                icon={<PlusCircleOutlined />}
+                onClick={handleCreateRole}
+              >
+                Crear Rol
+              </Button>
             )}
           </div>
           {errorMessage && (
@@ -255,26 +272,22 @@ const Roles = () => {
               {errorMessage}
             </div>
           )}
-          <DataTable
+          </div>
+          <Table
             columns={columns}
-            data={filteredRoles}
-            pagination
-            highlightOnHover
-            pointerOnHover
-            responsive
-            customStyles={{
-              headCells: {
-                style: {
-                  backgroundColor: '#135ea9',
-                  color: '#ffffff',
-                  border: '1px solid #ccc',
-                },
-              },
-            }}
-          />
-          <button className="btn btn-primary mt-3" onClick={handleShowReport}>
+            dataSource={filteredRoles}
+            pagination={{ pageSize: 5 }}
+            rowKey="id_rol"
+            className="table-responsive" />
+          
+          <Button
+            type="primary"
+            icon={<PlusCircleOutlined />}
+            onClick={handleShowReport}
+            style={{ marginTop: 16 }}
+          >
             Mostrar Reporte
-          </button>
+          </Button>
         </>
       ) : (
         <RoleForm
@@ -282,10 +295,10 @@ const Roles = () => {
           permissionsList={permissionsList}
           onSave={handleSaveRole}
           onCancel={() => setShowForm(false)}
-          />
-        )}
-      </div>
-    );
-  };
-  
-  export default Roles;
+        />
+      )}
+    </div>
+  );
+};
+
+export default Roles;

@@ -257,7 +257,8 @@ const ExaminationOrder = () => {
         dataSource={filteredData}
         rowKey={"id"}
         pagination={tableParams.pagination}
-        onChange={handleTableChange} />
+        onChange={handleTableChange}
+        className="table-responsive" />
       {isModalOpen && (
         <EditCreateExaminationOrder
           isModalOpen={isModalOpen}

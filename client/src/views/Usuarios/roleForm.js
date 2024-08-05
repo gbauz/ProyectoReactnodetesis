@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
+import { Form, Input, Button, Checkbox, Table, Modal, Typography } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import PermissionModal from './PermissionModal'; // Asegúrate de crear este componente
+import './usuario.css';
+
+const { Title } = Typography;
 
 const RoleForm = ({ role, permissionsList, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -33,8 +38,7 @@ const RoleForm = ({ role, permissionsList, onSave, onCancel }) => {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     onSave(formData);
   };
 
@@ -66,70 +70,90 @@ const RoleForm = ({ role, permissionsList, onSave, onCancel }) => {
     handleCloseModal();
   };
 
+  const columns = [
+    {
+      title: 'Categoría',
+      dataIndex: 'categoria',
+      key: 'categoria',
+    },
+    {
+      title: 'Permisos',
+      dataIndex: 'permisos',
+      key: 'permisos',
+      render: (permisos) => (
+        <>
+          {permisos.map((permiso) => (
+            <Checkbox
+              key={permiso.id_permiso}
+              value={permiso.id_permiso}
+              checked={formData.permisos.includes(permiso.id_permiso)}
+              onChange={handlePermissionsChange}
+            >
+              {permiso.nombre_permiso}
+            </Checkbox>
+          ))}
+        </>
+      ),
+    },
+    {
+      title: 'Descripción',
+      dataIndex: 'permisos',
+      key: 'descripcion',
+      render: (permisos) => (
+        <>
+          {permisos.map((permiso) => (
+            <div key={permiso.id_permiso}>{permiso.descripcion}</div>
+          ))}
+        </>
+      ),
+    },
+  ];
+
+  const data = Object.entries(groupedPermissions).map(([category, permisos]) => ({
+    key: category,
+    categoria: category,
+    permisos,
+  }));
+
   return (
-    <div className="container mt-4">
-      <h4>{role ? 'Editar Rol' : 'Crear Nuevo Rol'}</h4>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Nombre del Rol</label>
-          <input type="text" className="form-control" name="nombre" value={formData.nombre} onChange={handleChange} />
-        </div>
-        <div className="form-group"><br/>
-          <label>
-            Asignar Permisos al Rol&nbsp;&nbsp;&nbsp;&nbsp;
-            <button type="button" className="btn btn-primary float-right" onClick={handleOpenModal}>
-              Crear Permiso
-            </button>
-          </label>
-          <table className="table table-bordered">
-            <thead>
-              <tr>
-                <th>Categoría</th>
-                <th>Permisos</th>
-                <th>Descripción</th> {/* Nueva columna para la descripción */}
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(groupedPermissions).map(([category, permisos]) => (
-                <tr key={category}>
-                  <td>{category}</td>
-                  <td>
-                    {permisos.map(permiso => (
-                      <div key={permiso.id_permiso} className="form-check">
-                        <input
-                          type="checkbox"
-                          className="form-check-input"
-                          name="permisos"
-                          value={permiso.id_permiso}
-                          checked={formData.permisos.includes(permiso.id_permiso)}
-                          onChange={handlePermissionsChange}
-                        />
-                        <label className="form-check-label">
-                          {permiso.nombre_permiso}
-                        </label>
-                      </div>
-                    ))}
-                  </td>
-                  <td> {/* Columna para mostrar la descripción del permiso */}
-                    {permisos.map(permiso => (
-                      <div key={permiso.id_permiso}>
-                        {permiso.descripcion}
-                      </div>
-                    ))}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <button type="submit" className="btn btn-primary">{role ? 'Guardar' : 'Crear'}</button>
-        <button type="button" className="btn btn-secondary" onClick={onCancel}>Cancelar</button>
-      </form>
+    <div className="roles">
+      <div className="header-content">
+      <Title level={4}>{role ? 'Editar Rol' : 'Crear Nuevo Rol'}</Title>
+      <Form layout="vertical" onFinish={handleSubmit}>
+        <Form.Item label="Nombre del Rol" required>
+          <Input
+            name="nombre"
+            value={formData.nombre}
+            onChange={handleChange}
+            placeholder="Ingrese el nombre del rol"
+          />
+        </Form.Item>
+        <Form.Item label="Asignar Permisos al Rol">
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenModal}>
+            Crear Permiso
+          </Button>
+          <Table
+            columns={columns}
+            dataSource={data}
+            pagination={false}
+            bordered
+          />
+        </Form.Item>
+        <Form.Item>
+          <Button type="primary" htmlType="submit">
+            {role ? 'Guardar' : 'Crear'}
+          </Button>
+          <Button type="default" onClick={onCancel} style={{ marginLeft: '8px' }}>
+            Cancelar
+          </Button>
+        </Form.Item>
+      </Form>
       <PermissionModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSave={handleSavePermission}
       />
+      </div>
     </div>
   );
 };

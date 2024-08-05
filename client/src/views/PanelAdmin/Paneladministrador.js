@@ -17,6 +17,7 @@ import Rol from '../Rol/Rol';
 import { useAuth } from '../../services/AuthProvider';
 import ExamDetail from '../ExamDetails/ExamDetail';
 import Resultados from '../Results/Results';
+import Roles from '../Usuarios/roles';
 
 const AdminPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -145,7 +146,7 @@ const AdminPage = () => {
       case 'users':
         return <User />;
       case 'roles':
-        return <Rol />;
+        return <Roles />;
       case 'auditoria':
         return <Audit />;
       case 'Realizar Examenes':
@@ -215,10 +216,11 @@ const AdminPage = () => {
     'Analisis': 'fa-solid fa-notes-medical',
     'Examenes': 'fas fa-file-medical-alt',
     'Especialidad': 'fas fa-briefcase-medical',
+    'Examen Detalles': 'fas fa-file-medical-alt',
 
   };
-  const principalCategories = ['Registro de Pacientes', 'Registro de Resultados', 'Generar Examenes'];
-  const configuracionesCategories = ['Usuarios', 'Roles', 'Auditoria'];
+  /* const principalCategories = ['Registro de Pacientes', 'Registro de Resultados', 'Generar Examenes'];
+  const configuracionesCategories = ['Usuarios', 'Roles', 'Auditoria']; */
 
  
 
