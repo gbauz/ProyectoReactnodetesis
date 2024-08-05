@@ -64,7 +64,7 @@ router.put('/:id', verificaToken, auditoriaMiddleware((req) => `Editó Rol: ${re
     await (await Conexion).execute('DELETE FROM roles_permisos WHERE id_rol = ?', [roleId]);
 
     if (permisos && permisos.length > 0) {
-      const permisosValues = permisos.map(permisoId => [roleId, permisoId.id_permiso]);
+      const permisosValues = permisos.map(permisoId => [roleId, permisoId]);
       await (await Conexion).query(
         'INSERT INTO roles_permisos (id_rol, id_permiso) VALUES ?',
         [permisosValues]

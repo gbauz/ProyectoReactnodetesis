@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Form } from 'react-bootstrap';
+import { Modal, Button, Form, Input } from 'antd';
 import Uri from '../../environment/environment';
 
 const PermissionModal = ({ isOpen, onClose, onSave }) => {
   const [permissions, setPermissions] = useState([]);
+  const [form] = Form.useForm();
   const [formData, setFormData] = useState({
     nombre_permiso: '',
     categoria: '',
@@ -17,7 +18,7 @@ const PermissionModal = ({ isOpen, onClose, onSave }) => {
         console.error('Token no encontrado en sessionStorage');
         return;
       }
-      const response = await fetch(Uri+'permisos', {
+      const response = await fetch(Uri + 'permisos', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -45,17 +46,17 @@ const PermissionModal = ({ isOpen, onClose, onSave }) => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     try {
+      const values = await form.validateFields(); // Validate fields before submitting
       const token = sessionStorage.getItem('token');
-      const response = await fetch(Uri+'permisos', {
+      const response = await fetch(Uri + 'permisos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(values),
       });
       if (response.ok) {
         const newPermission = await response.json();
@@ -70,52 +71,58 @@ const PermissionModal = ({ isOpen, onClose, onSave }) => {
   };
 
   return (
-    <Modal show={isOpen} onHide={onClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>Crear Nuevo Permiso</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <Form onSubmit={handleSubmit}>
-          <Form.Group>
-            <Form.Label>Nombre del Permiso</Form.Label>
-            <Form.Control
-              type="text"
-              name="nombre_permiso"
-              value={formData.nombre_permiso}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Categoría</Form.Label>
-            <Form.Control
-              type="text"
-              name="categoria"
-              value={formData.categoria}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Descripción</Form.Label>
-            <Form.Control
-              as="textarea"
-              name="descripcion"
-              value={formData.descripcion}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Button type="submit" variant="primary">
-            Guardar
-          </Button>
-        </Form>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={onClose}>
+    <Modal
+      title="Crear Nuevo Permiso"
+      visible={isOpen}
+      onCancel={onClose}
+      footer={[
+        <Button key="cancel" onClick={onClose}>
           Cancelar
+        </Button>,
+        <Button key="submit" type="primary" onClick={handleSubmit}>
+          Guardar
         </Button>
-      </Modal.Footer>
+      ]}
+    >
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={formData}
+      >
+        <Form.Item
+          label="Nombre del Permiso"
+          name="nombre_permiso"
+          rules={[{ required: true, message: 'Por favor ingrese el nombre del permiso' }]}
+        >
+          <Input
+            name="nombre_permiso"
+            value={formData.nombre_permiso}
+            onChange={handleChange}
+          />
+        </Form.Item>
+        <Form.Item
+          label="Categoría"
+          name="categoria"
+          rules={[{ required: true, message: 'Por favor ingrese la categoría' }]}
+        >
+          <Input
+            name="categoria"
+            value={formData.categoria}
+            onChange={handleChange}
+          />
+        </Form.Item>
+        <Form.Item
+          label="Descripción"
+          name="descripcion"
+          rules={[{ required: true, message: 'Por favor ingrese la descripción' }]}
+        >
+          <Input.TextArea
+            name="descripcion"
+            value={formData.descripcion}
+            onChange={handleChange}
+          />
+        </Form.Item>
+      </Form>
     </Modal>
   );
 };
