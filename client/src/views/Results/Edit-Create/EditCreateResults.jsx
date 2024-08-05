@@ -8,11 +8,10 @@ import { CheckCircleOutlined, CloudUploadOutlined, UploadOutlined } from "@ant-d
 import Notification from "../../../components/Notification/Notification";
 import Uri from "../../../environment/environment";
 
-const EditCreateEspecialty = ({ isModalOpen, handleSubmit, handleCancel, initialValues, action }) => {
+const EditCreateEspecialty = ({ isModalOpen,  handleCancel, initialValues, action }) => {
   const [form]                    = Form.useForm();
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError]         = useState(null);
-  const [loading, setLoading]     = useState(false);
   let response = '';
   let columns                     = [];
   const [api, contextHolder]      = notification.useNotification(); //Notification
@@ -39,16 +38,15 @@ const EditCreateEspecialty = ({ isModalOpen, handleSubmit, handleCancel, initial
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    if (action=='Edit') {
+    if (action==='Edit') {
       let nuevosExamenes = [];
-      console.log(initialValues);
       form.setFieldsValue(initialValues);
       setIsEditing(true);
       setSelectedPatient(initialValues.id_paciente);
       setSelectedMedic(initialValues.id_medico);
       for (let examen of initialValues.examen) {
         nuevosExamenes.push({
-          id: examen.id_resultado,
+          id_resultado: examen.id_resultado,
           resultado: examen.resultado,
           id_realizar: examen.id_realizar,
           id_analisis: examen.id_analisis,
@@ -60,7 +58,7 @@ const EditCreateEspecialty = ({ isModalOpen, handleSubmit, handleCancel, initial
       setFile(null);
       setExamenesInitial(nuevosExamenes);
     } 
-    if (action=='Create'){
+    if (action==='Create'){
       form.resetFields();
       setExamenesInitial([]);
       setFile(null);
@@ -92,7 +90,7 @@ const EditCreateEspecialty = ({ isModalOpen, handleSubmit, handleCancel, initial
   const filter = (input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase());
   const handlePatientChange = (value) => {
     setSelectedPatient(value);
-    if(selectedMedic) getExamOrder(value, selectedMedic);
+    if(selectedMedic) getExamOrder(value, selectedMedic, 'Create');
   };
 
   //Lógica de Médico
@@ -118,23 +116,15 @@ const EditCreateEspecialty = ({ isModalOpen, handleSubmit, handleCancel, initial
   const filterMedic = (input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase());
   const handleMedicChange = (value) => {
     setSelectedMedic(value);
-    if(selectedPatient) getExamOrder(selectedPatient, value);
+    if(selectedPatient) getExamOrder(selectedPatient, value, 'Create');
   };
 
   //Lógica de obtener examenes
-  const getExamOrder = async (id_paciente, id_medico) => {
+  const getExamOrder = async (id_paciente, id_medico, action) => {
     // setloadingSelect(true);
     try {
-      response = await ResultService.getResultPacientMedic(id_paciente, id_medico);
-      console.log(response);
-      // const medics = response.data.medicos.map(medic => ({
-      //   value: medic.id_medico,
-      //   label: `${medic.cedula} (${medic.nombre_apellido})`,
-      //   nombre_apellido: medic.nombre_apellido,
-      //   nombre: medic.nombre
-      // }))
+      response = await ResultService.getResultPacientMedic(id_paciente, id_medico, action);
       setExamenesInitial(response.data.resultadosData);
-      // setMedicOptions(medics);
     } catch (error) {
       setDataMedic('');
       setError(error);
@@ -145,44 +135,88 @@ const EditCreateEspecialty = ({ isModalOpen, handleSubmit, handleCancel, initial
 
   //Lógica para subir archivo
   const uploadFile = async (value) => {
-    let axiosResponse;
+    const token = sessionStorage.getItem('token');
     const formData = new FormData();
+    let axiosResponse;
+    let resultResponse;
+    let flag = false;
+    resultResponse = await ResultService.getResultOnly();
+    for (let result of resultResponse.data.result){
+      if(value.id_resultado === result.id_resultado){
+        flag = true;
+      }
+    }
     formData.append('file', file);
     formData.append('id_realizar', value.id_realizar);
-    console.log("Subiendo", formData);
     setUploading(true);
-    const token = sessionStorage.getItem('token');
-    try {
-      response = await fetch(Uri+'resultado', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-      if(response.status >= 200 && response.status < 300){
-        axiosResponse = {
-          status: 200,
-          data: {
-            message: "El archivo fue subido!!"
-          }
-        }
-      }else{
-        axiosResponse = {
-          status: 500,
-          response: {
+    if (flag === false) {
+      try {
+        response = await fetch(Uri+'resultado', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
+        if(response.status >= 200 && response.status < 300){
+          axiosResponse = {
+            status: 200,
             data: {
-              error: "Hubo un error al subir el archivo!!"
+              message: "El archivo fue subido!!"
+            }
+          }
+        } else {
+          axiosResponse = {
+            status: 500,
+            response: {
+              data: {
+                error: "Hubo un error al subir el archivo!!"
+              }
             }
           }
         }
+      } catch (error) {
+        setError(error)
+      } finally {
+        Notification(api, axiosResponse);
+        setUploading(false);
+        setFile(null);
+        getExamOrder(selectedPatient, selectedMedic, (action==='Create')?'Create':'Edit');
       }
-    } catch (error) {
-      setError(error)
-    } finally {
-      Notification(api, axiosResponse);
-      setUploading(false);
-      setFile(null);
+    } else {
+      try {
+        response = await fetch(`${Uri}resultado/${value.id_resultado}`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
+        if(response.status >= 200 && response.status < 300){
+          axiosResponse = {
+            status: 200,
+            data: {
+              message: "El archivo fue modificado!!"
+            }
+          }
+        } else {
+          axiosResponse = {
+            status: 500,
+            response: {
+              data: {
+                error: "Hubo un error al subir el archivo!!"
+              }
+            }
+          }
+        }
+      } catch (error) {
+        setError(error)
+      } finally {
+        Notification(api, axiosResponse);
+        setUploading(false);
+        setFile(null);
+        getExamOrder(selectedPatient, selectedMedic, (action==='Create')?'Create':'Edit');
+      }
     }
   }
   const props = {
@@ -193,6 +227,7 @@ const EditCreateEspecialty = ({ isModalOpen, handleSubmit, handleCancel, initial
       setFile(file);
       return false;
     },
+    accept: ".pdf"
   };
 
   //Llenar columnas
@@ -222,7 +257,7 @@ const EditCreateEspecialty = ({ isModalOpen, handleSubmit, handleCancel, initial
       align: "center",
       render: (_, record) => (
         <Space size="middle">
-          <Upload {...props} maxCount={1}>
+          <Upload {...props} maxCount={1} showUploadList={false}>
             <Button icon={<UploadOutlined />}>Select File</Button>
           </Upload>
           <Tooltip title='Subir resultados'>
@@ -255,23 +290,6 @@ const EditCreateEspecialty = ({ isModalOpen, handleSubmit, handleCancel, initial
     });
   };
 
-  const onFinish = async (values) => {
-    setLoading(true);
-    try {
-      // if (action=='Edit') response = await SpecialtyService.editSpecialty(values.id_especialidad, values);
-      // if (action=='Create') response = await SpecialtyService.createSpecialty(values);
-    } catch (error) {
-      setError(error);
-    }finally {
-      setLoading(false);
-      if (response) {
-        setUploading(false);
-        handleSubmit(response);
-        form.resetFields();
-      }
-    }
-  };
-
   const handleCancelModal = () => {
     clean();
     handleCancel();
@@ -297,7 +315,7 @@ const EditCreateEspecialty = ({ isModalOpen, handleSubmit, handleCancel, initial
       width={1000}
     >
       {contextHolder}
-      <Form form={form} layout="vertical" onFinish={onFinish}>
+      <Form form={form} layout="vertical">
         <Row>
           <Row gutter={[16, 8]}>
             <Col span={12}>
@@ -333,11 +351,8 @@ const EditCreateEspecialty = ({ isModalOpen, handleSubmit, handleCancel, initial
           </Row>
         </Row>
         <Form.Item className="footer">
-          <Button key="back" onClick={handleCancelModal} style={{marginRight:'15px'}}>
-            Cancelar
-          </Button>
-          <Button htmlType="submit" style={{background: '#4096FF', color:'white'}} loading={loading}>
-            {isEditing ? "Editar" : "Crear"}
+          <Button onClick={handleCancelModal} style={{background: '#4096FF', color:'white'}}>
+            Aceptar
           </Button>
         </Form.Item>
       </Form>

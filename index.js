@@ -28,13 +28,13 @@ function exception_routes(paths, fn) {
   }
 }
 
-app.use(exception_routes(['/login', '/another_route'], cors(corsOptions)));
+app.use(exception_routes(['/login', '/another_route', '/uploads'], cors(corsOptions)));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(routes); // Usar el archivo de rutas
-
+app.use('/uploads', express.static(__dirname+'/uploads'));
 app.use(express.static(path.join(__dirname, 'client', 'build')));
 
 app.get('*', (req, res) => {

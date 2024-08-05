@@ -32,7 +32,6 @@ const User = () => {
     try {
       const response = await UserService.getUsers();
       setData(response.data.users);
-      console.log(response);
     } catch (error) {
       setError(error);
     } finally {

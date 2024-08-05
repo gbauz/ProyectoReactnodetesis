@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
 const Conexion = require('../controlador/conexion');
 const { verificaToken } = require('./auth');
 
@@ -24,7 +23,6 @@ router.get('/', verificaToken, async (req, res) => {
       ORDER BY re.fecha DESC;
     `);
     const patientMap = new Map();
-
     rows.forEach(row => {
       if (!patientMap.has(row.id_paciente)) {
         patientMap.set(row.id_paciente, {
@@ -76,7 +74,6 @@ const storage = multer.diskStorage({
     cb(null, `${Date.now()}_${file.originalname}`);
   }
 });
-
 const upload = multer({ storage });
 
 // Subir un nuevo archivo
@@ -84,16 +81,13 @@ router.post('/', verificaToken, upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No se subió ningún archivo' });
   }
-
   const { id_realizar } = req.body;
   const filePath = req.file.path;
-
   try {
     await (await Conexion).execute(
       'INSERT INTO resultado (resultado, id_realizar) VALUES (?, ?)',
       [filePath, id_realizar]
     );
-
     res.json({ success: true, message: 'Archivo subido exitosamente.' });
   } catch (error) {
     console.error('Error al guardar el archivo en la base de datos:', error);
@@ -105,7 +99,6 @@ router.post('/', verificaToken, upload.single('file'), async (req, res) => {
 router.put('/:id', verificaToken, upload.single('file'), async (req, res) => {
   const { id } = req.params;
   const filePath = req.file ? req.file.path : null;
-
   try {
     if (filePath) {
       // Si hay un archivo, actualizamos el campo 'resultado'
@@ -115,14 +108,12 @@ router.put('/:id', verificaToken, upload.single('file'), async (req, res) => {
       // Si no hay archivo, devolvemos un error
       return res.status(400).json({ error: 'No se ha proporcionado un archivo para actualizar el resultado' });
     }
-
     res.json({ success: true, message: 'Resultado actualizado exitosamente.' });
   } catch (error) {
     console.error('Error al actualizar el resultado en la base de datos:', error);
     res.status(500).json({ error: 'Error al actualizar el resultado' });
   }
 });
-
 
 // Eliminar un resultado existente
 router.delete('/:id', verificaToken, async (req, res) => {
@@ -138,7 +129,7 @@ router.delete('/:id', verificaToken, async (req, res) => {
 
 // Obtener por paciente y medico
 router.get('/obtener/pacmedic', verificaToken, async (req, res) => {
-  const { id_paciente, id_medico } = req.query;
+  const { id_paciente, id_medico, action } = req.query;
   try {
     let query = `
       SELECT res.id_resultado, res.resultado, 
@@ -164,19 +155,36 @@ router.get('/obtener/pacmedic', verificaToken, async (req, res) => {
     }
     query += ` ORDER BY re.fecha DESC;`;
     const [rows] = await (await Conexion).execute(query, queryParams);
-    const filteredResults = [];
-    for (let patient of rows) {
-      let hasNullResult = false;
-      if (patient.id_resultado === null) hasNullResult = true;
-      if (hasNullResult) {
-        filteredResults.push(patient);
-        break;
+    let filteredResults = [];
+    if (action==='Create'){
+      for (let patient of rows) {
+        let hasNullResult = false;
+        if (patient.id_resultado === null) hasNullResult = true;
+        if (hasNullResult) {
+          filteredResults.push(patient);
+          break;
+        }
       }
+    } else {
+      filteredResults = rows;
     }
     res.json({ resultadosData: filteredResults });
   } catch (error) {
     console.error('Error al obtener los resultados:', error);
     res.status(500).json({ error: 'Error al obtener los resultados' });
+  }
+});
+
+// Endpoint para Obtener todos los resultados
+router.get('/obtener/result', verificaToken, async (req, res) => {
+  try {
+    const [rows] = await (await Conexion).execute(
+      'SELECT * FROM resultado'
+    );
+    res.json({ result: rows });
+  } catch (error) {
+    console.error('Error fetching resultados:', error);
+    res.status(500).json({ error: 'Error al obtener resultados.' });
   }
 });
 

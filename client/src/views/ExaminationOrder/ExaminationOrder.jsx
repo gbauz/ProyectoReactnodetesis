@@ -33,7 +33,6 @@ const ExaminationOrder = () => {
     try {
       const response = await ExaminationOrderService.getExaminationOrder();
       setData(response.data.mantexamen);
-      console.log(response.data.mantexamen);
     } catch (error) {
       setError(error);
     } finally {

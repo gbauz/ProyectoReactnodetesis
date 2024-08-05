@@ -5,7 +5,7 @@ const Notification = (api, axiosResponse) => {
     description: (status) ? axiosResponse.data.message : axiosResponse.response.data.error,
     showProgress: true,
     pauseOnHover: false,
-    placement: "topRight",
+    placement: "bottomRight",
   };
   (status) ? api.success(config) : api.error(config);
 };

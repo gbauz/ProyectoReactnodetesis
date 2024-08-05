@@ -10,9 +10,11 @@ const DeleteSpecialty = ({ isDeleteModalOpen, handleDelete, handleDeleteCancel, 
 
   const onFinish = async () => {
     try {
-      console.log(initialValues);
-      response = await ResultService.deleteResult(initialValues)
-      // response = await SpecialtyService.deleteSpecialty(initialValues.id_especialidad, initialValues.nombre);
+      for(let exam of initialValues.examen){
+        if(exam.id_resultado !== null){
+          response = await ResultService.deleteResult(exam.id_resultado)
+        }
+      }
     } catch (error) {
       setError(error);
     } finally {

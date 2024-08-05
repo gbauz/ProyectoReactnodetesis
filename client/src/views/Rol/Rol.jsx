@@ -28,7 +28,6 @@ const Rol = () => {
     try {
       const response = await RolService.getRols();
       setData(response.data.roles);
-      console.log(response.data.roles);
     } catch (error) {
       setError(error);
     } finally {

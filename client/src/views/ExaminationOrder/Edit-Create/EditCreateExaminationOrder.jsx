@@ -284,7 +284,6 @@ const EditCreateExaminationOrder = ({ isModalOpen, handleSubmit, handleCancel, i
   };
 
   const handleEliminarExamen = async (index) => {
-    console.log(index);
     if (examenesSeleccionados.length > 1) {
       for (let examen of examenesInitial){
         if (examen.id === index.id) {

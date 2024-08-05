@@ -28,7 +28,6 @@ const ExamDetail = () => {
     try {
       const response = await ExamDetailService.getExamDetails();
       setData(response.data.detalles);
-      console.log(response.data.detalles);
     } catch (error) {
       setError(error);
     } finally {

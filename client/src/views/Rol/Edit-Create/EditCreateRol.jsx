@@ -58,7 +58,6 @@ const EditCreateRol = ({ isModalOpen, handleSubmit, handleCancel, initialValues,
         ...values,
         permisos: selectedPermissions.map(id_permiso => ({ id_permiso }))
       };
-      // console.log(formattedValue);
       if (action=='Edit') response = await RolService.editRol(initialValues.id_rol, formattedValue);
       if (action=='Create') response = await RolService.createRol(formattedValue);
     } catch (error) {

@@ -7,6 +7,7 @@ import Notification from "../../components/Notification/Notification";
 import DeleteSpecialty from "./Delete/DeleteResults";
 import SpecialtyService from "../../services/SpecialtyService";
 import ResultService from "../../services/ResultService";
+import apiClient from "../../services/AxiosAPI";
 
 const Resultados = () => {
   let columns                         = [];
@@ -24,11 +25,10 @@ const Resultados = () => {
       position: ["bottomRight"]
     },
   });
-  const fetchAnalysis = async () => {
+  const fetchResult = async () => {
     setLoading(true);
     try {
       const response = await ResultService.getResults();
-      console.log(response.data.resultadosData);
       setData(response.data.resultadosData);
     } catch (error) {
       setError(error);
@@ -38,7 +38,7 @@ const Resultados = () => {
   };
   
   useEffect(() => {
-    fetchAnalysis();
+    fetchResult();
   }, []);
 
   //Llenar columnas
@@ -70,7 +70,7 @@ const Resultados = () => {
       render: (_, { examen }) => (
         <Space size="middle">
           {examen.map((exam) => 
-            <Tooltip title={exam.examen}>
+            <Tooltip title={exam.examen} key={exam.id_realizar}>
               <Button className="actions" onClick={() => downloadFile(exam)} disabled={(exam.id_resultado===null)?true:false}>
                 <FilePdfOutlined className={(exam.id_resultado===null)? "":"download-icon"} />
               </Button>
@@ -127,11 +127,7 @@ const Resultados = () => {
   };
   const handleCancel = () => {
     setIsModalOpen(false);
-  };
-  const handleSubmit = (axiosResponse) => {
-    Notification(api, axiosResponse);
-    setIsModalOpen(false);
-    fetchAnalysis();
+    fetchResult();
   };
   
   //Delete
@@ -146,11 +142,29 @@ const Resultados = () => {
   const handleDelete = (axiosResponse) => {
     Notification(api, axiosResponse);
     setIsDeleteModalOpen(false);
-    fetchAnalysis();
+    fetchResult();
   };
 
-  const downloadFile = (value) =>{
+  const downloadFile = async (value) => {
     console.log(value);
+    const filePath = value.resultado;
+    try {
+      const response = await apiClient.get(filePath, {
+        responseType: 'blob', // Importante para recibir el archivo como un blob
+      });
+      console.log(response);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filePath.split('\\').pop());
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      // Liberar la URL del blob después de la descarga
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error al descargar el archivo:', error);
+    }
   }
 
   return (
@@ -182,17 +196,20 @@ const Resultados = () => {
         onChange={handleTableChange}
         scroll={{ x: 'max-content' }}
         className="table-responsive" />
-      <EditCreateEspecialty
-        isModalOpen={isModalOpen}
-        handleCancel={handleCancel}
-        handleSubmit={handleSubmit}
-        initialValues={currentItem}
-        action={action} />
-      <DeleteSpecialty 
-        isDeleteModalOpen={isDeleteModalOpen}
-        handleDelete={handleDelete}
-        handleDeleteCancel={handleDeleteCancel}
-        initialValues={currentItem} />
+      {isModalOpen && (
+        <EditCreateEspecialty
+          isModalOpen={isModalOpen}
+          handleCancel={handleCancel}
+          initialValues={currentItem}
+          action={action} />
+      )}
+      {isDeleteModalOpen && (
+        <DeleteSpecialty 
+          isDeleteModalOpen={isDeleteModalOpen}
+          handleDelete={handleDelete}
+          handleDeleteCancel={handleDeleteCancel}
+          initialValues={currentItem} />
+      )}
     </div>
   );
 }

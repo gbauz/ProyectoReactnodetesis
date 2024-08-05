@@ -20,8 +20,6 @@ const createRol = async (rolData) => {
 
 const editRol = async (id, rolData) => {
   try {
-    console.log(id);
-    console.log(rolData);
     const response = await apiClient.put(`roles/${id}`, rolData);
     return response;
   } catch (error) {
