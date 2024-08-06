@@ -34,7 +34,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(routes); // Usar el archivo de rutas
-app.use('/uploads', express.static(__dirname+'/uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, 'client', 'build')));
 
 app.get('*', (req, res) => {
