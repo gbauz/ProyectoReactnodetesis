@@ -66,14 +66,8 @@ router.get('/', verificaToken, async (req, res) => {
 });
 
 // Configuración de multer para manejo de archivos
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}_${file.originalname}`);
-  }
-});
+// Configuración de multer para manejo de archivos en memoria
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 // Subir un nuevo archivo
@@ -82,11 +76,11 @@ router.post('/', verificaToken, upload.single('file'), async (req, res) => {
     return res.status(400).json({ error: 'No se subió ningún archivo' });
   }
   const { id_realizar } = req.body;
-  const filePath = req.file.path;
+  const fileBuffer = req.file.buffer;
   try {
     await (await Conexion).execute(
       'INSERT INTO resultado (resultado, id_realizar) VALUES (?, ?)',
-      [filePath, id_realizar]
+      [fileBuffer, id_realizar]
     );
     res.json({ success: true, message: 'Archivo subido exitosamente.' });
   } catch (error) {
@@ -155,7 +149,7 @@ router.get('/obtener/pacmedic', verificaToken, async (req, res) => {
     }
     query += ` ORDER BY re.fecha DESC;`;
     const [rows] = await (await Conexion).execute(query, queryParams);
-    console.log("Columnas",rows);
+    //console.log("Columnas",rows);
     let filteredResults = [];
     let hasNullResult = false;
     if (action==='Create'){
@@ -186,6 +180,25 @@ router.get('/obtener/result', verificaToken, async (req, res) => {
   } catch (error) {
     console.error('Error fetching resultados:', error);
     res.status(500).json({ error: 'Error al obtener resultados.' });
+  }
+});
+router.get('/download/:id', verificaToken, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await (await Conexion).execute(
+      'SELECT res.resultado, p.paciente  FROM resultado res  join realizar_examen re ON res.id_realizar = re.id_realizar JOIN pacientes p ON re.id_paciente = p.id_paciente  WHERE res.id_resultado = ?',
+      [id]
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Archivo no encontrado' });
+    }
+    const fileData = rows[0].resultado;
+    res.setHeader('Content-Disposition', `attachment; filename=${id}.pdf`);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.send(fileData);
+  } catch (error) {
+    console.error('Error al obtener el archivo de la base de datos:', error);
+    res.status(500).json({ error: 'Error al obtener el archivo' });
   }
 });
 

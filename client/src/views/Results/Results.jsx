@@ -68,15 +68,18 @@ const Resultados = () => {
       title: "Resultado",
       dataIndex: "resultado",
       align: "center",
-      render: (_, { examen }) => (
+      render: (_, record) => (
         <Space size="middle">
-          {examen.map((exam) => 
+          {record.examen.map((exam) => (
             <Tooltip title={exam.examen} key={exam.id_realizar}>
-              <Button className="actions" onClick={() => downloadFile(exam)} disabled={(exam.id_resultado===null)?true:false}>
+              <Button
+                className="actions"
+                onClick={() => downloadFile(exam)}
+                disabled={(exam.id_resultado===null)?true:false}>
                 <FilePdfOutlined className={(exam.id_resultado===null)? "":"download-icon"} />
               </Button>
             </Tooltip>
-          )}
+          ))}
         </Space>
       ),
     },
@@ -146,11 +149,26 @@ const Resultados = () => {
     fetchResult();
   };
 
-  const downloadFile = async (value) => {
-    const fileName = value.resultado.split('\\').pop();
-    const uri = Uri.replace('api/', '');
-    window.open(uri+"uploads/"+fileName, '_blank');
-  }
+  const downloadFile = async (exam) => {
+    try {
+      const response = await ResultService.downloadFile(exam.id_resultado);
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'resultado.pdf'; // Nombre del archivo que se descargará
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url); // Libera el URL objeto creado
+    } catch (error) {
+      console.error('Error al descargar el archivo:', error);
+      notification.error({
+        message: 'Error',
+        description: 'No se pudo descargar el archivo. Por favor, inténtelo de nuevo.',
+      });
+    }
+  };
 
   return (
     <div className="specialty">

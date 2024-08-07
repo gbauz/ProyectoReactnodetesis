@@ -42,9 +42,21 @@ const getResultOnly = async () => {
   }
 };
 
+const downloadFile = async (resultadoId) => {
+  try {
+    const response = await apiClient.get(`resultado/download/${resultadoId}`, {
+      responseType: 'blob' // Importante para archivos binarios como PDF
+    });
+    return response;
+  } catch (error) {
+    throw new Error(`Error al descargar el archivo: ${error.message}`);
+  }
+};
+
 export default {
   getResults,
   deleteResult,
   getResultPacientMedic,
-  getResultOnly
+  getResultOnly,
+  downloadFile
 };
