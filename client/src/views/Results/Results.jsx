@@ -8,6 +8,7 @@ import DeleteSpecialty from "./Delete/DeleteResults";
 import SpecialtyService from "../../services/SpecialtyService";
 import ResultService from "../../services/ResultService";
 import apiClient from "../../services/AxiosAPI";
+import Uri from "../../environment/environment";
 
 const Resultados = () => {
   let columns                         = [];
@@ -146,25 +147,9 @@ const Resultados = () => {
   };
 
   const downloadFile = async (value) => {
-    console.log(value);
-    const filePath = value.resultado;
-    try {
-      const response = await apiClient.get(filePath, {
-        responseType: 'blob', // Importante para recibir el archivo como un blob
-      });
-      console.log(response);
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', filePath.split('\\').pop());
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      // Liberar la URL del blob después de la descarga
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error al descargar el archivo:', error);
-    }
+    const fileName = value.resultado.split('\\').pop();
+    const uri = Uri.replace('api/', '');
+    window.open(uri+"uploads/"+fileName, '_blank');
   }
 
   return (
