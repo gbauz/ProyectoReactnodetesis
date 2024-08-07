@@ -155,14 +155,15 @@ router.get('/obtener/pacmedic', verificaToken, async (req, res) => {
     }
     query += ` ORDER BY re.fecha DESC;`;
     const [rows] = await (await Conexion).execute(query, queryParams);
+    console.log("Columnas",rows);
     let filteredResults = [];
+    let hasNullResult = false;
     if (action==='Create'){
       for (let patient of rows) {
-        let hasNullResult = false;
         if (patient.id_resultado === null) hasNullResult = true;
         if (hasNullResult) {
           filteredResults.push(patient);
-          break;
+          hasNullResult = false;
         }
       }
     } else {
